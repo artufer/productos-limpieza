@@ -31,13 +31,14 @@
   .stat .label { font-size: 13px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
   .stat .value { font-size: 28px; font-weight: bold; margin-top: 5px; }
   .stat .sub { font-size: 12px; opacity: 0.85; margin-top: 4px; }
-  .filtros { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filtros { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
   select, input[type="text"], input[type="number"], input[type="date"], input[type="month"] { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; background: white; }
   button { background: #2c5282; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
   button:hover { background: #1e3a5f; }
   button.secondary { background: #718096; }
   button.success { background: #16a34a; }
   button.danger { background: #dc2626; }
+  button.purple { background: #7c3aed; }
   table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
   table th { background: #1e3a5f; color: white; padding: 12px; text-align: left; font-weight: 600; }
   table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
@@ -64,11 +65,17 @@
   .form-group label { display: block; margin-bottom: 4px; font-weight: 500; font-size: 13px; color: #4a5568; }
   .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; }
   .linea-item { background: #f7fafc; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .chart-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
   .chart-bar { display: flex; align-items: center; margin-bottom: 8px; }
   .chart-bar .label { width: 80px; font-size: 13px; }
-  .chart-bar .bar { flex: 1; background: #e2e8f0; height: 24px; border-radius: 4px; overflow: hidden; position: relative; }
+  .chart-bar .bar { flex: 1; background: #e2e8f0; height: 24px; border-radius: 4px; overflow: hidden; }
   .chart-bar .fill { background: linear-gradient(90deg, #2c5282 0%, #4299e1 100%); height: 100%; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 11px; font-weight: bold; min-width: 30px; }
+  .toallita-row { background: #fffbeb !important; }
+  @media (max-width: 768px) {
+    header h1 { font-size: 18px; }
+    .tab-btn { padding: 8px 12px; font-size: 12px; }
+    table { font-size: 12px; }
+    table th, table td { padding: 6px; }
+  }
 </style>
 </head>
 <body>
@@ -82,7 +89,7 @@
   <button class="tab-btn active" data-seccion="dashboard">📊 Dashboard</button>
   <button class="tab-btn" data-seccion="albaranes">📋 Albaranes</button>
   <button class="tab-btn" data-seccion="productos">📦 Productos</button>
-  <button class="tab-btn" data-seccion="evolucion"> Evolución Precios</button>
+  <button class="tab-btn" data-seccion="evolucion">📈 Evolución Precios</button>
   <button class="tab-btn" data-seccion="pedido">🛒 Preparar Pedido</button>
   <button class="tab-btn" data-seccion="informes">📑 Informes</button>
 </nav>
@@ -90,7 +97,7 @@
 <main>
   <div id="seccion-dashboard" class="seccion active">
     <div class="card">
-      <h2> Dashboard</h2>
+      <h2>📊 Dashboard</h2>
       <div class="grid" id="dashboardStats"><div class="loading">Cargando...</div></div>
       <h3>📅 Gasto por mes (últimos 12 meses)</h3>
       <div id="graficoMensual"></div>
@@ -156,12 +163,14 @@
     <div class="card">
       <h2>🛒 Preparar Pedido</h2>
       <div class="filtros">
-        <select id="filtroProveedorPedido" onchange="cargarProductosPedido()">
+        <label style="font-weight:600;">Proveedor:</label>
+        <select id="filtroProveedorPedido" onchange="onCambiarProveedorPedido()">
           <option value="LUNA">LUNA</option>
           <option value="LIDERA">LIDERA</option>
         </select>
-        <input type="month" id="mesPedido" onchange="cargarProductosPedido()">
-        <button onclick="cargarPrediccion()" style="background:#7c3aed;"> Calcular predicción</button>
+        <label style="font-weight:600;">Mes:</label>
+        <input type="month" id="mesPedido" onchange="onCambiarMesPedido()">
+        <button onclick="cargarPrediccion()" class="purple">🤖 Calcular predicción</button>
         <button onclick="abrirModalAlbaran()" class="success">➕ Añadir albarán manual</button>
       </div>
       <div id="alertaPresupuesto"></div>
@@ -176,8 +185,8 @@
         </div>
         <p style="font-size:13px; color:#666; margin-top:8px;">Límite mensual: <strong>500,00 €</strong> por proveedor</p>
       </div>
-      <div style="margin-top:16px; display:flex; gap:10px;">
-        <button onclick="guardarPedido()" class="success"> Guardar pedido</button>
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button onclick="guardarPedido()" class="success">💾 Guardar pedido</button>
         <button onclick="limpiarPedido()" class="secondary">🗑️ Limpiar</button>
       </div>
     </div>
@@ -191,7 +200,7 @@
 
   <div id="seccion-informes" class="seccion">
     <div class="card">
-      <h2>📑 Informes</h2>
+      <h2> Informes</h2>
       <div class="filtros">
         <select id="filtroProvInf">
           <option value="TODOS">Todos los proveedores</option>
@@ -236,7 +245,7 @@
     <button onclick="agregarLineaModal()" style="margin:10px 0;">➕ Añadir línea</button>
     <div style="display:flex; gap:10px; margin-top:16px;">
       <button onclick="guardarAlbaranManual()" class="success">💾 Guardar</button>
-      <button onclick="cerrarModal()" class="secondary">❌ Cancelar</button>
+      <button onclick="cerrarModal()" class="secondary"> Cancelar</button>
     </div>
   </div>
 </div>
@@ -262,7 +271,6 @@ let albaranesCache = [];
 let pedidoActual = [];
 let datosCargados = false;
 
-// ===== UTILIDADES =====
 const formatearFecha = (f) => {
   if (!f) return '';
   const [y,m,d] = f.split('-');
@@ -273,23 +281,20 @@ const formatearMoneda = (n) => {
   return new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR'}).format(n || 0);
 };
 
-// ===== CARGA DE DATOS =====
 async function cargarAlbaranes() {
   if (datosCargados) return;
   try {
     const snapshot = await getDocs(collection(db, "albaranes"));
     albaranesCache = [];
     snapshot.forEach(d => albaranesCache.push(d.data()));
-    albaranesCache.sort((a,b) => b.fecha.localeCompare(a.fecha));
+    albaranesCache.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
     datosCargados = true;
     console.log(`✅ ${albaranesCache.length} albaranes cargados`);
   } catch(e) {
     console.error('Error cargando albaranes:', e);
-    document.getElementById('dashboardStats').innerHTML = '<div class="alert alert-danger">Error al cargar datos: ' + e.message + '</div>';
   }
 }
 
-// ===== NAVEGACIÓN =====
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -303,13 +308,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (seccion === 'productos') renderProductos();
     if (seccion === 'evolucion') renderEvolucion();
     if (seccion === 'pedido') {
-      document.getElementById('mesPedido').value = new Date().toISOString().slice(0,7);
+      if (!document.getElementById('mesPedido').value) {
+        document.getElementById('mesPedido').value = new Date().toISOString().slice(0,7);
+      }
       renderPedido();
     }
   });
 });
 
-// ===== DASHBOARD =====
 function renderDashboard() {
   const hoy = new Date();
   const mesActual = hoy.toISOString().slice(0,7);
@@ -358,10 +364,9 @@ function renderDashboard() {
   document.getElementById('graficoMensual').innerHTML = html || '<div class="empty">Sin datos</div>';
 }
 
-// ===== ALBARANES =====
 function renderAlbaranes() {
   const prov = document.getElementById('filtroProvAlb').value;
-  const busq = document.getElementById('buscadorAlb').value.toLowerCase();
+  const busq = (document.getElementById('buscadorAlb').value || '').toLowerCase();
   const anio = document.getElementById('filtroAnioAlb').value;
   
   let filtrados = albaranesCache;
@@ -390,10 +395,9 @@ function renderAlbaranes() {
   document.getElementById('tablaAlbaranes').innerHTML = html;
 }
 
-// ===== PRODUCTOS =====
 function renderProductos() {
   const prov = document.getElementById('filtroProvProd').value;
-  const busq = document.getElementById('buscadorProd').value.toLowerCase();
+  const busq = (document.getElementById('buscadorProd').value || '').toLowerCase();
   
   const productos = {};
   albaranesCache.forEach(a => {
@@ -435,10 +439,9 @@ function renderProductos() {
   document.getElementById('tablaProductos').innerHTML = html;
 }
 
-// ===== EVOLUCIÓN DE PRECIOS =====
 function renderEvolucion() {
   const prov = document.getElementById('filtroProvEvol').value;
-  const busq = document.getElementById('buscadorEvol').value.toLowerCase();
+  const busq = (document.getElementById('buscadorEvol').value || '').toLowerCase();
   
   let filtrados = albaranesCache;
   if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
@@ -484,8 +487,7 @@ function renderEvolucion() {
   document.getElementById('tablaEvolucion').innerHTML = html;
 }
 
-// ===== PDF EVOLUCIÓN =====
-window.generarPDFEvolucion = async () => {
+window.generarPDFEvolucion = () => {
   const prov = document.getElementById('filtroProvEvol').value;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -540,15 +542,14 @@ window.generarPDFEvolucion = async () => {
   doc.save(`evolucion-precios-${prov.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-// ===== PREPARAR PEDIDO (CORREGIDO) =====
+// ===== PREPARAR PEDIDO CON VALIDACIÓN DE MÚLTIPLOS DE 20 PARA TOALLITAS =====
 function renderPedido() {
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
   
-  // Obtener TODOS los productos históricos del proveedor seleccionado
   const productos = {};
   albaranesCache.forEach(a => {
-    if (a.proveedor !== prov) return; // Solo productos de este proveedor
+    if (a.proveedor !== prov) return;
     (a.lineas || []).forEach(l => {
       if (!productos[l.ref]) {
         productos[l.ref] = { 
@@ -558,7 +559,6 @@ function renderPedido() {
           ultimaFecha: a.fecha 
         };
       }
-      // Mantener el precio más reciente
       if (a.fecha >= (productos[l.ref].ultimaFecha || '')) {
         productos[l.ref].ultimoPrecio = l.precio;
         productos[l.ref].ultimaFecha = a.fecha;
@@ -566,7 +566,6 @@ function renderPedido() {
     });
   });
   
-  // Calcular lo ya pedido este mes (solo para mostrar info)
   const yaPedido = {};
   albaranesCache.forEach(a => {
     if (a.proveedor !== prov || !a.fecha || !a.fecha.startsWith(mes)) return;
@@ -578,24 +577,32 @@ function renderPedido() {
   const listaProductos = Object.values(productos).sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
   
   if (listaProductos.length === 0) {
-    document.getElementById('listaPedido').innerHTML = `<div class="empty">No hay productos históricos para ${prov}. Añade un albarán manual o importa datos.</div>`;
+    document.getElementById('listaPedido').innerHTML = `<div class="empty">No hay productos históricos para <strong>${prov}</strong>.</div>`;
     document.getElementById('totalPedido').textContent = '0,00 €';
     actualizarBarraPresupuesto(prov, mes);
     return;
   }
   
-  let html = `<p style="color:#666; margin-bottom:10px;"><strong>${listaProductos.length} productos</strong> disponibles de ${prov} (basado en histórico)</p>`;
-  html += '<table><thead><tr><th>Producto</th><th>Ref</th><th>Precio actual</th><th>Ya pedido en ' + mes + '</th><th>Cantidad a pedir</th><th>Importe</th></tr></thead><tbody>';
+  let html = `<p style="color:#666; margin-bottom:10px;"><strong>${listaProductos.length} productos</strong> disponibles de <strong>${prov}</strong></p>`;
+  html += '<table><thead><tr><th>Producto</th><th>Ref</th><th>Precio</th><th>Ya pedido en ' + (mes || '...') + '</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
   
   listaProductos.forEach(p => {
     const ya = yaPedido[p.ref] || 0;
     const nombreEscapado = (p.nombre || '').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-    html += `<tr>
-      <td>${p.nombre}</td>
+    
+    // VALIDACIÓN: toallitas (CEL0013) en múltiplos de 20
+    const esToallita = p.ref === 'CEL0013';
+    const stepAttr = esToallita ? 'step="20"' : 'step="1"';
+    const minAttr = esToallita ? 'min="0"' : 'min="0"';
+    const hintToallita = esToallita ? ' <small style="color:#ea580c;font-size:11px;">⚠️ múltiplos de 20</small>' : '';
+    const filaClass = esToallita ? ' class="toallita-row"' : '';
+    
+    html += `<tr${filaClass}>
+      <td>${p.nombre}${hintToallita}</td>
       <td><small>${p.ref}</small></td>
       <td>${formatearMoneda(p.ultimoPrecio)}</td>
       <td>${ya > 0 ? '<strong style="color:#ea580c;">' + ya + '</strong>' : '<span style="color:#a0aec0;">0</span>'}</td>
-      <td><input type="number" min="0" value="0" id="cant-${p.ref}" onchange="actualizarPedido('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value)" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"></td>
+      <td><input type="number" min="0" value="0" id="cant-${p.ref}" ${stepAttr} ${minAttr} onchange="validarYActualizar('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value, ${esToallita})" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"></td>
       <td class="importe-${p.ref}" style="font-weight:bold;">0,00 €</td>
     </tr>`;
   });
@@ -603,6 +610,67 @@ function renderPedido() {
   document.getElementById('listaPedido').innerHTML = html;
   actualizarBarraPresupuesto(prov, mes);
 }
+
+// Función que valida múltiplos de 20 antes de actualizar
+window.validarYActualizar = (ref, nombre, precio, cantidad, esMultiplo20) => {
+  let cant = parseInt(cantidad) || 0;
+  
+  if (esMultiplo20 && cant > 0 && cant % 20 !== 0) {
+    const multiploInferior = Math.floor(cant / 20) * 20;
+    const multiploSuperior = multiploInferior + 20;
+    
+    // Elegir el múltiplo más cercano
+    const diffInferior = cant - multiploInferior;
+    const diffSuperior = multiploSuperior - cant;
+    const multiploCercano = diffInferior <= diffSuperior ? multiploInferior : multiploSuperior;
+    
+    // Si el inferior es 0, usar el superior
+    const valorFinal = multiploCercano === 0 ? multiploSuperior : multiploCercano;
+    
+    const confirmar = confirm(
+      `⚠️ Las toallitas (CEL0013) solo se pueden pedir en múltiplos de 20.\n\n` +
+      `Has introducido: ${cant} uds\n` +
+      `Múltiplos válidos más cercanos: ${multiploInferior} o ${multiploSuperior}\n\n` +
+      `¿Redondear a ${valorFinal} uds?\n\n` +
+      `• Aceptar = ${valorFinal} uds\n` +
+      `• Cancelar = 0 uds (borrar)`
+    );
+    
+    cant = confirmar ? valorFinal : 0;
+    
+    const input = document.getElementById(`cant-${ref}`);
+    if (input) input.value = cant;
+  }
+  
+  actualizarPedido(ref, nombre, precio, cant);
+};
+
+window.onCambiarProveedorPedido = () => {
+  pedidoActual = [];
+  document.getElementById('totalPedido').textContent = '0,00 €';
+  renderPedido();
+};
+
+window.onCambiarMesPedido = () => {
+  renderPedido();
+};
+
+window.actualizarPedido = (ref, nombre, precio, cantidad) => {
+  const cant = parseInt(cantidad) || 0;
+  const importe = cant * precio;
+  const el = document.querySelector(`.importe-${ref}`);
+  if (el) el.textContent = formatearMoneda(importe);
+  
+  const idx = pedidoActual.findIndex(p => p.ref === ref);
+  if (cant > 0) {
+    if (idx >= 0) pedidoActual[idx] = { ref, nombre, precio, cantidad: cant };
+    else pedidoActual.push({ ref, nombre, precio, cantidad: cant });
+  } else {
+    if (idx >= 0) pedidoActual.splice(idx, 1);
+  }
+  actualizarTotalPedido();
+};
+
 function actualizarTotalPedido() {
   const total = pedidoActual.reduce((s,p) => s + p.cantidad*p.precio, 0);
   document.getElementById('totalPedido').textContent = formatearMoneda(total);
@@ -637,6 +705,16 @@ window.limpiarPedido = () => {
 
 window.guardarPedido = async () => {
   if (pedidoActual.length === 0) { alert('No hay productos en el pedido'); return; }
+  
+  // Validación final: comprobar que las toallitas están en múltiplos de 20
+  const toallitas = pedidoActual.filter(p => p.ref === 'CEL0013');
+  for (const t of toallitas) {
+    if (t.cantidad % 20 !== 0) {
+      alert(`❌ Las toallitas deben estar en múltiplos de 20. Tienes ${t.cantidad} uds. Corrígelo antes de guardar.`);
+      return;
+    }
+  }
+  
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
   const hoy = new Date().toISOString().split('T')[0];
@@ -656,7 +734,6 @@ window.guardarPedido = async () => {
   renderPedido();
 };
 
-// ===== PREDICCIÓN =====
 window.cargarPrediccion = async () => {
   const prov = document.getElementById('filtroProveedorPedido').value;
   const contenedor = document.getElementById('seccion-prediccion');
@@ -681,15 +758,23 @@ window.cargarPrediccion = async () => {
   let html = '<table><thead><tr><th>Producto</th><th>Consumo 6m</th><th>Media/mes</th><th>Precio</th><th>Sugerencia</th></tr></thead><tbody>';
   
   Object.values(productos).sort((a,b) => b.totalCantidad - a.totalCantidad).forEach(p => {
-    const media = Math.ceil(p.totalCantidad / meses);
-    const sugerencia = Math.ceil(media * 1.1);
+    let media = Math.ceil(p.totalCantidad / meses);
+    let sugerencia = Math.ceil(media * 1.1);
+    
+    // Si es toallita, forzar múltiplo de 20
+    const esToallita = Object.keys(productos).find(k => productos[k] === p) === 'CEL0013' || p.nombre?.includes('TOALLA');
+    if (esToallita && sugerencia > 0) {
+      sugerencia = Math.ceil(sugerencia / 20) * 20;
+    }
+    
     const coste = (sugerencia * p.ultimoPrecio).toFixed(2);
+    const notaToallita = esToallita ? ' <small style="color:#ea580c;">(múlt. 20)</small>' : '';
     html += `<tr>
-      <td><strong>${p.nombre}</strong></td>
+      <td><strong>${p.nombre}</strong>${notaToallita}</td>
       <td>${p.totalCantidad} uds</td>
       <td>${media} uds/mes</td>
       <td>${formatearMoneda(p.ultimoPrecio)}</td>
-      <td><input type="number" class="pred-cantidad" data-ref="${p.ref}" data-nombre="${(p.nombre || '').replace(/"/g,'&quot;')}" data-precio="${p.ultimoPrecio}" value="${sugerencia}" style="width:80px; padding:4px;"> <span style="color:#666; font-size:12px;">(~${coste} €)</span></td>
+      <td><input type="number" class="pred-cantidad" data-ref="${Object.keys(productos).find(k => productos[k] === p)}" data-nombre="${(p.nombre || '').replace(/"/g,'&quot;')}" data-precio="${p.ultimoPrecio}" value="${sugerencia}" style="width:80px; padding:4px;"> <span style="color:#666; font-size:12px;">(~${coste} €)</span></td>
     </tr>`;
   });
   
@@ -704,7 +789,7 @@ window.usarPrediccion = () => {
     const cant = parseInt(inp.value);
     if (cant > 0) {
       const ref = inp.dataset.ref;
-      const el = document.querySelector(`input[onchange*="${ref}"]`);
+      const el = document.querySelector(`#cant-${ref}`);
       if (el) {
         el.value = cant;
         actualizarPedido(ref, inp.dataset.nombre, parseFloat(inp.dataset.precio), cant);
@@ -715,7 +800,6 @@ window.usarPrediccion = () => {
   document.getElementById('seccion-prediccion').style.display = 'none';
 };
 
-// ===== INFORMES =====
 window.generarInforme = () => {
   const prov = document.getElementById('filtroProvInf').value;
   const anio = document.getElementById('filtroAnioInf').value;
@@ -791,7 +875,6 @@ window.generarPDFInforme = () => {
   doc.save(`informe-${prov.toLowerCase()}-${anio}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-// ===== MODAL ALBARÁN MANUAL =====
 window.abrirModalAlbaran = () => {
   document.getElementById('modalNumero').value = '';
   document.getElementById('modalFecha').value = new Date().toISOString().split('T')[0];
@@ -838,13 +921,10 @@ window.guardarAlbaranManual = async () => {
   renderAlbaranes();
 };
 
-// ===== FUNCIONES GLOBALES PARA ONCHANGE =====
 window.cargarAlbaranes = renderAlbaranes;
 window.cargarProductos = renderProductos;
 window.cargarEvolucion = renderEvolucion;
-window.cargarProductosPedido = renderPedido;
 
-// ===== INICIALIZACIÓN =====
 await cargarAlbaranes();
 renderDashboard();
 </script>
