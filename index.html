@@ -39,6 +39,7 @@
   button.success { background: #16a34a; }
   button.danger { background: #dc2626; }
   button.purple { background: #7c3aed; }
+  button.info { background: #0284c7; }
   table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
   table th { background: #1e3a5f; color: white; padding: 12px; text-align: left; font-weight: 600; }
   table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
@@ -47,10 +48,13 @@
   .badge-luna { background: #dbeafe; color: #1e40af; }
   .badge-lidera { background: #fef3c7; color: #92400e; }
   .badge-minimo { background: #fef3c7; color: #92400e; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+  .badge-manual { background: #d1fae5; color: #065f46; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+  .badge-similar { background: #ede9fe; color: #5b21b6; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
   .alert { padding: 12px 16px; border-radius: 6px; margin: 10px 0; font-size: 14px; }
   .alert-warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
   .alert-danger { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
   .alert-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+  .alert-info { background: #dbeafe; color: #1e40af; border-left: 4px solid #0284c7; }
   .progress-bar { background: #e2e8f0; border-radius: 10px; overflow: hidden; height: 20px; margin: 8px 0; }
   .progress-fill { background: linear-gradient(90deg, #16a34a 0%, #10b981 100%); height: 100%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; }
   .progress-fill.warning { background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); }
@@ -61,17 +65,40 @@
   .empty { text-align: center; padding: 40px; color: #a0aec0; }
   .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
   .modal.active { display: flex; }
-  .modal-content { background: white; padding: 24px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+  .modal-content { background: white; padding: 24px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
   .form-group { margin-bottom: 12px; }
   .form-group label { display: block; margin-bottom: 4px; font-weight: 500; font-size: 13px; color: #4a5568; }
   .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; }
+  .form-group small { color: #718096; font-size: 12px; }
   .linea-item { background: #f7fafc; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .chart-bar { display: flex; align-items: center; margin-bottom: 8px; }
   .chart-bar .label { width: 80px; font-size: 13px; }
   .chart-bar .bar { flex: 1; background: #e2e8f0; height: 24px; border-radius: 4px; overflow: hidden; }
   .chart-bar .fill { background: linear-gradient(90deg, #2c5282 0%, #4299e1 100%); height: 100%; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 11px; font-weight: bold; min-width: 30px; }
   .minimo-row { background: #fffbeb !important; }
+  .similar-row { background: #faf5ff !important; }
   .minimo-hint { color: #ea580c; font-size: 11px; font-weight: 600; }
+  .similar-hint { color: #7c3aed; font-size: 11px; font-weight: 600; }
+  .similar-alert { 
+    background: linear-gradient(90deg, #ede9fe 0%, #faf5ff 100%); 
+    border: 1px solid #c4b5fd; 
+    border-left: 4px solid #7c3aed;
+    padding: 10px 14px; 
+    border-radius: 6px; 
+    margin: 8px 0; 
+    font-size: 13px;
+  }
+  .similar-alert strong { color: #5b21b6; }
+  .precio-comparado { 
+    display: inline-block; 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    font-weight: bold;
+    margin: 0 4px;
+  }
+  .precio-mejor { background: #d1fae5; color: #065f46; }
+  .precio-peor { background: #fee2e2; color: #991b1b; }
+  .ref-vacia { color: #a0aec0; font-style: italic; }
   @media (max-width: 768px) {
     header h1 { font-size: 18px; }
     .tab-btn { padding: 8px 12px; font-size: 12px; }
@@ -131,14 +158,20 @@
 
   <div id="seccion-productos" class="seccion">
     <div class="card">
-      <h2>📦 Catálogo de Productos</h2>
-      <div class="filtros">
-        <select id="filtroProvProd" onchange="cargarProductos()">
-          <option value="TODOS">Todos los proveedores</option>
-          <option value="LUNA">Solo LUNA</option>
-          <option value="LIDERA">Solo LIDERA</option>
-        </select>
-        <input type="text" id="buscadorProd" placeholder=" Buscar producto..." oninput="cargarProductos()">
+      <h2> Catálogo de Productos</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <div class="filtros" style="margin-bottom:0;">
+          <select id="filtroProvProd" onchange="cargarProductos()">
+            <option value="TODOS">Todos los proveedores</option>
+            <option value="LUNA">Solo LUNA</option>
+            <option value="LIDERA">Solo LIDERA</option>
+          </select>
+          <input type="text" id="buscadorProd" placeholder="🔍 Buscar producto..." oninput="cargarProductos()">
+        </div>
+        <button onclick="abrirModalProducto()" class="success">➕ Añadir producto nuevo</button>
+      </div>
+      <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">
+         <strong>Referencia opcional:</strong> Si no la conoces, déjala vacía y se generará automáticamente. Podrás editarla después.
       </div>
       <div id="tablaProductos"></div>
     </div>
@@ -166,6 +199,7 @@
       <h2>🛒 Preparar Pedido</h2>
       <div class="alert alert-warning" style="margin-bottom:15px;">
         ℹ️ Los productos marcados con <span class="badge-minimo">MÍN</span> solo se pueden pedir en múltiplos de la cantidad mínima indicada.
+        Los marcados con <span class="badge-similar">SIMILAR</span> también existen en el otro proveedor.
       </div>
       <div class="filtros">
         <label style="font-weight:600;">Proveedor:</label>
@@ -176,7 +210,7 @@
         <label style="font-weight:600;">Mes:</label>
         <input type="month" id="mesPedido" onchange="onCambiarMesPedido()">
         <button onclick="cargarPrediccion()" class="purple">🤖 Calcular predicción</button>
-        <button onclick="abrirModalAlbaran()" class="success">➕ Añadir albarán manual</button>
+        <button onclick="abrirModalAlbaran()" class="success">➕ Albarán manual</button>
       </div>
       <div id="alertaPresupuesto"></div>
       <div id="listaPedido"></div>
@@ -228,6 +262,54 @@
   </div>
 </main>
 
+<!-- MODAL NUEVO PRODUCTO -->
+<div id="modalProducto" class="modal">
+  <div class="modal-content">
+    <h3 id="modalProductoTitulo" style="margin-bottom:16px;">➕ Añadir Nuevo Producto</h3>
+    <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">
+      💡 La referencia es <strong>opcional</strong>. Si no la conoces, déjala vacía y se generará automáticamente. Podrás editarla más tarde.
+    </div>
+    <div class="form-group">
+      <label>Referencia del producto <small style="color:#a0aec0;">(opcional - se autogenera si se deja vacía)</small></label>
+      <input type="text" id="prodRef" placeholder="Ej: CEL0013, 10002029... o déjalo vacío">
+    </div>
+    <div class="form-group">
+      <label>Nombre del producto *</label>
+      <input type="text" id="prodNombre" placeholder="Ej: Toalla manos TISSUE engarz.">
+    </div>
+    <div class="form-group">
+      <label>Proveedor *</label>
+      <select id="prodProveedor">
+        <option value="LUNA">LUNA</option>
+        <option value="LIDERA">LIDERA</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Precio unitario (€) *</label>
+      <input type="number" id="prodPrecio" placeholder="0.00" step="0.0001" min="0">
+    </div>
+    <div class="form-group">
+      <label>¿Tiene mínimo de pedido?</label>
+      <select id="prodTieneMinimo" onchange="toggleMinimoInput()">
+        <option value="no">No</option>
+        <option value="si">Sí</option>
+      </select>
+    </div>
+    <div class="form-group" id="formMinimo" style="display:none;">
+      <label>Cantidad mínima</label>
+      <input type="number" id="prodMinimo" placeholder="Ej: 20" min="1">
+      <small>Unidad de empaquetado (Ej: "caja de 20", "fardo de 18")</small>
+      <input type="text" id="prodUnidadMinimo" placeholder="Ej: caja de 20 uds" style="margin-top:4px;">
+    </div>
+    <div id="similarWarning" style="display:none;" class="alert alert-warning" style="margin-top:10px;"></div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button id="btnGuardarProducto" onclick="guardarNuevoProducto()" class="success">💾 Guardar producto</button>
+      <button onclick="cerrarModalProducto()" class="secondary">❌ Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALBARÁN MANUAL -->
 <div id="modalAlbaran" class="modal">
   <div class="modal-content">
     <h3 style="margin-bottom:16px;">➕ Añadir albarán manual</h3>
@@ -250,14 +332,14 @@
     <button onclick="agregarLineaModal()" style="margin:10px 0;">➕ Añadir línea</button>
     <div style="display:flex; gap:10px; margin-top:16px;">
       <button onclick="guardarAlbaranManual()" class="success">💾 Guardar</button>
-      <button onclick="cerrarModal()" class="secondary"> Cancelar</button>
+      <button onclick="cerrarModal()" class="secondary">❌ Cancelar</button>
     </div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA80eaP6z8X8YrzQjr5CrgQr-9E9vqpwkY",
@@ -274,7 +356,6 @@ const LIMITE = 500;
 
 // ===== MÍNIMOS DE PEDIDO POR REFERENCIA =====
 const MINIMOS_PEDIDO = {
-  // LUNA
   'CEL0013': { minimo: 20, unidad: 'caja de 20 uds' },
   'HER/100012': { minimo: 12, unidad: 'caja 6 botellas' },
   '210197': { minimo: 50, unidad: 'caja de rollos' },
@@ -285,8 +366,6 @@ const MINIMOS_PEDIDO = {
   'HER/100045': { minimo: 12, unidad: 'caja 6 botellas' },
   '276006': { minimo: 30, unidad: 'caja 30 rollos' },
   '14454': { minimo: 12, unidad: 'bolsa de 12' },
-  
-  // LIDERA
   '10030037': { minimo: 108, unidad: 'fardo de 108' },
   '10032567': { minimo: 4, unidad: '4 garrafas' },
   '10014448': { minimo: 12, unidad: 'caja de 12' },
@@ -307,10 +386,12 @@ const MINIMOS_PEDIDO = {
 
 let albaranesCache = [];
 let pedidoActual = [];
+let productosCache = [];
 let datosCargados = false;
+let editandoRefAntigua = null; // Para saber si estamos editando y cuál era la ref original
 
 const formatearFecha = (f) => {
-  if (!f) return '';
+  if (!f || f === '-') return '';
   const [y,m,d] = f.split('-');
   return `${d}/${m}/${y}`;
 };
@@ -319,9 +400,87 @@ const formatearMoneda = (n) => {
   return new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR'}).format(n || 0);
 };
 
-// Obtener mínimo de pedido para una referencia
 function getMinimo(ref) {
   return MINIMOS_PEDIDO[ref] || null;
+}
+
+// ===== FUNCIONES DE SIMILITUD DE TEXTO =====
+function normalizarTexto(texto) {
+  if (!texto) return '';
+  return texto
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar acentos
+    .replace(/[^a-z0-9\s]/g, '') // quitar caracteres especiales
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function obtenerPalabrasSignificativas(texto) {
+  const palabrasVacias = new Set(['de', 'la', 'el', 'las', 'los', 'y', 'o', 'u', 'a', 'en', 'con', 'por', 'para', 'sin', 'sobre', 'entre', 'hacia', 'hasta', 'del', 'al', 'un', 'una', 'unos', 'unas', 'c', 'ml', 'lt', 'gr', 'uds', 'ud', 'p', 't', 'm', 'g', 'kg']);
+  const normalizado = normalizarTexto(texto);
+  return normalizado.split(' ').filter(p => p.length >= 3 && !palabrasVacias.has(p));
+}
+
+function calcularSimilitud(texto1, texto2) {
+  const palabras1 = new Set(obtenerPalabrasSignificativas(texto1));
+  const palabras2 = new Set(obtenerPalabrasSignificativas(texto2));
+  
+  if (palabras1.size === 0 || palabras2.size === 0) return 0;
+  
+  // Intersección
+  let comunes = 0;
+  palabras1.forEach(p => { if (palabras2.has(p)) comunes++; });
+  
+  // Coeficiente de Jaccard
+  const union = new Set([...palabras1, ...palabras2]).size;
+  return comunes / union;
+}
+
+function buscarProductoSimilar(nombre, proveedorActual, excluirRef = null) {
+  const proveedorAlternativo = proveedorActual === 'LUNA' ? 'LIDERA' : 'LUNA';
+  let mejorCoincidencia = null;
+  let mejorSimilitud = 0;
+  
+  // Buscar en productos del histórico del otro proveedor
+  const productosOtroProveedor = new Set();
+  albaranesCache.forEach(a => {
+    if (a.proveedor !== proveedorAlternativo) return;
+    (a.lineas || []).forEach(l => {
+      if (!productosOtroProveedor.has(l.ref)) {
+        productosOtroProveedor.add(l.ref);
+        const similitud = calcularSimilitud(nombre, l.producto);
+        if (similitud > mejorSimilitud && similitud >= 0.5) {
+          mejorSimilitud = similitud;
+          mejorCoincidencia = {
+            ref: l.ref,
+            nombre: l.producto,
+            proveedor: proveedorAlternativo,
+            precio: l.precio,
+            similitud: similitud
+          };
+        }
+      }
+    });
+  });
+  
+  // Buscar también en productos manuales del otro proveedor
+  productosCache.forEach(p => {
+    if (p.proveedor !== proveedorAlternativo) return;
+    if (excluirRef && p.ref === excluirRef) return;
+    const similitud = calcularSimilitud(nombre, p.nombre);
+    if (similitud > mejorSimilitud && similitud >= 0.5) {
+      mejorSimilitud = similitud;
+      mejorCoincidencia = {
+        ref: p.ref,
+        nombre: p.nombre,
+        proveedor: proveedorAlternativo,
+        precio: p.precio,
+        similitud: similitud
+      };
+    }
+  });
+  
+  return mejorCoincidencia;
 }
 
 async function cargarAlbaranes() {
@@ -331,10 +490,33 @@ async function cargarAlbaranes() {
     albaranesCache = [];
     snapshot.forEach(d => albaranesCache.push(d.data()));
     albaranesCache.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
+    
+    await cargarProductosDesdeFirestore();
+    
     datosCargados = true;
-    console.log(`✅ ${albaranesCache.length} albaranes cargados`);
+    console.log(`✅ ${albaranesCache.length} albaranes y ${productosCache.length} productos manuales cargados`);
   } catch(e) {
     console.error('Error cargando albaranes:', e);
+  }
+}
+
+async function cargarProductosDesdeFirestore() {
+  try {
+    const snapshot = await getDocs(collection(db, "productos"));
+    productosCache = [];
+    snapshot.forEach(d => {
+      const data = d.data();
+      productosCache.push({
+        ref: d.id,
+        nombre: data.nombre,
+        proveedor: data.proveedor,
+        precio: data.precio,
+        minimo: data.minimo || null,
+        unidadMinimo: data.unidadMinimo || null
+      });
+    });
+  } catch(e) {
+    console.error('Error cargando productos:', e);
   }
 }
 
@@ -375,6 +557,7 @@ function renderDashboard() {
   
   const productosUnicos = new Set();
   albaranesCache.forEach(a => (a.lineas || []).forEach(l => productosUnicos.add(l.ref)));
+  productosCache.forEach(p => productosUnicos.add(p.ref));
   
   document.getElementById('dashboardStats').innerHTML = `
     <div class="stat"><div class="label">Mes actual (${mesActual})</div><div class="value">${formatearMoneda(totalMes)}</div><div class="sub">${albsMes.length} albaranes</div></div>
@@ -442,23 +625,44 @@ function renderProductos() {
   const prov = document.getElementById('filtroProvProd').value;
   const busq = (document.getElementById('buscadorProd').value || '').toLowerCase();
   
-  const productos = {};
+  const productosHistoricos = {};
   albaranesCache.forEach(a => {
     if (prov !== 'TODOS' && a.proveedor !== prov) return;
     (a.lineas || []).forEach(l => {
-      if (!productos[l.ref]) productos[l.ref] = { nombre: l.producto, ref: l.ref, proveedores: new Set(), ultimoPrecio: l.precio, ultimaFecha: a.fecha, totalCantidad: 0, totalImporte: 0 };
-      productos[l.ref].proveedores.add(a.proveedor);
-      if (a.fecha >= productos[l.ref].ultimaFecha) {
-        productos[l.ref].ultimoPrecio = l.precio;
-        productos[l.ref].ultimaFecha = a.fecha;
+      if (!productosHistoricos[l.ref]) productosHistoricos[l.ref] = { nombre: l.producto, ref: l.ref, proveedores: new Set(), ultimoPrecio: l.precio, ultimaFecha: a.fecha, totalCantidad: 0, totalImporte: 0, esManual: false };
+      productosHistoricos[l.ref].proveedores.add(a.proveedor);
+      if (a.fecha >= productosHistoricos[l.ref].ultimaFecha) {
+        productosHistoricos[l.ref].ultimoPrecio = l.precio;
+        productosHistoricos[l.ref].ultimaFecha = a.fecha;
       }
-      productos[l.ref].totalCantidad += l.cantidad || 0;
-      productos[l.ref].totalImporte += (l.cantidad || 0) * (l.precio || 0);
+      productosHistoricos[l.ref].totalCantidad += l.cantidad || 0;
+      productosHistoricos[l.ref].totalImporte += (l.cantidad || 0) * (l.precio || 0);
     });
   });
   
-  let lista = Object.values(productos);
-  if (busq) lista = lista.filter(p => (p.nombre || '').toLowerCase().includes(busq));
+  const productosManuales = {};
+  productosCache.forEach(p => {
+    if (prov !== 'TODOS' && p.proveedor !== prov) return;
+    if (!productosManuales[p.ref]) {
+      productosManuales[p.ref] = {
+        nombre: p.nombre,
+        ref: p.ref,
+        proveedores: new Set([p.proveedor]),
+        ultimoPrecio: p.precio,
+        ultimaFecha: '-',
+        totalCantidad: 0,
+        totalImporte: 0,
+        esManual: true,
+        minimo: p.minimo,
+        unidadMinimo: p.unidadMinimo
+      };
+    }
+  });
+  
+  const todosProductos = { ...productosHistoricos, ...productosManuales };
+  
+  let lista = Object.values(todosProductos);
+  if (busq) lista = lista.filter(p => (p.nombre || '').toLowerCase().includes(busq) || (p.ref || '').toLowerCase().includes(busq));
   lista.sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
   
   if (lista.length === 0) {
@@ -466,19 +670,26 @@ function renderProductos() {
     return;
   }
   
-  let html = '<table><thead><tr><th>Producto</th><th>Ref</th><th>Proveedores</th><th>Mín. pedido</th><th>Último precio</th><th>Última compra</th><th>Total histórico</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Producto</th><th>Ref</th><th>Proveedor</th><th>Mín. pedido</th><th>Precio</th><th>Última compra</th><th>Total histórico</th><th></th></tr></thead><tbody>';
   lista.forEach(p => {
     const provs = Array.from(p.proveedores).map(x => `<span class="badge ${x==='LUNA'?'badge-luna':'badge-lidera'}">${x}</span>`).join(' ');
-    const minInfo = getMinimo(p.ref);
+    const badgeManual = p.esManual ? '<span class="badge-manual" style="margin-left:5px;">MANUAL</span>' : '';
+    
+    let minInfo = p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo } : getMinimo(p.ref);
     const minTexto = minInfo ? `<span class="badge-minimo">${minInfo.minimo} ${minInfo.unidad}</span>` : '<span style="color:#a0aec0;font-size:11px;">Sin mínimo</span>';
-    html += `<tr>
-      <td><strong>${p.nombre}</strong></td>
-      <td>${p.ref}</td>
+    
+    const totalTexto = p.esManual ? '<span style="color:#a0aec0;">Sin pedidos</span>' : `${formatearMoneda(p.totalImporte)} (${p.totalCantidad} uds)`;
+    const refTexto = p.ref ? p.ref : '<span class="ref-vacia">autogenerada</span>';
+    
+    html += `<tr style="${p.esManual ? 'background:#f0fff4;' : ''}">
+      <td><strong>${p.nombre}</strong>${badgeManual}</td>
+      <td>${refTexto}</td>
       <td>${provs}</td>
       <td>${minTexto}</td>
       <td>${formatearMoneda(p.ultimoPrecio)}</td>
       <td>${formatearFecha(p.ultimaFecha)}</td>
-      <td>${formatearMoneda(p.totalImporte)} (${p.totalCantidad} uds)</td>
+      <td>${totalTexto}</td>
+      <td>${p.esManual ? `<button onclick="editarProducto('${p.ref}')" style="padding:4px 8px; font-size:12px;">✏️ Editar</button>` : ''}</td>
     </tr>`;
   });
   html += '</tbody></table>';
@@ -588,10 +799,11 @@ window.generarPDFEvolucion = () => {
   doc.save(`evolucion-precios-${prov.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-// ===== PREPARAR PEDIDO CON VALIDACIÓN DE MÍNIMOS =====
+// ===== PREPARAR PEDIDO CON SIMILARES =====
 function renderPedido() {
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
+  const provAlternativo = prov === 'LUNA' ? 'LIDERA' : 'LUNA';
   
   const productos = {};
   albaranesCache.forEach(a => {
@@ -602,7 +814,8 @@ function renderPedido() {
           nombre: l.producto, 
           ref: l.ref, 
           ultimoPrecio: l.precio, 
-          ultimaFecha: a.fecha 
+          ultimaFecha: a.fecha,
+          esManual: false
         };
       }
       if (a.fecha >= (productos[l.ref].ultimaFecha || '')) {
@@ -610,6 +823,20 @@ function renderPedido() {
         productos[l.ref].ultimaFecha = a.fecha;
       }
     });
+  });
+  
+  productosCache.forEach(p => {
+    if (p.proveedor === prov && !productos[p.ref]) {
+      productos[p.ref] = {
+        nombre: p.nombre,
+        ref: p.ref,
+        ultimoPrecio: p.precio,
+        ultimaFecha: '-',
+        esManual: true,
+        minimo: p.minimo,
+        unidadMinimo: p.unidadMinimo
+      };
+    }
   });
   
   const yaPedido = {};
@@ -623,7 +850,11 @@ function renderPedido() {
   const listaProductos = Object.values(productos).sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
   
   if (listaProductos.length === 0) {
-    document.getElementById('listaPedido').innerHTML = `<div class="empty">No hay productos históricos para <strong>${prov}</strong>.</div>`;
+    document.getElementById('listaPedido').innerHTML = `
+      <div class="empty">
+        <p>No hay productos históricos para <strong>${prov}</strong>.</p>
+        <button onclick="abrirModalProducto()" class="success" style="margin-top:15px;">➕ Añadir primer producto</button>
+      </div>`;
     document.getElementById('totalPedido').textContent = '0,00 €';
     actualizarBarraPresupuesto(prov, mes);
     return;
@@ -636,32 +867,63 @@ function renderPedido() {
     const ya = yaPedido[p.ref] || 0;
     const nombreEscapado = (p.nombre || '').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     
-    const minInfo = getMinimo(p.ref);
+    const minInfo = p.esManual && p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo } : getMinimo(p.ref);
     const tieneMinimo = minInfo !== null;
     const minimo = tieneMinimo ? minInfo.minimo : 1;
     const stepAttr = tieneMinimo ? `step="${minimo}"` : 'step="1"';
     const hintMinimo = tieneMinimo ? `<br><span class="minimo-hint">⚠️ mín. ${minimo} (${minInfo.unidad})</span>` : '';
     const filaClass = tieneMinimo ? ' class="minimo-row"' : '';
+    const badgeManual = p.esManual ? ' <span class="badge-manual">MANUAL</span>' : '';
+    
+    // BUSCAR PRODUCTO SIMILAR EN EL OTRO PROVEEDOR
+    const similar = buscarProductoSimilar(p.nombre, prov, p.ref);
+    let alertaSimilar = '';
+    let badgeSimilar = '';
+    if (similar) {
+      badgeSimilar = ' <span class="badge-similar">SIMILAR</span>';
+      const esMasBaratoAqui = p.ultimoPrecio <= similar.precio;
+      const claseAqui = esMasBaratoAqui ? 'precio-mejor' : 'precio-peor';
+      const claseOtro = esMasBaratoAqui ? 'precio-peor' : 'precio-mejor';
+      const diff = Math.abs(p.ultimoPrecio - similar.precio).toFixed(4);
+      const diffPct = ((Math.abs(p.ultimoPrecio - similar.precio) / Math.min(p.ultimoPrecio, similar.precio)) * 100).toFixed(0);
+      
+      alertaSimilar = `
+        <tr class="similar-row">
+          <td colspan="7">
+            <div class="similar-alert">
+               <strong>Producto similar en ${similar.proveedor}:</strong> "${similar.nombre}" 
+              (Ref: ${similar.ref || 'N/A'}) - Similitud: ${Math.round(similar.similitud * 100)}%<br>
+              💰 Precio aquí (${prov}): <span class="precio-comparado ${claseAqui}">${formatearMoneda(p.ultimoPrecio)}</span>
+              vs Precio en ${similar.proveedor}: <span class="precio-comparado ${claseOtro}">${formatearMoneda(similar.precio)}</span>
+              ${esMasBaratoAqui 
+                ? `✅ <strong>${diffPct}% más barato aquí</strong> (ahorro: ${diff} €/ud)` 
+                : `⚠️ <strong>${diffPct}% más caro aquí</strong> (diferencia: ${diff} €/ud)`
+              }
+            </div>
+          </td>
+        </tr>`;
+    }
     
     html += `<tr${filaClass}>
-      <td>${p.nombre}${hintMinimo}</td>
-      <td><small>${p.ref}</small></td>
+      <td>${p.nombre}${badgeManual}${badgeSimilar}${hintMinimo}</td>
+      <td><small>${p.ref || '<span class="ref-vacia">auto</span>'}</small></td>
       <td>${formatearMoneda(p.ultimoPrecio)}</td>
       <td>${tieneMinimo ? `<span class="badge-minimo">${minimo}</span>` : '-'}</td>
       <td>${ya > 0 ? '<strong style="color:#ea580c;">' + ya + '</strong>' : '<span style="color:#a0aec0;">0</span>'}</td>
       <td><input type="number" min="0" value="0" id="cant-${p.ref}" ${stepAttr} onchange="validarYActualizar('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value)" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"></td>
       <td class="importe-${p.ref}" style="font-weight:bold;">0,00 €</td>
-    </tr>`;
+    </tr>${alertaSimilar}`;
   });
   html += '</tbody></table>';
   document.getElementById('listaPedido').innerHTML = html;
   actualizarBarraPresupuesto(prov, mes);
 }
 
-// Función que valida múltiplos del mínimo antes de actualizar
 window.validarYActualizar = (ref, nombre, precio, cantidad) => {
   let cant = parseInt(cantidad) || 0;
-  const minInfo = getMinimo(ref);
+  
+  const prodManual = productosCache.find(p => p.ref === ref);
+  const minInfo = prodManual && prodManual.minimo ? { minimo: prodManual.minimo, unidad: prodManual.unidadMinimo } : getMinimo(ref);
   
   if (minInfo && cant > 0) {
     const minimo = minInfo.minimo;
@@ -676,7 +938,7 @@ window.validarYActualizar = (ref, nombre, precio, cantidad) => {
       const valorFinal = multiploCercano === 0 ? multiploSuperior : multiploCercano;
       
       const confirmar = confirm(
-        `⚠️ ${nombre}\n\n` +
+        `️ ${nombre}\n\n` +
         `El pedido mínimo es de ${minimo} uds (${minInfo.unidad}).\n\n` +
         `Has introducido: ${cant} uds\n` +
         `Múltiplos válidos más cercanos: ${multiploInferior} o ${multiploSuperior}\n\n` +
@@ -756,10 +1018,10 @@ window.limpiarPedido = () => {
 window.guardarPedido = async () => {
   if (pedidoActual.length === 0) { alert('No hay productos en el pedido'); return; }
   
-  // Validación final: comprobar que todos los productos con mínimo están en múltiplos correctos
   const errores = [];
   pedidoActual.forEach(p => {
-    const minInfo = getMinimo(p.ref);
+    const prodManual = productosCache.find(mp => mp.ref === p.ref);
+    const minInfo = prodManual && prodManual.minimo ? { minimo: prodManual.minimo } : getMinimo(p.ref);
     if (minInfo && p.cantidad % minInfo.minimo !== 0) {
       errores.push(`${p.nombre}: ${p.cantidad} uds (mínimo ${minInfo.minimo})`);
     }
@@ -802,13 +1064,9 @@ window.cargarPrediccion = async () => {
   const albsRecientes = albsProv.filter(a => new Date(a.fecha) >= hace6meses);
   
   const productos = {};
-  const refsProductos = {};
   albsRecientes.forEach(alb => {
     (alb.lineas || []).forEach(lin => {
-      if (!productos[lin.ref]) {
-        productos[lin.ref] = { nombre: lin.producto, totalCantidad: 0, ultimoPrecio: lin.precio };
-        refsProductos[lin.ref] = lin.ref;
-      }
+      if (!productos[lin.ref]) productos[lin.ref] = { nombre: lin.producto, totalCantidad: 0, ultimoPrecio: lin.precio };
       productos[lin.ref].totalCantidad += lin.cantidad || 0;
     });
   });
@@ -820,11 +1078,9 @@ window.cargarPrediccion = async () => {
     let media = Math.ceil(p.totalCantidad / meses);
     let sugerencia = Math.ceil(media * 1.1);
     
-    // Respetar mínimo de pedido
     const minInfo = getMinimo(ref);
     let notaMinimo = '';
     if (minInfo) {
-      // Redondear al múltiplo del mínimo más cercano (hacia arriba)
       sugerencia = Math.ceil(sugerencia / minInfo.minimo) * minInfo.minimo;
       if (sugerencia === 0) sugerencia = minInfo.minimo;
       notaMinimo = ` <small style="color:#ea580c;">(mín. ${minInfo.minimo})</small>`;
@@ -937,6 +1193,267 @@ window.generarPDFInforme = () => {
   doc.save(`informe-${prov.toLowerCase()}-${anio}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
+// ===== GESTIÓN DE PRODUCTOS MANUALES (CON REFERENCIA OPCIONAL) =====
+window.toggleMinimoInput = () => {
+  const tieneMinimo = document.getElementById('prodTieneMinimo').value === 'si';
+  document.getElementById('formMinimo').style.display = tieneMinimo ? 'block' : 'none';
+};
+
+window.abrirModalProducto = (productoEditar = null) => {
+  editandoRefAntigua = null;
+  const warningDiv = document.getElementById('similarWarning');
+  warningDiv.style.display = 'none';
+  
+  if (productoEditar) {
+    // Modo edición
+    document.getElementById('modalProductoTitulo').textContent = '✏️ Editar Producto';
+    document.getElementById('prodRef').value = productoEditar.ref;
+    document.getElementById('prodNombre').value = productoEditar.nombre;
+    document.getElementById('prodProveedor').value = productoEditar.proveedor;
+    document.getElementById('prodPrecio').value = productoEditar.precio;
+    editandoRefAntigua = productoEditar.ref;
+    
+    if (productoEditar.minimo) {
+      document.getElementById('prodTieneMinimo').value = 'si';
+      document.getElementById('prodMinimo').value = productoEditar.minimo;
+      document.getElementById('prodUnidadMinimo').value = productoEditar.unidadMinimo || '';
+      document.getElementById('formMinimo').style.display = 'block';
+    } else {
+      document.getElementById('prodTieneMinimo').value = 'no';
+      document.getElementById('prodMinimo').value = '';
+      document.getElementById('prodUnidadMinimo').value = '';
+      document.getElementById('formMinimo').style.display = 'none';
+    }
+    
+    // En edición, la referencia no se puede dejar vacía si ya tiene una
+    if (productoEditar.ref && !productoEditar.ref.startsWith('PROD-')) {
+      document.getElementById('prodRef').readOnly = false;
+    }
+  } else {
+    // Modo creación
+    document.getElementById('modalProductoTitulo').textContent = '➕ Añadir Nuevo Producto';
+    document.getElementById('prodRef').value = '';
+    document.getElementById('prodNombre').value = '';
+    document.getElementById('prodProveedor').value = 'LUNA';
+    document.getElementById('prodPrecio').value = '';
+    document.getElementById('prodTieneMinimo').value = 'no';
+    document.getElementById('prodMinimo').value = '';
+    document.getElementById('prodUnidadMinimo').value = '';
+    document.getElementById('formMinimo').style.display = 'none';
+    document.getElementById('prodRef').readOnly = false;
+  }
+  
+  document.getElementById('modalProducto').classList.add('active');
+  
+  // Restaurar botón
+  const btnGuardar = document.getElementById('btnGuardarProducto');
+  btnGuardar.textContent = productoEditar ? '💾 Actualizar producto' : ' Guardar producto';
+  btnGuardar.onclick = productoEditar ? () => actualizarProductoExistente() : () => guardarNuevoProducto();
+};
+
+window.cerrarModalProducto = () => {
+  document.getElementById('modalProducto').classList.remove('active');
+  editandoRefAntigua = null;
+};
+
+// Verificar similitud mientras se escribe el nombre
+document.addEventListener('DOMContentLoaded', () => {
+  const inputNombre = document.getElementById('prodNombre');
+  if (inputNombre) {
+    inputNombre.addEventListener('input', () => {
+      const nombre = inputNombre.value.trim();
+      const proveedor = document.getElementById('prodProveedor').value;
+      const warningDiv = document.getElementById('similarWarning');
+      
+      if (nombre.length < 5) {
+        warningDiv.style.display = 'none';
+        return;
+      }
+      
+      const similar = buscarProductoSimilar(nombre, proveedor);
+      if (similar) {
+        warningDiv.style.display = 'block';
+        warningDiv.className = 'alert alert-warning';
+        warningDiv.innerHTML = `
+          🔍 <strong>¡Producto similar detectado en ${similar.proveedor}!</strong><br>
+          "${similar.nombre}" (Ref: ${similar.ref}) - Similitud: ${Math.round(similar.similitud * 100)}%<br>
+          Precio en ${similar.proveedor}: <strong>${formatearMoneda(similar.precio)}</strong>
+        `;
+      } else {
+        warningDiv.style.display = 'none';
+      }
+    });
+  }
+});
+
+window.guardarNuevoProducto = async () => {
+  let ref = document.getElementById('prodRef').value.trim();
+  const nombre = document.getElementById('prodNombre').value.trim();
+  const proveedor = document.getElementById('prodProveedor').value;
+  const precio = parseFloat(document.getElementById('prodPrecio').value);
+  const tieneMinimo = document.getElementById('prodTieneMinimo').value === 'si';
+  const minimo = tieneMinimo ? parseInt(document.getElementById('prodMinimo').value) : null;
+  const unidadMinimo = tieneMinimo ? document.getElementById('prodUnidadMinimo').value.trim() : null;
+  
+  if (!nombre || !proveedor || isNaN(precio) || precio <= 0) {
+    alert('❌ Completa todos los campos obligatorios (*)');
+    return;
+  }
+  
+  if (tieneMinimo && (isNaN(minimo) || minimo <= 0)) {
+    alert('❌ La cantidad mínima debe ser mayor que 0');
+    return;
+  }
+  
+  // Si no hay referencia, generar una automáticamente
+  if (!ref) {
+    ref = 'PROD-' + Date.now().toString().slice(-8);
+  }
+  
+  // Verificar si ya existe
+  const existe = productosCache.some(p => p.ref === ref);
+  if (existe) {
+    alert(`❌ Ya existe un producto con la referencia "${ref}"`);
+    return;
+  }
+  
+  try {
+    await setDoc(doc(db, "productos", ref), {
+      nombre,
+      proveedor,
+      precio,
+      minimo,
+      unidadMinimo,
+      createdAt: new Date().toISOString()
+    });
+    
+    productosCache.push({ ref, nombre, proveedor, precio, minimo, unidadMinimo });
+    
+    if (tieneMinimo) {
+      MINIMOS_PEDIDO[ref] = { minimo, unidad: unidadMinimo };
+    }
+    
+    alert(`✅ Producto "${nombre}" guardado correctamente\nReferencia: ${ref}`);
+    cerrarModalProducto();
+    renderProductos();
+    
+    const seccionActiva = document.querySelector('.seccion.active');
+    if (seccionActiva && seccionActiva.id === 'seccion-pedido') {
+      const provActual = document.getElementById('filtroProveedorPedido').value;
+      if (provActual === proveedor) {
+        renderPedido();
+      }
+    }
+  } catch(e) {
+    console.error('Error guardando producto:', e);
+    alert('❌ Error al guardar el producto: ' + e.message);
+  }
+};
+
+window.editarProducto = (ref) => {
+  const prod = productosCache.find(p => p.ref === ref);
+  if (!prod) {
+    alert('Producto no encontrado');
+    return;
+  }
+  abrirModalProducto(prod);
+};
+
+window.actualizarProductoExistente = async () => {
+  if (!editandoRefAntigua) {
+    alert('Error: no se está editando ningún producto');
+    return;
+  }
+  
+  const nuevaRef = document.getElementById('prodRef').value.trim();
+  const nombre = document.getElementById('prodNombre').value.trim();
+  const proveedor = document.getElementById('prodProveedor').value;
+  const precio = parseFloat(document.getElementById('prodPrecio').value);
+  const tieneMinimo = document.getElementById('prodTieneMinimo').value === 'si';
+  const minimo = tieneMinimo ? parseInt(document.getElementById('prodMinimo').value) : null;
+  const unidadMinimo = tieneMinimo ? document.getElementById('prodUnidadMinimo').value.trim() : null;
+  
+  if (!nombre || !proveedor || isNaN(precio) || precio <= 0) {
+    alert('❌ Completa todos los campos obligatorios');
+    return;
+  }
+  
+  if (tieneMinimo && (isNaN(minimo) || minimo <= 0)) {
+    alert('❌ La cantidad mínima debe ser mayor que 0');
+    return;
+  }
+  
+  // Determinar la referencia final
+  let refFinal = nuevaRef || editandoRefAntigua;
+  
+  // Si se cambió la referencia, verificar que no exista ya
+  if (refFinal !== editandoRefAntigua) {
+    const existe = productosCache.some(p => p.ref === refFinal);
+    if (existe) {
+      alert(`❌ Ya existe un producto con la referencia "${refFinal}"`);
+      return;
+    }
+  }
+  
+  try {
+    // Si cambió la referencia, borrar el documento antiguo
+    if (refFinal !== editandoRefAntigua) {
+      await deleteDoc(doc(db, "productos", editandoRefAntigua));
+      
+      // Actualizar MINIMOS_PEDIDO
+      if (MINIMOS_PEDIDO[editandoRefAntigua]) {
+        delete MINIMOS_PEDIDO[editandoRefAntigua];
+      }
+    }
+    
+    // Guardar (o re-guardar con nueva ref)
+    await setDoc(doc(db, "productos", refFinal), {
+      nombre,
+      proveedor,
+      precio,
+      minimo,
+      unidadMinimo,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Actualizar cache
+    const idx = productosCache.findIndex(p => p.ref === editandoRefAntigua);
+    if (idx >= 0) {
+      productosCache[idx] = {
+        ref: refFinal,
+        nombre,
+        proveedor,
+        precio,
+        minimo,
+        unidadMinimo
+      };
+    }
+    
+    // Actualizar MINIMOS_PEDIDO
+    if (tieneMinimo) {
+      MINIMOS_PEDIDO[refFinal] = { minimo, unidad: unidadMinimo };
+    } else {
+      delete MINIMOS_PEDIDO[refFinal];
+    }
+    
+    alert(`✅ Producto actualizado correctamente\nNueva referencia: ${refFinal}`);
+    cerrarModalProducto();
+    renderProductos();
+    
+    const seccionActiva = document.querySelector('.seccion.active');
+    if (seccionActiva && seccionActiva.id === 'seccion-pedido') {
+      const provActual = document.getElementById('filtroProveedorPedido').value;
+      if (provActual === proveedor) {
+        renderPedido();
+      }
+    }
+  } catch(e) {
+    console.error('Error actualizando producto:', e);
+    alert('❌ Error al actualizar: ' + e.message);
+  }
+};
+
+// ===== MODAL ALBARÁN MANUAL =====
 window.abrirModalAlbaran = () => {
   document.getElementById('modalNumero').value = '';
   document.getElementById('modalFecha').value = new Date().toISOString().split('T')[0];
@@ -952,7 +1469,7 @@ window.agregarLineaModal = () => {
   div.className = 'linea-item';
   div.innerHTML = `
     <input type="text" placeholder="Producto" class="modal-prod" style="flex:2; padding:6px; border:1px solid #cbd5e0; border-radius:4px;">
-    <input type="text" placeholder="Ref" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;">
+    <input type="text" placeholder="Ref (opcional)" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;">
     <input type="number" placeholder="Cant" class="modal-cant" min="0" value="1" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;">
     <input type="number" placeholder="Precio" class="modal-precio" min="0" step="0.01" style="width:100px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;">
     <button onclick="this.parentElement.remove()" class="danger">🗑️</button>
@@ -967,7 +1484,7 @@ window.guardarAlbaranManual = async () => {
   const lineas = [];
   document.querySelectorAll('.linea-item').forEach(item => {
     const prod = item.querySelector('.modal-prod').value;
-    const ref = item.querySelector('.modal-ref').value;
+    const ref = item.querySelector('.modal-ref').value || ('MAN-' + Date.now().toString().slice(-6));
     const cant = parseInt(item.querySelector('.modal-cant').value) || 0;
     const precio = parseFloat(item.querySelector('.modal-precio').value) || 0;
     if (prod && cant > 0) lineas.push({ producto: prod, ref, cantidad: cant, precio });
