@@ -46,6 +46,7 @@
   .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
   .badge-luna { background: #dbeafe; color: #1e40af; }
   .badge-lidera { background: #fef3c7; color: #92400e; }
+  .badge-minimo { background: #fef3c7; color: #92400e; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
   .alert { padding: 12px 16px; border-radius: 6px; margin: 10px 0; font-size: 14px; }
   .alert-warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
   .alert-danger { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
@@ -69,7 +70,8 @@
   .chart-bar .label { width: 80px; font-size: 13px; }
   .chart-bar .bar { flex: 1; background: #e2e8f0; height: 24px; border-radius: 4px; overflow: hidden; }
   .chart-bar .fill { background: linear-gradient(90deg, #2c5282 0%, #4299e1 100%); height: 100%; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 11px; font-weight: bold; min-width: 30px; }
-  .toallita-row { background: #fffbeb !important; }
+  .minimo-row { background: #fffbeb !important; }
+  .minimo-hint { color: #ea580c; font-size: 11px; font-weight: 600; }
   @media (max-width: 768px) {
     header h1 { font-size: 18px; }
     .tab-btn { padding: 8px 12px; font-size: 12px; }
@@ -129,14 +131,14 @@
 
   <div id="seccion-productos" class="seccion">
     <div class="card">
-      <h2> Catálogo de Productos</h2>
+      <h2>📦 Catálogo de Productos</h2>
       <div class="filtros">
         <select id="filtroProvProd" onchange="cargarProductos()">
           <option value="TODOS">Todos los proveedores</option>
           <option value="LUNA">Solo LUNA</option>
           <option value="LIDERA">Solo LIDERA</option>
         </select>
-        <input type="text" id="buscadorProd" placeholder="🔍 Buscar producto..." oninput="cargarProductos()">
+        <input type="text" id="buscadorProd" placeholder=" Buscar producto..." oninput="cargarProductos()">
       </div>
       <div id="tablaProductos"></div>
     </div>
@@ -162,6 +164,9 @@
   <div id="seccion-pedido" class="seccion">
     <div class="card">
       <h2>🛒 Preparar Pedido</h2>
+      <div class="alert alert-warning" style="margin-bottom:15px;">
+        ℹ️ Los productos marcados con <span class="badge-minimo">MÍN</span> solo se pueden pedir en múltiplos de la cantidad mínima indicada.
+      </div>
       <div class="filtros">
         <label style="font-weight:600;">Proveedor:</label>
         <select id="filtroProveedorPedido" onchange="onCambiarProveedorPedido()">
@@ -192,7 +197,7 @@
     </div>
     <div id="seccion-prediccion" class="card" style="display:none;">
       <h3>🤖 Predicción basada en últimos 6 meses</h3>
-      <p style="color:#666; font-size:14px; margin-bottom:16px;">Sugerencia automática según tu histórico de consumo</p>
+      <p style="color:#666; font-size:14px; margin-bottom:16px;">Sugerencia automática según tu histórico de consumo (respeta mínimos de pedido)</p>
       <div id="tablaPrediccion"></div>
       <button onclick="usarPrediccion()" class="success" style="margin-top:15px;">✅ Usar predicción en el pedido</button>
     </div>
@@ -267,6 +272,39 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const LIMITE = 500;
 
+// ===== MÍNIMOS DE PEDIDO POR REFERENCIA =====
+const MINIMOS_PEDIDO = {
+  // LUNA
+  'CEL0013': { minimo: 20, unidad: 'caja de 20 uds' },
+  'HER/100012': { minimo: 12, unidad: 'caja 6 botellas' },
+  '210197': { minimo: 50, unidad: 'caja de rollos' },
+  '00830': { minimo: 12, unidad: 'bolsa de 12' },
+  '5332P': { minimo: 12, unidad: 'bolsa 12 pares' },
+  'CEL0007': { minimo: 18, unidad: 'fardo de 18' },
+  '5094': { minimo: 2, unidad: 'paquete de 2' },
+  'HER/100045': { minimo: 12, unidad: 'caja 6 botellas' },
+  '276006': { minimo: 30, unidad: 'caja 30 rollos' },
+  '14454': { minimo: 12, unidad: 'bolsa de 12' },
+  
+  // LIDERA
+  '10030037': { minimo: 108, unidad: 'fardo de 108' },
+  '10032567': { minimo: 4, unidad: '4 garrafas' },
+  '10014448': { minimo: 12, unidad: 'caja de 12' },
+  '10033342': { minimo: 6, unidad: 'fardo de 6' },
+  '10006043': { minimo: 12, unidad: 'caja de 12' },
+  '10005181': { minimo: 18, unidad: 'fardo de 18' },
+  '10020381': { minimo: 12, unidad: 'paquete de 12' },
+  '10023300': { minimo: 20, unidad: 'caja de 20' },
+  '10025386': { minimo: 50, unidad: 'caja de 50' },
+  '10023961': { minimo: 5, unidad: 'paquete de 5' },
+  '10031086': { minimo: 2, unidad: 'paquete de 2' },
+  '10005183': { minimo: 108, unidad: 'fardo de 108' },
+  '10005196': { minimo: 6, unidad: 'fardo de 6' },
+  '10031291': { minimo: 100, unidad: 'paquete de 100' },
+  '10031292': { minimo: 100, unidad: 'paquete de 100' },
+  '10031293': { minimo: 100, unidad: 'paquete de 100' }
+};
+
 let albaranesCache = [];
 let pedidoActual = [];
 let datosCargados = false;
@@ -280,6 +318,11 @@ const formatearFecha = (f) => {
 const formatearMoneda = (n) => {
   return new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR'}).format(n || 0);
 };
+
+// Obtener mínimo de pedido para una referencia
+function getMinimo(ref) {
+  return MINIMOS_PEDIDO[ref] || null;
+}
 
 async function cargarAlbaranes() {
   if (datosCargados) return;
@@ -423,13 +466,16 @@ function renderProductos() {
     return;
   }
   
-  let html = '<table><thead><tr><th>Producto</th><th>Ref</th><th>Proveedores</th><th>Último precio</th><th>Última compra</th><th>Total histórico</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Producto</th><th>Ref</th><th>Proveedores</th><th>Mín. pedido</th><th>Último precio</th><th>Última compra</th><th>Total histórico</th></tr></thead><tbody>';
   lista.forEach(p => {
     const provs = Array.from(p.proveedores).map(x => `<span class="badge ${x==='LUNA'?'badge-luna':'badge-lidera'}">${x}</span>`).join(' ');
+    const minInfo = getMinimo(p.ref);
+    const minTexto = minInfo ? `<span class="badge-minimo">${minInfo.minimo} ${minInfo.unidad}</span>` : '<span style="color:#a0aec0;font-size:11px;">Sin mínimo</span>';
     html += `<tr>
       <td><strong>${p.nombre}</strong></td>
       <td>${p.ref}</td>
       <td>${provs}</td>
+      <td>${minTexto}</td>
       <td>${formatearMoneda(p.ultimoPrecio)}</td>
       <td>${formatearFecha(p.ultimaFecha)}</td>
       <td>${formatearMoneda(p.totalImporte)} (${p.totalCantidad} uds)</td>
@@ -542,7 +588,7 @@ window.generarPDFEvolucion = () => {
   doc.save(`evolucion-precios-${prov.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-// ===== PREPARAR PEDIDO CON VALIDACIÓN DE MÚLTIPLOS DE 20 PARA TOALLITAS =====
+// ===== PREPARAR PEDIDO CON VALIDACIÓN DE MÍNIMOS =====
 function renderPedido() {
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
@@ -584,25 +630,26 @@ function renderPedido() {
   }
   
   let html = `<p style="color:#666; margin-bottom:10px;"><strong>${listaProductos.length} productos</strong> disponibles de <strong>${prov}</strong></p>`;
-  html += '<table><thead><tr><th>Producto</th><th>Ref</th><th>Precio</th><th>Ya pedido en ' + (mes || '...') + '</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
+  html += '<table><thead><tr><th>Producto</th><th>Ref</th><th>Precio</th><th>Mínimo</th><th>Ya pedido</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
   
   listaProductos.forEach(p => {
     const ya = yaPedido[p.ref] || 0;
     const nombreEscapado = (p.nombre || '').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     
-    // VALIDACIÓN: toallitas (CEL0013) en múltiplos de 20
-    const esToallita = p.ref === 'CEL0013';
-    const stepAttr = esToallita ? 'step="20"' : 'step="1"';
-    const minAttr = esToallita ? 'min="0"' : 'min="0"';
-    const hintToallita = esToallita ? ' <small style="color:#ea580c;font-size:11px;">⚠️ múltiplos de 20</small>' : '';
-    const filaClass = esToallita ? ' class="toallita-row"' : '';
+    const minInfo = getMinimo(p.ref);
+    const tieneMinimo = minInfo !== null;
+    const minimo = tieneMinimo ? minInfo.minimo : 1;
+    const stepAttr = tieneMinimo ? `step="${minimo}"` : 'step="1"';
+    const hintMinimo = tieneMinimo ? `<br><span class="minimo-hint">⚠️ mín. ${minimo} (${minInfo.unidad})</span>` : '';
+    const filaClass = tieneMinimo ? ' class="minimo-row"' : '';
     
     html += `<tr${filaClass}>
-      <td>${p.nombre}${hintToallita}</td>
+      <td>${p.nombre}${hintMinimo}</td>
       <td><small>${p.ref}</small></td>
       <td>${formatearMoneda(p.ultimoPrecio)}</td>
+      <td>${tieneMinimo ? `<span class="badge-minimo">${minimo}</span>` : '-'}</td>
       <td>${ya > 0 ? '<strong style="color:#ea580c;">' + ya + '</strong>' : '<span style="color:#a0aec0;">0</span>'}</td>
-      <td><input type="number" min="0" value="0" id="cant-${p.ref}" ${stepAttr} ${minAttr} onchange="validarYActualizar('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value, ${esToallita})" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"></td>
+      <td><input type="number" min="0" value="0" id="cant-${p.ref}" ${stepAttr} onchange="validarYActualizar('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value)" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"></td>
       <td class="importe-${p.ref}" style="font-weight:bold;">0,00 €</td>
     </tr>`;
   });
@@ -611,35 +658,38 @@ function renderPedido() {
   actualizarBarraPresupuesto(prov, mes);
 }
 
-// Función que valida múltiplos de 20 antes de actualizar
-window.validarYActualizar = (ref, nombre, precio, cantidad, esMultiplo20) => {
+// Función que valida múltiplos del mínimo antes de actualizar
+window.validarYActualizar = (ref, nombre, precio, cantidad) => {
   let cant = parseInt(cantidad) || 0;
+  const minInfo = getMinimo(ref);
   
-  if (esMultiplo20 && cant > 0 && cant % 20 !== 0) {
-    const multiploInferior = Math.floor(cant / 20) * 20;
-    const multiploSuperior = multiploInferior + 20;
-    
-    // Elegir el múltiplo más cercano
-    const diffInferior = cant - multiploInferior;
-    const diffSuperior = multiploSuperior - cant;
-    const multiploCercano = diffInferior <= diffSuperior ? multiploInferior : multiploSuperior;
-    
-    // Si el inferior es 0, usar el superior
-    const valorFinal = multiploCercano === 0 ? multiploSuperior : multiploCercano;
-    
-    const confirmar = confirm(
-      `⚠️ Las toallitas (CEL0013) solo se pueden pedir en múltiplos de 20.\n\n` +
-      `Has introducido: ${cant} uds\n` +
-      `Múltiplos válidos más cercanos: ${multiploInferior} o ${multiploSuperior}\n\n` +
-      `¿Redondear a ${valorFinal} uds?\n\n` +
-      `• Aceptar = ${valorFinal} uds\n` +
-      `• Cancelar = 0 uds (borrar)`
-    );
-    
-    cant = confirmar ? valorFinal : 0;
-    
-    const input = document.getElementById(`cant-${ref}`);
-    if (input) input.value = cant;
+  if (minInfo && cant > 0) {
+    const minimo = minInfo.minimo;
+    if (cant % minimo !== 0) {
+      const multiploInferior = Math.floor(cant / minimo) * minimo;
+      const multiploSuperior = multiploInferior + minimo;
+      
+      const diffInferior = cant - multiploInferior;
+      const diffSuperior = multiploSuperior - cant;
+      const multiploCercano = diffInferior <= diffSuperior ? multiploInferior : multiploSuperior;
+      
+      const valorFinal = multiploCercano === 0 ? multiploSuperior : multiploCercano;
+      
+      const confirmar = confirm(
+        `⚠️ ${nombre}\n\n` +
+        `El pedido mínimo es de ${minimo} uds (${minInfo.unidad}).\n\n` +
+        `Has introducido: ${cant} uds\n` +
+        `Múltiplos válidos más cercanos: ${multiploInferior} o ${multiploSuperior}\n\n` +
+        `¿Redondear a ${valorFinal} uds?\n\n` +
+        `• Aceptar = ${valorFinal} uds\n` +
+        `• Cancelar = 0 uds (borrar)`
+      );
+      
+      cant = confirmar ? valorFinal : 0;
+      
+      const input = document.getElementById(`cant-${ref}`);
+      if (input) input.value = cant;
+    }
   }
   
   actualizarPedido(ref, nombre, precio, cant);
@@ -706,13 +756,18 @@ window.limpiarPedido = () => {
 window.guardarPedido = async () => {
   if (pedidoActual.length === 0) { alert('No hay productos en el pedido'); return; }
   
-  // Validación final: comprobar que las toallitas están en múltiplos de 20
-  const toallitas = pedidoActual.filter(p => p.ref === 'CEL0013');
-  for (const t of toallitas) {
-    if (t.cantidad % 20 !== 0) {
-      alert(`❌ Las toallitas deben estar en múltiplos de 20. Tienes ${t.cantidad} uds. Corrígelo antes de guardar.`);
-      return;
+  // Validación final: comprobar que todos los productos con mínimo están en múltiplos correctos
+  const errores = [];
+  pedidoActual.forEach(p => {
+    const minInfo = getMinimo(p.ref);
+    if (minInfo && p.cantidad % minInfo.minimo !== 0) {
+      errores.push(`${p.nombre}: ${p.cantidad} uds (mínimo ${minInfo.minimo})`);
     }
+  });
+  
+  if (errores.length > 0) {
+    alert(`❌ Hay productos que no cumplen el mínimo de pedido:\n\n${errores.join('\n')}\n\nCorrígelo antes de guardar.`);
+    return;
   }
   
   const prov = document.getElementById('filtroProveedorPedido').value;
@@ -747,9 +802,13 @@ window.cargarPrediccion = async () => {
   const albsRecientes = albsProv.filter(a => new Date(a.fecha) >= hace6meses);
   
   const productos = {};
+  const refsProductos = {};
   albsRecientes.forEach(alb => {
     (alb.lineas || []).forEach(lin => {
-      if (!productos[lin.ref]) productos[lin.ref] = { nombre: lin.producto, totalCantidad: 0, ultimoPrecio: lin.precio };
+      if (!productos[lin.ref]) {
+        productos[lin.ref] = { nombre: lin.producto, totalCantidad: 0, ultimoPrecio: lin.precio };
+        refsProductos[lin.ref] = lin.ref;
+      }
       productos[lin.ref].totalCantidad += lin.cantidad || 0;
     });
   });
@@ -757,24 +816,27 @@ window.cargarPrediccion = async () => {
   const meses = Math.max(1, Math.ceil(albsRecientes.length));
   let html = '<table><thead><tr><th>Producto</th><th>Consumo 6m</th><th>Media/mes</th><th>Precio</th><th>Sugerencia</th></tr></thead><tbody>';
   
-  Object.values(productos).sort((a,b) => b.totalCantidad - a.totalCantidad).forEach(p => {
+  Object.entries(productos).sort((a,b) => b[1].totalCantidad - a[1].totalCantidad).forEach(([ref, p]) => {
     let media = Math.ceil(p.totalCantidad / meses);
     let sugerencia = Math.ceil(media * 1.1);
     
-    // Si es toallita, forzar múltiplo de 20
-    const esToallita = Object.keys(productos).find(k => productos[k] === p) === 'CEL0013' || p.nombre?.includes('TOALLA');
-    if (esToallita && sugerencia > 0) {
-      sugerencia = Math.ceil(sugerencia / 20) * 20;
+    // Respetar mínimo de pedido
+    const minInfo = getMinimo(ref);
+    let notaMinimo = '';
+    if (minInfo) {
+      // Redondear al múltiplo del mínimo más cercano (hacia arriba)
+      sugerencia = Math.ceil(sugerencia / minInfo.minimo) * minInfo.minimo;
+      if (sugerencia === 0) sugerencia = minInfo.minimo;
+      notaMinimo = ` <small style="color:#ea580c;">(mín. ${minInfo.minimo})</small>`;
     }
     
     const coste = (sugerencia * p.ultimoPrecio).toFixed(2);
-    const notaToallita = esToallita ? ' <small style="color:#ea580c;">(múlt. 20)</small>' : '';
     html += `<tr>
-      <td><strong>${p.nombre}</strong>${notaToallita}</td>
+      <td><strong>${p.nombre}</strong>${notaMinimo}</td>
       <td>${p.totalCantidad} uds</td>
       <td>${media} uds/mes</td>
       <td>${formatearMoneda(p.ultimoPrecio)}</td>
-      <td><input type="number" class="pred-cantidad" data-ref="${Object.keys(productos).find(k => productos[k] === p)}" data-nombre="${(p.nombre || '').replace(/"/g,'&quot;')}" data-precio="${p.ultimoPrecio}" value="${sugerencia}" style="width:80px; padding:4px;"> <span style="color:#666; font-size:12px;">(~${coste} €)</span></td>
+      <td><input type="number" class="pred-cantidad" data-ref="${ref}" data-nombre="${(p.nombre || '').replace(/"/g,'&quot;')}" data-precio="${p.ultimoPrecio}" value="${sugerencia}" style="width:80px; padding:4px;"> <span style="color:#666; font-size:12px;">(~${coste} €)</span></td>
     </tr>`;
   });
   
