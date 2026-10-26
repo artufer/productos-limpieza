@@ -1119,9 +1119,22 @@ window.generarPDFInforme = () => {
   let filtrados = albaranesCache;
   if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
-  doc.autoTable({ startY: 40, head: [['Fecha', 'Nº Albarán', 'Proveedor', 'Líneas', 'Total']], body: filtrados.sort((a,b) => (a.fecha || '').localeCompare(b.fecha || '')).map(a => [ formatearFecha(a.fecha), a.numero || '', a.proveedor || '', (a.lineas || []).length, formatearMoneda((a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0)) ]), styles: { fontSize: 9 }, headStyles: { fillColor: [44, 82, 130] } });
-  doc.save(`informe-${prov.toLowerCase()}-${anio}-${new Date().toISOString().split('T')[0]}.pdf`);
-};
+ doc.autoTable({
+  startY: 72,
+  head: [['#', 'Producto', 'Ref.', 'Cantidad', 'Precio ud.', 'Importe']],
+  body: filas,
+  styles: { fontSize: 10, cellPadding: 4 },
+  headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold' },
+  alternateRowStyles: { fillColor: [245, 247, 250] },
+  columnStyles: {
+    0: { cellWidth: 10, halign: 'center' },
+    1: { cellWidth: 65 },
+    2: { cellWidth: 28, halign: 'center' },
+    3: { cellWidth: 22, halign: 'center' },
+    4: { cellWidth: 24, halign: 'right' },
+    5: { cellWidth: 26, halign: 'right' }
+  }
+});
 
 window.toggleMinimoInput = () => { document.getElementById('formMinimo').style.display = document.getElementById('prodTieneMinimo').value === 'si' ? 'block' : 'none'; };
 window.onCambiarTipoPedido = () => {
