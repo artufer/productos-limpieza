@@ -229,8 +229,7 @@
         </select>
         <label style="font-weight:600;">Mes:</label>
         <input type="month" id="mesPedido" onchange="onCambiarMesPedido()">
-        <button onclick="cargarPrediccion()" class="purple">🤖 Calcular predicción</button>
-        <button onclick="abrirModalAlbaran()" class="success">➕ Albarán manual</button>
+      
       </div>
       <div id="alertaPresupuesto"></div>
       <div id="listaPedido"></div>
@@ -250,12 +249,7 @@
         <button onclick="limpiarPedido()" class="secondary">️ Limpiar</button>
       </div>
     </div>
-    <div id="seccion-prediccion" class="card" style="display:none;">
-      <h3>🤖 Predicción (últimos 6 meses)</h3>
-      <p style="color:#666; font-size:14px; margin-bottom:16px;">Sugerencia automática según tu histórico</p>
-      <div id="tablaPrediccion"></div>
-      <button onclick="usarPrediccion()" class="success" style="margin-top:15px;">✅ Usar predicción</button>
-    </div>
+    
   </div>
 
   <div id="seccion-informes" class="seccion">
@@ -809,7 +803,23 @@ function renderPedido() {
         } catch(e) { console.warn('Error similar', p.ref, e); }
         const refDisplay = p.ref || 'auto';
         const nombreEscapado = (p.nombre || '').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-        html += `<div class="pedido-linea"><div><div class="producto-nombre">${p.nombre}${badgeSimilar}</div><div class="producto-ref">Ref: ${refDisplay}</div><div class="producto-tipo">${tipoTexto}</div><div class="producto-precio">${formatearMoneda(p.ultimoPrecio)} /ud</div></div><input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value)" placeholder="0"><div class="linea-total" id="total-${p.ref}">0,00 €</div></div>`;
+       // Texto del mínimo (solo si tiene)
+const textoMinimo = tieneMinimo 
+  ? `<span style="font-size:11px; color:#ea580c; font-weight:600; white-space:nowrap;">mín. ${minimo} ${minInfo.unidad || ''}</span>` 
+  : '';
+
+html += `<div class="pedido-linea">
+  <div>
+    <div class="producto-nombre">${p.nombre}${badgeSimilar}</div>
+    <div class="producto-ref">Ref: ${refDisplay}</div>
+    <div class="producto-precio">${formatearMoneda(p.ultimoPrecio)} /ud</div>
+  </div>
+  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+    ${textoMinimo}
+    <input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value)" placeholder="0" style="width:100%; text-align:right; font-size:16px; padding:8px; border:2px solid #cbd5e0; border-radius:6px;">
+  </div>
+  <div class="linea-total" id="total-${p.ref}">0,00 €</div>
+</div>`;
       } catch(e) { console.error('Error producto', p.ref, e); }
     });
     html += '</div>';
