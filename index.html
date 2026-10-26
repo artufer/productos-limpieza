@@ -134,7 +134,7 @@
   <button class="tab-btn" data-seccion="productos">📦 Productos</button>
   <button class="tab-btn" data-seccion="evolucion">📈 Evolución Precios</button>
   <button class="tab-btn" data-seccion="pedido">🛒 Preparar Pedido</button>
-  <button class="tab-btn" data-seccion="informes"> Informes</button>
+  <button class="tab-btn" data-seccion="informes">📑 Informes</button>
 </nav>
 
 <div id="floatingTotal" class="floating-total">
@@ -179,7 +179,7 @@
 
   <div id="seccion-productos" class="seccion">
     <div class="card">
-      <h2> Catálogo de Productos</h2>
+      <h2>📦 Catálogo de Productos</h2>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
         <div class="filtros" style="margin-bottom:0;">
           <select id="filtroProvProd" onchange="cargarProductos()">
@@ -192,7 +192,7 @@
         <button onclick="abrirModalProducto()" class="success">➕ Añadir producto nuevo</button>
       </div>
       <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">
-        ℹ️ <strong>Referencia opcional:</strong> Si no la conoces, déjala vacía y se generará automáticamente.
+        ️ <strong>Referencia opcional:</strong> Si no la conoces, déjala vacía y se generará automáticamente.
       </div>
       <div id="tablaProductos"></div>
     </div>
@@ -208,7 +208,7 @@
           <option value="LUNA">Solo LUNA</option>
           <option value="LIDERA">Solo LIDERA</option>
         </select>
-        <input type="text" id="buscadorEvol" placeholder="🔍 Buscar..." oninput="cargarEvolucion()">
+        <input type="text" id="buscadorEvol" placeholder=" Buscar..." oninput="cargarEvolucion()">
         <button onclick="generarPDFEvolucion()" class="success">📄 Descargar PDF</button>
       </div>
       <div id="tablaEvolucion"></div>
@@ -217,7 +217,7 @@
 
   <div id="seccion-pedido" class="seccion">
     <div class="card">
-      <h2>🛒 Preparar Pedido</h2>
+      <h2> Preparar Pedido</h2>
       <div class="alert alert-warning" style="margin-bottom:15px;">
         ℹ️ <strong>Cajas</strong>: se piden por cajas (1, 2, 3...). <strong>Líquidos</strong>: se piden por litros (mínimo = contenido de 1 caja). <strong>Unidades</strong>: múltiplos del mínimo.
       </div>
@@ -283,7 +283,7 @@
 
 <div id="modalProducto" class="modal">
   <div class="modal-content">
-    <h3 id="modalProductoTitulo" style="margin-bottom:16px;"> Añadir Nuevo Producto</h3>
+    <h3 id="modalProductoTitulo" style="margin-bottom:16px;">➕ Añadir Nuevo Producto</h3>
     <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">💡 La referencia es <strong>opcional</strong>. Se autogenera si se deja vacía.</div>
     <div class="form-group"><label>Referencia <small style="color:#a0aec0;">(opcional)</small></label><input type="text" id="prodRef" placeholder="Ej: CEL0013"></div>
     <div class="form-group"><label>Nombre del producto *</label><input type="text" id="prodNombre" placeholder="Ej: Toalla manos TISSUE"></div>
@@ -309,7 +309,7 @@
     <button onclick="agregarLineaModal()" style="margin:10px 0;">➕ Añadir línea</button>
     <div style="display:flex; gap:10px; margin-top:16px;">
       <button onclick="guardarAlbaranManual()" class="success">💾 Guardar</button>
-      <button onclick="cerrarModal()" class="secondary"> Cancelar</button>
+      <button onclick="cerrarModal()" class="secondary">❌ Cancelar</button>
     </div>
   </div>
 </div>
@@ -637,7 +637,7 @@ function renderProductos() {
     const provs = Array.from(p.proveedores).map(x => `<span class="badge ${x==='LUNA'?'badge-luna':'badge-lidera'}">${x}</span>`).join(' ');
     const badgeManual = p.esManual ? '<span class="badge-manual" style="margin-left:5px;">MANUAL</span>' : '';
     const minInfo = p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo, tipo: p.tipoPedido } : getMinimo(p.ref);
-    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? '📦 Cajas' : minInfo.tipo === 'litros' ? '💧 Litros' : '🔢 Uds') : '🔢 Uds';
+    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? '📦 Cajas' : minInfo.tipo === 'litros' ? ' Litros' : '🔢 Uds') : '🔢 Uds';
     const minTexto = minInfo ? `<span class="badge-minimo">${minInfo.minimo} ${minInfo.unidad || ''}</span>` : '<span style="color:#a0aec0;font-size:11px;">Sin mínimo</span>';
     const totalTexto = p.esManual ? '<span style="color:#a0aec0;">Sin pedidos</span>' : `${formatearMoneda(p.totalImporte)} (${p.totalCantidad})`;
     const refTexto = p.ref ? p.ref : '<span class="ref-vacia">auto</span>';
@@ -718,90 +718,59 @@ function renderPedido() {
   try {
     const prov = document.getElementById('filtroProveedorPedido').value;
     const mes = document.getElementById('mesPedido').value;
-    
-    // Función auxiliar para obtener el nombre correcto
-    const obtenerNombre = (ref, nombreAlbaran) => {
-      if (nombreAlbaran && nombreAlbaran.trim() !== '' && !nombreAlbaran.startsWith('Producto ')) {
-        return nombreAlbaran;
-      }
-      const prodManual = productosCache.find(p => p.ref === ref);
-      if (prodManual) return prodManual.nombre;
-      for (const a of albaranesCache) {
-        if (a.proveedor !== prov) continue;
-        const linea = (a.lineas || []).find(l => l.ref === ref && l.producto && l.producto.trim() !== '' && !l.producto.startsWith('Producto '));
-        if (linea) return linea.producto;
-      }
-      return `Producto ${ref}`;
-    };
-    
     const productos = {};
-    albaranesCache.forEach(a => {
-      if (a.proveedor !== prov) return;
+    const albaranesFiltrados = albaranesCache.filter(a => a.proveedor && a.proveedor.toUpperCase() === prov.toUpperCase());
+    albaranesFiltrados.forEach(a => {
       (a.lineas || []).forEach(l => {
         if (!l.ref) return;
-        const nombreCorrecto = obtenerNombre(l.ref, l.producto);
+        const nombreProducto = l.producto || `Producto ${l.ref}`;
         if (!productos[l.ref]) {
-          productos[l.ref] = { nombre: nombreCorrecto, ref: l.ref, ultimoPrecio: l.precio || 0, ultimaFecha: a.fecha, esManual: false, tipoPedido: 'unidades' };
+          productos[l.ref] = { nombre: nombreProducto, ref: l.ref, ultimoPrecio: l.precio || 0, ultimaFecha: a.fecha, esManual: false, tipoPedido: 'unidades' };
         }
         if (a.fecha >= (productos[l.ref].ultimaFecha || '')) { 
           productos[l.ref].ultimoPrecio = l.precio || 0; 
           productos[l.ref].ultimaFecha = a.fecha;
-          if (productos[l.ref].nombre.startsWith('Producto ') && !nombreCorrecto.startsWith('Producto ')) {
-            productos[l.ref].nombre = nombreCorrecto;
+          if (productos[l.ref].nombre.startsWith('Producto ') && !nombreProducto.startsWith('Producto ')) {
+            productos[l.ref].nombre = nombreProducto;
           }
         }
       });
     });
-    
     productosCache.forEach(p => {
-      if (p.proveedor === prov && !productos[p.ref]) {
+      if (p.proveedor && p.proveedor.toUpperCase() === prov.toUpperCase() && !productos[p.ref]) {
         productos[p.ref] = { nombre: p.nombre, ref: p.ref, ultimoPrecio: p.precio, ultimaFecha: '-', esManual: true, minimo: p.minimo, unidadMinimo: p.unidadMinimo, tipoPedido: p.tipoPedido || 'unidades' };
       }
     });
-    
     const listaProductos = Object.values(productos).sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
-    
     if (listaProductos.length === 0) {
-      document.getElementById('listaPedido').innerHTML = `<div class="empty"><p>No hay productos para <strong>${prov}</strong>.</p><button onclick="abrirModalProducto()" class="success" style="margin-top:15px;"> Añadir primer producto</button></div>`;
+      document.getElementById('listaPedido').innerHTML = `<div class="empty"><p>No hay productos para <strong>${prov}</strong>.</p><button onclick="abrirModalProducto()" class="success" style="margin-top:15px;">➕ Añadir primer producto</button></div>`;
       document.getElementById('resumenPedido').style.display = 'none';
       document.getElementById('floatingTotal').classList.remove('visible');
       return;
     }
-    
     document.getElementById('floatingTotal').classList.add('visible');
-    
     let html = `<p style="color:#666; margin-bottom:15px;"><strong>${listaProductos.length} productos</strong> disponibles de <strong>${prov}</strong></p>`;
     html += '<div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">';
-    
     listaProductos.forEach(p => {
       try {
         const minInfo = p.esManual && p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo || '', tipo: p.tipoPedido || 'unidades' } : (getMinimo(p.ref) || null);
         const tieneMinimo = minInfo !== null;
         const tipo = tieneMinimo ? (minInfo.tipo || 'unidades') : 'unidades';
         const minimo = tieneMinimo ? minInfo.minimo : 1;
-        
         let tipoTexto = '';
         if (tipo === 'cajas') tipoTexto = `📦 Cajas (mín. ${minimo}) · ${minInfo ? (minInfo.unidad || '') : ''}`;
         else if (tipo === 'litros') tipoTexto = `💧 Litros (mín. ${minimo}L) · ${minInfo ? (minInfo.unidad || '') : ''}`;
-        else tipoTexto = `🔢 Uds (mín. ${minimo}) · ${minInfo ? (minInfo.unidad || 'ud') : 'ud'}`;
-        
-        const similar = buscarProductoSimilar(p.nombre, prov, p.ref);
-        const badgeSimilar = similar ? ' <span class="badge-similar">SIMILAR</span>' : '';
+        else tipoTexto = ` Uds (mín. ${minimo}) · ${minInfo ? (minInfo.unidad || 'ud') : 'ud'}`;
+        let badgeSimilar = '';
+        try {
+          const similar = buscarProductoSimilar(p.nombre, prov, p.ref);
+          if (similar) badgeSimilar = ' <span class="badge-similar">SIMILAR</span>';
+        } catch(e) { console.warn('Error similar', p.ref, e); }
         const refDisplay = p.ref || 'auto';
-        
-        html += `<div class="pedido-linea">
-          <div>
-            <div class="producto-nombre">${p.nombre}${badgeSimilar}</div>
-            <div class="producto-ref">Ref: ${refDisplay}</div>
-            <div class="producto-tipo">${tipoTexto}</div>
-            <div class="producto-precio">${formatearMoneda(p.ultimoPrecio)} /ud</div>
-          </div>
-          <input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${(p.nombre || '').replace(/'/g,"\\'")}', ${p.ultimoPrecio}, this.value)" placeholder="0">
-          <div class="linea-total" id="total-${p.ref}">0,00 €</div>
-        </div>`;
+        const nombreEscapado = (p.nombre || '').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        html += `<div class="pedido-linea"><div><div class="producto-nombre">${p.nombre}${badgeSimilar}</div><div class="producto-ref">Ref: ${refDisplay}</div><div class="producto-tipo">${tipoTexto}</div><div class="producto-precio">${formatearMoneda(p.ultimoPrecio)} /ud</div></div><input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value)" placeholder="0"><div class="linea-total" id="total-${p.ref}">0,00 €</div></div>`;
       } catch(e) { console.error('Error producto', p.ref, e); }
     });
-    
     html += '</div>';
     document.getElementById('listaPedido').innerHTML = html;
     document.getElementById('resumenPedido').style.display = 'block';
@@ -827,7 +796,7 @@ window.actualizarLineaPedido = (ref, nombre, precio, cantidad) => {
         const multiploInf = Math.floor(cant / minimo) * minimo;
         const multiploSup = multiploInf + minimo;
         const valorFinal = ((cant - multiploInf) <= (multiploSup - cant) ? multiploInf : multiploSup) || multiploSup;
-        const confirmar = confirm(` ${nombre}\n\nEl pedido mínimo es de ${minimo}L (${minInfo.unidad || ''}).\n\nHas introducido: ${cant}L\nMúltiplos válidos: ${multiploInf}L o ${multiploSup}L\n\n¿Redondear a ${valorFinal}L?\n\n• Aceptar = ${valorFinal}L\n• Cancelar = 0L`);
+        const confirmar = confirm(`💧 ${nombre}\n\nEl pedido mínimo es de ${minimo}L (${minInfo.unidad || ''}).\n\nHas introducido: ${cant}L\nMúltiplos válidos: ${multiploInf}L o ${multiploSup}L\n\n¿Redondear a ${valorFinal}L?\n\n• Aceptar = ${valorFinal}L\n• Cancelar = 0L`);
         cant = confirmar ? valorFinal : 0;
         const input = document.getElementById(`cant-${ref}`);
         if (input) input.value = cant;
@@ -837,7 +806,7 @@ window.actualizarLineaPedido = (ref, nombre, precio, cantidad) => {
         const multiploInf = Math.floor(cant / minimo) * minimo;
         const multiploSup = multiploInf + minimo;
         const valorFinal = ((cant - multiploInf) <= (multiploSup - cant) ? multiploInf : multiploSup) || multiploSup;
-        const confirmar = confirm(`⚠️ ${nombre}\n\nEl pedido mínimo es de ${minimo} uds (${minInfo.unidad || ''}).\n\nHas introducido: ${cant} uds\nMúltiplos válidos: ${multiploInf} o ${multiploSup}\n\n¿Redondear a ${valorFinal} uds?\n\n• Aceptar = ${valorFinal} uds\n• Cancelar = 0 uds`);
+        const confirmar = confirm(`️ ${nombre}\n\nEl pedido mínimo es de ${minimo} uds (${minInfo.unidad || ''}).\n\nHas introducido: ${cant} uds\nMúltiplos válidos: ${multiploInf} o ${multiploSup}\n\n¿Redondear a ${valorFinal} uds?\n\n• Aceptar = ${valorFinal} uds\n• Cancelar = 0 uds`);
         cant = confirmar ? valorFinal : 0;
         const input = document.getElementById(`cant-${ref}`);
         if (input) input.value = cant;
@@ -906,7 +875,7 @@ window.guardarPedido = async () => {
       else if (minInfo.tipo === 'unidades' && p.cantidad % minInfo.minimo !== 0) errores.push(`${p.nombre}: ${p.cantidad} uds (mínimo ${minInfo.minimo})`);
     }
   });
-  if (errores.length > 0) { alert(`❌ Productos que no cumplen el mínimo:\n\n${errores.join('\n')}`); return; }
+  if (errores.length > 0) { alert(` Productos que no cumplen el mínimo:\n\n${errores.join('\n')}`); return; }
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
   const hoy = new Date().toISOString().split('T')[0];
@@ -927,35 +896,20 @@ window.generarPDFPedido = () => {
   const total = subtotal + iva;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  
-  // Cabecera
   doc.setFontSize(20);
   doc.setTextColor(30, 58, 95);
   doc.text('PEDIDO DE MATERIAL DE LIMPIEZA', 14, 20);
-  
   doc.setFontSize(11);
   doc.setTextColor(100, 100, 100);
   doc.text('Diputación Provincial de León', 14, 28);
   doc.text('Complejo San Cayetano', 14, 34);
   doc.text('Carretera de Carbajal, 60 - 24008 León', 14, 40);
-  
-  // Datos del pedido
   doc.setFontSize(12);
   doc.setTextColor(30, 58, 95);
   doc.text(`Proveedor: ${prov}`, 14, 52);
   doc.text(`Fecha: ${hoy}`, 14, 58);
   doc.text(`Periodo: ${mes}`, 14, 64);
-  
-  // Tabla de productos - columnas ajustadas
-  const filas = pedidoActual.map((p, idx) => [
-    idx + 1,
-    p.nombre,
-    p.ref || '-',
-    p.cantidad,
-    formatearMoneda(p.precio),
-    formatearMoneda(p.cantidad * p.precio)
-  ]);
-  
+  const filas = pedidoActual.map((p, idx) => [idx + 1, p.nombre, p.ref || '-', p.cantidad, formatearMoneda(p.precio), formatearMoneda(p.cantidad * p.precio)]);
   doc.autoTable({
     startY: 72,
     head: [['#', 'Producto', 'Ref.', 'Cantidad', 'Precio ud.', 'Importe']],
@@ -964,34 +918,27 @@ window.generarPDFPedido = () => {
     headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold' },
     alternateRowStyles: { fillColor: [245, 247, 250] },
     columnStyles: {
-  0: { cellWidth: 10, halign: 'center' },
-  1: { cellWidth: 65 },
-  2: { cellWidth: 20, halign: 'center' },
-  3: { cellWidth: 25, halign: 'center' },
-  4: { cellWidth: 25, halign: 'right' },
-  5: { cellWidth: 30, halign: 'right' }
-}
+      0: { cellWidth: 10, halign: 'center' },
+      1: { cellWidth: 65 },
+      2: { cellWidth: 28, halign: 'center' },
+      3: { cellWidth: 22, halign: 'center' },
+      4: { cellWidth: 24, halign: 'right' },
+      5: { cellWidth: 26, halign: 'right' }
+    }
   });
-  
-  // Totales alineados con la columna Importe
   const finalY = doc.lastAutoTable.finalY + 10;
-  const colImporteX = 195; // Alineado con la columna Importe
-  
+  const colImporteX = 195;
   doc.setFontSize(11);
   doc.setTextColor(100, 100, 100);
   doc.text('Subtotal:', colImporteX - 55, finalY);
   doc.text(formatearMoneda(subtotal), colImporteX, finalY, { align: 'right' });
-  
   doc.text('IVA (21%):', colImporteX - 55, finalY + 6);
   doc.text(formatearMoneda(iva), colImporteX, finalY + 6, { align: 'right' });
-  
   doc.setFontSize(13);
   doc.setTextColor(30, 58, 95);
   doc.setFont(undefined, 'bold');
   doc.text('TOTAL:', colImporteX - 55, finalY + 14);
   doc.text(formatearMoneda(total), colImporteX, finalY + 14, { align: 'right' });
-  
-  // Pie con firma
   doc.setFontSize(11);
   doc.setTextColor(30, 58, 95);
   doc.setFont(undefined, 'bold');
@@ -999,13 +946,11 @@ window.generarPDFPedido = () => {
   doc.setFont(undefined, 'normal');
   doc.setFontSize(10);
   doc.text('Encargado del edificio', 14, 282);
-  
   const ahora = new Date();
   const fechaHora = ahora.toLocaleDateString('es-ES') + ' ' + ahora.toLocaleTimeString('es-ES');
   doc.setFontSize(9);
   doc.setTextColor(150, 150, 150);
   doc.text(fechaHora, 14, 289);
-  
   const nombreArchivo = `pedido-${prov.toLowerCase()}-${mes}.pdf`;
   doc.save(nombreArchivo);
   alert(`✅ PDF generado: ${nombreArchivo}\n\nYa puedes adjuntarlo en un email al proveedor.`);
@@ -1105,7 +1050,7 @@ window.generarInforme = () => {
   filtrados.forEach(a => { if (!a.fecha) return; const m = a.fecha.slice(0,7); if (!meses[m]) meses[m] = 0; meses[m] += (a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0); });
   const productos = {};
   filtrados.forEach(a => { (a.lineas || []).forEach(l => { if (!productos[l.ref]) productos[l.ref] = { nombre: l.producto || `Producto ${l.ref}`, cantidad: 0, importe: 0 }; productos[l.ref].cantidad += l.cantidad || 0; productos[l.ref].importe += (l.cantidad || 0) * (l.precio || 0); }); });
-  let html = `<div class="grid"><div class="stat"><div class="label">Total periodo</div><div class="value">${formatearMoneda(total)}</div><div class="sub">${filtrados.length} albaranes</div></div><div class="stat green"><div class="label">Media mensual</div><div class="value">${formatearMoneda(total/Math.max(1,Object.keys(meses).length))}</div></div></div><h3> Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table><h3>📦 Top 10 productos</h3><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>${Object.values(productos).sort((a,b) => b.importe - a.importe).slice(0,10).map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td><strong>${formatearMoneda(p.importe)}</strong></td></tr>`).join('')}</tbody></table>`;
+  let html = `<div class="grid"><div class="stat"><div class="label">Total periodo</div><div class="value">${formatearMoneda(total)}</div><div class="sub">${filtrados.length} albaranes</div></div><div class="stat green"><div class="label">Media mensual</div><div class="value">${formatearMoneda(total/Math.max(1,Object.keys(meses).length))}</div></div></div><h3>📅 Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table><h3>📦 Top 10 productos</h3><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>${Object.values(productos).sort((a,b) => b.importe - a.importe).slice(0,10).map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td><strong>${formatearMoneda(p.importe)}</strong></td></tr>`).join('')}</tbody></table>`;
   document.getElementById('contenidoInforme').innerHTML = html;
 };
 
@@ -1119,22 +1064,9 @@ window.generarPDFInforme = () => {
   let filtrados = albaranesCache;
   if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
- doc.autoTable({
-  startY: 72,
-  head: [['#', 'Producto', 'Ref.', 'Cantidad', 'Precio ud.', 'Importe']],
-  body: filas,
-  styles: { fontSize: 10, cellPadding: 4 },
-  headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold' },
-  alternateRowStyles: { fillColor: [245, 247, 250] },
-  columnStyles: {
-    0: { cellWidth: 10, halign: 'center' },
-    1: { cellWidth: 65 },
-    2: { cellWidth: 28, halign: 'center' },
-    3: { cellWidth: 22, halign: 'center' },
-    4: { cellWidth: 24, halign: 'right' },
-    5: { cellWidth: 26, halign: 'right' }
-  }
-});
+  doc.autoTable({ startY: 40, head: [['Fecha', 'Nº Albarán', 'Proveedor', 'Líneas', 'Total']], body: filtrados.sort((a,b) => (a.fecha || '').localeCompare(b.fecha || '')).map(a => [ formatearFecha(a.fecha), a.numero || '', a.proveedor || '', (a.lineas || []).length, formatearMoneda((a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0)) ]), styles: { fontSize: 9 }, headStyles: { fillColor: [44, 82, 130] } });
+  doc.save(`informe-${prov.toLowerCase()}-${anio}-${new Date().toISOString().split('T')[0]}.pdf`);
+};
 
 window.toggleMinimoInput = () => { document.getElementById('formMinimo').style.display = document.getElementById('prodTieneMinimo').value === 'si' ? 'block' : 'none'; };
 window.onCambiarTipoPedido = () => {
@@ -1249,7 +1181,7 @@ window.cerrarModal = () => document.getElementById('modalAlbaran').classList.rem
 window.agregarLineaModal = () => {
   const div = document.createElement('div');
   div.className = 'linea-item';
-  div.innerHTML = `<input type="text" placeholder="Producto" class="modal-prod" style="flex:2; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="text" placeholder="Ref (opcional)" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Cant" class="modal-cant" min="0" value="1" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Precio" class="modal-precio" min="0" step="0.01" style="width:100px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><button onclick="this.parentElement.remove()" class="danger">️</button>`;
+  div.innerHTML = `<input type="text" placeholder="Producto" class="modal-prod" style="flex:2; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="text" placeholder="Ref (opcional)" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Cant" class="modal-cant" min="0" value="1" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Precio" class="modal-precio" min="0" step="0.01" style="width:100px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><button onclick="this.parentElement.remove()" class="danger">🗑️</button>`;
   document.getElementById('modalLineas').appendChild(div);
 };
 
@@ -1278,7 +1210,7 @@ window.cargarAlbaranes = renderAlbaranes;
 window.cargarProductos = renderProductos;
 window.cargarEvolucion = renderEvolucion;
 
-// Exponer variables a la consola para diagnóstico (se actualiza después de cargar)
+// Exponer variables a la consola con getters (siempre actualizados)
 window._debug = {
   get albaranesCache() { return albaranesCache; },
   get productosCache() { return productosCache; },
@@ -1301,15 +1233,6 @@ window._debug = {
 };
 
 await cargarAlbaranes();
-
-// Actualizar window._debug con los datos cargados
-console.log(' Datos cargados. Actualizando debug...');
-console.log('Albaranes:', albaranesCache.length);
-if (albaranesCache.length > 0) {
-  console.log('Primer albarán:', albaranesCache[0]);
-  console.log('Campos:', Object.keys(albaranesCache[0]));
-}
-
 renderDashboard();
 </script>
 
