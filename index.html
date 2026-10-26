@@ -93,11 +93,51 @@
   .ref-vacia { color: #a0aec0; font-style: italic; }
   .equivalente-btn { background: #7c3aed; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-left: 8px; }
   .equivalente-btn:hover { background: #6d28d9; }
+  
+  /* NUEVO: Estilos para pedido simplificado */
+  .pedido-linea { 
+    display: grid; 
+    grid-template-columns: 1fr 100px 120px; 
+    gap: 12px; 
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .pedido-linea:hover { background: #f7fafc; }
+  .pedido-linea .producto-nombre { font-weight: 500; }
+  .pedido-linea .producto-tipo { font-size: 11px; color: #718096; margin-top: 2px; }
+  .pedido-linea input[type="number"] { width: 100%; text-align: right; }
+  .pedido-linea .linea-total { text-align: right; font-weight: bold; color: #1e3a5f; }
+  
+  .resumen-pedido {
+    background: #f7fafc;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 2px solid #e2e8f0;
+  }
+  .resumen-linea {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 16px;
+  }
+  .resumen-linea.total {
+    border-top: 2px solid #2c5282;
+    margin-top: 8px;
+    padding-top: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #1e3a5f;
+  }
+  .resumen-linea.iva { color: #718096; }
+  
   @media (max-width: 768px) {
     header h1 { font-size: 18px; }
     .tab-btn { padding: 8px 12px; font-size: 12px; }
     table { font-size: 12px; }
     table th, table td { padding: 6px; }
+    .pedido-linea { grid-template-columns: 1fr 80px 100px; gap: 8px; }
   }
 </style>
 </head>
@@ -109,18 +149,18 @@
 </header>
 
 <nav>
-  <button class="tab-btn active" data-seccion="dashboard">📊 Dashboard</button>
-  <button class="tab-btn" data-seccion="albaranes">📋 Albaranes</button>
-  <button class="tab-btn" data-seccion="productos">📦 Productos</button>
-  <button class="tab-btn" data-seccion="evolucion"> Evolución Precios</button>
-  <button class="tab-btn" data-seccion="pedido">🛒 Preparar Pedido</button>
-  <button class="tab-btn" data-seccion="informes">📑 Informes</button>
+  <button class="tab-btn active" data-seccion="dashboard"> Dashboard</button>
+  <button class="tab-btn" data-seccion="albaranes"> Albaranes</button>
+  <button class="tab-btn" data-seccion="productos"> Productos</button>
+  <button class="tab-btn" data-seccion="evolucion">📈 Evolución Precios</button>
+  <button class="tab-btn" data-seccion="pedido"> Preparar Pedido</button>
+  <button class="tab-btn" data-seccion="informes"> Informes</button>
 </nav>
 
 <main>
   <div id="seccion-dashboard" class="seccion active">
     <div class="card">
-      <h2> Dashboard</h2>
+      <h2>📊 Dashboard</h2>
       <div class="grid" id="dashboardStats"><div class="loading">Cargando...</div></div>
       <h3>📅 Gasto por mes (últimos 12 meses)</h3>
       <div id="graficoMensual"></div>
@@ -150,7 +190,7 @@
 
   <div id="seccion-productos" class="seccion">
     <div class="card">
-      <h2>📦 Catálogo de Productos</h2>
+      <h2> Catálogo de Productos</h2>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
         <div class="filtros" style="margin-bottom:0;">
           <select id="filtroProvProd" onchange="cargarProductos()">
@@ -158,7 +198,7 @@
             <option value="LUNA">Solo LUNA</option>
             <option value="LIDERA">Solo LIDERA</option>
           </select>
-          <input type="text" id="buscadorProd" placeholder=" Buscar producto..." oninput="cargarProductos()">
+          <input type="text" id="buscadorProd" placeholder="🔍 Buscar producto..." oninput="cargarProductos()">
         </div>
         <button onclick="abrirModalProducto()" class="success">➕ Añadir producto nuevo</button>
       </div>
@@ -171,7 +211,7 @@
 
   <div id="seccion-evolucion" class="seccion">
     <div class="card">
-      <h2>📈 Evolución de Precios</h2>
+      <h2> Evolución de Precios</h2>
       <p style="color:#666; margin-bottom:16px;">Seguimiento histórico de cambios de precio</p>
       <div class="filtros">
         <select id="filtroProvEvol" onchange="cargarEvolucion()">
@@ -180,7 +220,7 @@
           <option value="LIDERA">Solo LIDERA</option>
         </select>
         <input type="text" id="buscadorEvol" placeholder="🔍 Buscar..." oninput="cargarEvolucion()">
-        <button onclick="generarPDFEvolucion()" class="success"> Descargar PDF</button>
+        <button onclick="generarPDFEvolucion()" class="success">📄 Descargar PDF</button>
       </div>
       <div id="tablaEvolucion"></div>
     </div>
@@ -190,7 +230,7 @@
     <div class="card">
       <h2>🛒 Preparar Pedido</h2>
       <div class="alert alert-warning" style="margin-bottom:15px;">
-        ️ <strong>Cajas</strong>: se piden por cajas (1, 2, 3...). <strong>Líquidos</strong>: se piden por litros (mínimo = contenido de 1 caja). <strong>Unidades</strong>: múltiplos del mínimo.
+        ℹ️ <strong>Cajas</strong>: se piden por cajas (1, 2, 3...). <strong>Líquidos</strong>: se piden por litros (mínimo = contenido de 1 caja). <strong>Unidades</strong>: múltiplos del mínimo.
       </div>
       <div class="filtros">
         <label style="font-weight:600;">Proveedor:</label>
@@ -201,23 +241,31 @@
         <label style="font-weight:600;">Mes:</label>
         <input type="month" id="mesPedido" onchange="onCambiarMesPedido()">
         <button onclick="cargarPrediccion()" class="purple">🤖 Calcular predicción</button>
-        <button onclick="abrirModalAlbaran()" class="success"> Albarán manual</button>
+        <button onclick="abrirModalAlbaran()" class="success">➕ Albarán manual</button>
       </div>
       <div id="alertaPresupuesto"></div>
       <div id="listaPedido"></div>
-      <div style="margin-top:20px; padding:16px; background:#f7fafc; border-radius:6px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-          <strong>Total pedido:</strong>
-          <strong id="totalPedido" style="font-size:20px; color:#1e3a5f;">0,00 €</strong>
+      <div id="resumenPedido" style="display:none;" class="resumen-pedido">
+        <div class="resumen-linea">
+          <span>Subtotal (sin IVA):</span>
+          <span id="subtotalPedido">0,00 €</span>
         </div>
-        <div class="progress-bar">
+        <div class="resumen-linea iva">
+          <span>IVA (21%):</span>
+          <span id="ivaPedido">0,00 €</span>
+        </div>
+        <div class="resumen-linea total">
+          <span>TOTAL (con IVA):</span>
+          <span id="totalPedido">0,00 €</span>
+        </div>
+        <div class="progress-bar" style="margin-top:12px;">
           <div class="progress-fill" id="barraPresupuesto" style="width:0%;">0%</div>
         </div>
-        <p style="font-size:13px; color:#666; margin-top:8px;">Límite mensual: <strong>500,00 €</strong> por proveedor</p>
+        <p style="font-size:13px; color:#666; margin-top:8px;">Límite mensual: <strong>500,00 €</strong> (con IVA incluido) por proveedor</p>
       </div>
       <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
         <button onclick="guardarPedido()" class="success">💾 Guardar pedido</button>
-        <button onclick="limpiarPedido()" class="secondary">️ Limpiar</button>
+        <button onclick="limpiarPedido()" class="secondary">🗑️ Limpiar</button>
       </div>
     </div>
     <div id="seccion-prediccion" class="card" style="display:none;">
@@ -256,7 +304,7 @@
   <div class="modal-content">
     <h3 id="modalProductoTitulo" style="margin-bottom:16px;">➕ Añadir Nuevo Producto</h3>
     <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">
-       La referencia es <strong>opcional</strong>. Se autogenera si se deja vacía.
+      💡 La referencia es <strong>opcional</strong>. Se autogenera si se deja vacía.
     </div>
     <div class="form-group">
       <label>Referencia <small style="color:#a0aec0;">(opcional)</small></label>
@@ -302,7 +350,7 @@
 <!-- MODAL ALBARÁN MANUAL -->
 <div id="modalAlbaran" class="modal">
   <div class="modal-content">
-    <h3 style="margin-bottom:16px;">➕ Añadir albarán manual</h3>
+    <h3 style="margin-bottom:16px;"> Añadir albarán manual</h3>
     <div class="form-group"><label>Número de albarán</label><input type="text" id="modalNumero"></div>
     <div class="form-group"><label>Fecha</label><input type="date" id="modalFecha"></div>
     <div class="form-group">
@@ -337,6 +385,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const LIMITE = 500;
+const IVA_PORCENTAJE = 0.21;
 
 const MINIMOS_PEDIDO = {
   'CEL0013': { minimo: 20, unidad: 'caja de 20 uds', tipo: 'unidades' },
@@ -385,10 +434,23 @@ const formatearFecha = (f) => {
 const formatearMoneda = (n) => new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR'}).format(n || 0);
 const getMinimo = (ref) => MINIMOS_PEDIDO[ref] || null;
 
-// ===== SIMILITUD DE TEXTO MEJORADA =====
+// ===== SIMILITUD DE TEXTO ULTRA ESTRICTA =====
 function normalizarTexto(texto) {
   if (!texto) return '';
-  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+  return texto.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // quitar tildes
+    .replace(/[^a-z0-9\s]/g, '')                        // quitar símbolos
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Convertir plural a singular (reglas básicas)
+function singularizar(palabra) {
+  if (palabra.endsWith('s') && palabra.length > 3) {
+    if (palabra.endsWith('es')) return palabra.slice(0, -2);
+    return palabra.slice(0, -1);
+  }
+  return palabra;
 }
 
 function obtenerPalabrasSignificativas(texto) {
@@ -420,7 +482,19 @@ function distanciaLevenshtein(a, b) {
 function palabrasSimilares(p1, p2) {
   if (p1 === p2) return true;
   if (p1.length < 3 || p2.length < 3) return false;
-  return (distanciaLevenshtein(p1, p2) / Math.max(p1.length, p2.length)) < 0.3;
+  // Singularizar ambas palabras
+  const s1 = singularizar(p1);
+  const s2 = singularizar(p2);
+  if (s1 === s2) return true;
+  // Distancia Levenshtein
+  return (distanciaLevenshtein(s1, s2) / Math.max(s1.length, s2.length)) < 0.25;
+}
+
+// Extraer dimensiones de bolsas de basura
+function extraerDimensiones(texto) {
+  const match = texto.match(/(\d{2,3})\s*[xX*]\s*(\d{2,3})/);
+  if (match) return `${match[1]}x${match[2]}`;
+  return null;
 }
 
 function calcularSimilitud(t1, t2) {
@@ -440,8 +514,8 @@ function calcularSimilitud(t1, t2) {
   const totalPalabras = new Set([...p1, ...p2]).size;
   const ratio = coincidencias / totalPalabras;
   let bonus = 0;
-  if (coincidencias >= 2) bonus = 0.1;
-  if (coincidencias >= 3) bonus = 0.15;
+  if (coincidencias >= 2) bonus = 0.15;
+  if (coincidencias >= 3) bonus = 0.2;
   return Math.min(1, ratio + bonus);
 }
 
@@ -451,11 +525,33 @@ function detectarPorCategorias(t1, t2) {
   const p1 = new Set(obtenerPalabrasSignificativas(t1));
   const p2 = new Set(obtenerPalabrasSignificativas(t2));
   
+  // Verificar si son bolsas de basura con mismas dimensiones
+  const dim1 = extraerDimensiones(t1);
+  const dim2 = extraerDimensiones(t2);
+  if (dim1 && dim2 && dim1 === dim2) {
+    // Mismas dimensiones → muy similares
+    return 0.85;
+  }
+  if (dim1 && dim2 && dim1 !== dim2) {
+    // Diferentes dimensiones → no similares
+    return 0;
+  }
+  
+  // Verificar higiénico industrial vs doméstico
+  const esIndustrial1 = n1.includes('industrial') || n1.includes('indust') || n1.includes('t45');
+  const esIndustrial2 = n2.includes('industrial') || n2.includes('indust') || n2.includes('t45');
+  const esDomestico1 = n1.includes('domestico') || n1.includes('doméstico') || n1.includes('strong');
+  const esDomestico2 = n2.includes('domestico') || n2.includes('doméstico') || n2.includes('strong');
+  
+  if ((esIndustrial1 && esDomestico2) || (esDomestico1 && esIndustrial2)) {
+    return 0; // Diferentes tipos de higiénico
+  }
+  
   const categorias = {
     'higienico_papel': { palabras: ['higienico','papel','t45','tisoft','gof','fardo','rollo','wc','cel0007','cel0013'], min: 2 },
     'lejia': { palabras: ['lejia','tuna','detergente','diluida','her100012','her100045'], min: 2 },
     'toallas_mano': { palabras: ['toalla','manos','tissue','engarz','pasta','cel0013','secamanos'], min: 2 },
-    'guantes': { palabras: ['guantes','nitrilo','algodon','talla','caja','100','gd21'], min: 2 },
+    'guantes': { palabras: ['guantes','guante','nitrilo','algodon','talla','caja','100','gd21'], min: 2 },
     'bolsas_basura': { palabras: ['basura','bolsa','rollo','autocierre','tricapa','negra','210197','276006'], min: 2 },
     'bayetas_mopas': { palabras: ['bayeta','microfibra','fregona','mopa','algodon','recambio'], min: 2 },
     'limpiadores_liquidos': { palabras: ['limpiador','neutro','perfumado','fregasuelos','floorrit','aloe','supera','garrafa'], min: 2 },
@@ -472,7 +568,7 @@ function detectarPorCategorias(t1, t2) {
     const enT2 = cfg.palabras.filter(p => n2.includes(p) || [...p2].some(pp => p.includes(pp) || pp.includes(p)));
     if (enT1.length >= cfg.min && enT2.length >= cfg.min) {
       const comunes = enT1.filter(p => enT2.some(p2 => palabrasSimilares(p, p2))).length;
-      const sim = 0.6 + (comunes / cfg.palabras.length) * 0.3;
+      const sim = 0.65 + (comunes / cfg.palabras.length) * 0.3;
       if (sim > mejorSim) mejorSim = sim;
     }
   }
@@ -483,7 +579,7 @@ function buscarProductoSimilar(nombre, proveedorActual, excluirRef = null) {
   const provAlt = proveedorActual === 'LUNA' ? 'LIDERA' : 'LUNA';
   let mejor = null;
   let mejorSim = 0;
-  const UMBRAL = 0.45;
+  const UMBRAL = 0.55; // Más estricto
   
   const equivManual = productosEquivalentes.find(e => 
     (e.ref1 === excluirRef && e.prov1 === proveedorActual) ||
@@ -668,7 +764,7 @@ function renderProductos() {
     const provs = Array.from(p.proveedores).map(x => `<span class="badge ${x==='LUNA'?'badge-luna':'badge-lidera'}">${x}</span>`).join(' ');
     const badgeManual = p.esManual ? '<span class="badge-manual" style="margin-left:5px;">MANUAL</span>' : '';
     const minInfo = p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo, tipo: p.tipoPedido } : getMinimo(p.ref);
-    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? '📦 Cajas' : minInfo.tipo === 'litros' ? '💧 Litros' : '🔢 Uds') : '🔢 Uds';
+    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? ' Cajas' : minInfo.tipo === 'litros' ? '💧 Litros' : ' Uds') : '🔢 Uds';
     const minTexto = minInfo ? `<span class="badge-minimo">${minInfo.minimo} ${minInfo.unidad || ''}</span>` : '<span style="color:#a0aec0;font-size:11px;">Sin mínimo</span>';
     const totalTexto = p.esManual ? '<span style="color:#a0aec0;">Sin pedidos</span>' : `${formatearMoneda(p.totalImporte)} (${p.totalCantidad})`;
     const refTexto = p.ref ? p.ref : '<span class="ref-vacia">auto</span>';
@@ -747,11 +843,13 @@ window.generarPDFEvolucion = () => {
   doc.save(`evolucion-precios-${prov.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
+// ===== PREPARAR PEDIDO SIMPLIFICADO =====
 function renderPedido() {
   try {
     const prov = document.getElementById('filtroProveedorPedido').value;
     const mes = document.getElementById('mesPedido').value;
     console.log('🔄 Renderizando pedido:', prov, mes);
+    
     const productos = {};
     albaranesCache.forEach(a => {
       if (a.proveedor !== prov) return;
@@ -764,52 +862,48 @@ function renderPedido() {
     productosCache.forEach(p => {
       if (p.proveedor === prov && !productos[p.ref]) productos[p.ref] = { nombre: p.nombre, ref: p.ref, ultimoPrecio: p.precio, ultimaFecha: '-', esManual: true, minimo: p.minimo, unidadMinimo: p.unidadMinimo, tipoPedido: p.tipoPedido || 'unidades' };
     });
-    const yaPedido = {};
-    albaranesCache.forEach(a => { if (a.proveedor !== prov || !a.fecha || !a.fecha.startsWith(mes)) return; (a.lineas || []).forEach(l => { yaPedido[l.ref] = (yaPedido[l.ref] || 0) + (l.cantidad || 0); }); });
+    
     const listaProductos = Object.values(productos).sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
+    
     if (listaProductos.length === 0) {
       document.getElementById('listaPedido').innerHTML = `<div class="empty"><p>No hay productos para <strong>${prov}</strong>.</p><button onclick="abrirModalProducto()" class="success" style="margin-top:15px;">➕ Añadir primer producto</button></div>`;
-      document.getElementById('totalPedido').textContent = '0,00 €';
-      actualizarBarraPresupuesto(prov, mes);
+      document.getElementById('resumenPedido').style.display = 'none';
       return;
     }
-    let html = `<p style="color:#666; margin-bottom:10px;"><strong>${listaProductos.length} productos</strong> disponibles de <strong>${prov}</strong></p>`;
-    html += '<table><thead><tr><th>Producto</th><th>Ref</th><th>Precio</th><th>Tipo/Mínimo</th><th>Ya pedido</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
+    
+    let html = `<p style="color:#666; margin-bottom:15px;"><strong>${listaProductos.length} productos</strong> disponibles de <strong>${prov}</strong></p>`;
+    html += '<div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">';
+    
     listaProductos.forEach(p => {
       try {
-        const ya = yaPedido[p.ref] || 0;
-        const nombreEscapado = (p.nombre || '').replace(/'/g,"\\'").replace(/"/g,'&quot;');
         const minInfo = p.esManual && p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo || '', tipo: p.tipoPedido || 'unidades' } : (getMinimo(p.ref) || null);
         const tieneMinimo = minInfo !== null;
         const tipo = tieneMinimo ? (minInfo.tipo || 'unidades') : 'unidades';
         const minimo = tieneMinimo ? minInfo.minimo : 1;
-        let hintMinimo = '';
-        let stepAttr = 'step="1"';
-        if (tieneMinimo) {
-          if (tipo === 'cajas') { hintMinimo = `<br><span class="minimo-hint">📦 mín. ${minimo} caja(s) (${minInfo.unidad || 'caja'})</span>`; stepAttr = 'step="1"'; }
-          else if (tipo === 'litros') { hintMinimo = `<br><span class="minimo-hint">💧 mín. ${minimo}L (${minInfo.unidad || ''})</span>`; stepAttr = `step="${minimo}"`; }
-          else { hintMinimo = `<br><span class="minimo-hint">🔢 mín. ${minimo} ${minInfo.unidad || 'uds'}</span>`; stepAttr = `step="${minimo}"`; }
-        }
-        const filaClass = tieneMinimo ? ' class="minimo-row"' : '';
-        const badgeManual = p.esManual ? ' <span class="badge-manual">MANUAL</span>' : '';
+        
+        let tipoTexto = '';
+        if (tipo === 'cajas') tipoTexto = `📦 Cajas (mín. ${minimo})`;
+        else if (tipo === 'litros') tipoTexto = `💧 Litros (mín. ${minimo}L)`;
+        else tipoTexto = `🔢 Uds (mín. ${minimo})`;
+        
         const similar = buscarProductoSimilar(p.nombre, prov, p.ref);
-        let alertaSimilar = '';
-        let badgeSimilar = '';
-        if (similar) {
-          badgeSimilar = ' <span class="badge-similar">SIMILAR</span>';
-          const esMasBaratoAqui = p.ultimoPrecio <= similar.precio;
-          const claseAqui = esMasBaratoAqui ? 'precio-mejor' : 'precio-peor';
-          const claseOtro = esMasBaratoAqui ? 'precio-peor' : 'precio-mejor';
-          const diff = Math.abs(p.ultimoPrecio - similar.precio).toFixed(4);
-          const diffPct = ((Math.abs(p.ultimoPrecio - similar.precio) / Math.min(p.ultimoPrecio, similar.precio)) * 100).toFixed(0);
-          alertaSimilar = `<tr class="similar-row"><td colspan="7"><div class="similar-alert"> <strong>Producto similar en ${similar.proveedor}:</strong> "${similar.nombre}" (Ref: ${similar.ref || 'N/A'}) - Similitud: ${Math.round(similar.similitud * 100)}%<br>💰 Precio aquí (${prov}): <span class="precio-comparado ${claseAqui}">${formatearMoneda(p.ultimoPrecio)}</span> vs Precio en ${similar.proveedor}: <span class="precio-comparado ${claseOtro}">${formatearMoneda(similar.precio)}</span>${esMasBaratoAqui ? ` ✅ <strong>${diffPct}% más barato aquí</strong> (ahorro: ${diff} €/ud)` : ` ⚠️ <strong>${diffPct}% más caro aquí</strong> (diferencia: ${diff} €/ud)`}</div></td></tr>`;
-        }
-        html += `<tr${filaClass}><td>${p.nombre}${badgeManual}${badgeSimilar}${hintMinimo}</td><td><small>${p.ref || '<span class="ref-vacia">auto</span>'}</small></td><td>${formatearMoneda(p.ultimoPrecio)}</td><td>${tieneMinimo ? `<span class="badge-minimo">${tipo === 'cajas' ? '📦' : tipo === 'litros' ? '💧' : ''} ${minimo}</span>` : '-'}</td><td>${ya > 0 ? '<strong style="color:#ea580c;">' + ya + '</strong>' : '<span style="color:#a0aec0;">0</span>'}</td><td><input type="number" min="0" value="0" id="cant-${p.ref}" ${stepAttr} onchange="validarYActualizar('${p.ref}', '${nombreEscapado}', ${p.ultimoPrecio}, this.value)" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"></td><td class="importe-${p.ref}" style="font-weight:bold;">0,00 €</td></tr>${alertaSimilar}`;
+        const badgeSimilar = similar ? ' <span class="badge-similar">SIMILAR</span>' : '';
+        
+        html += `<div class="pedido-linea">
+          <div>
+            <div class="producto-nombre">${p.nombre}${badgeSimilar}</div>
+            <div class="producto-tipo">${tipoTexto} · ${formatearMoneda(p.ultimoPrecio)}/ud</div>
+          </div>
+          <input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${(p.nombre || '').replace(/'/g,"\\'")}', ${p.ultimoPrecio}, this.value)" placeholder="0" style="width:100%; text-align:right;">
+          <div class="linea-total" id="total-${p.ref}">0,00 €</div>
+        </div>`;
       } catch(e) { console.error('Error producto', p.ref, e); }
     });
-    html += '</tbody></table>';
+    
+    html += '</div>';
     document.getElementById('listaPedido').innerHTML = html;
-    actualizarBarraPresupuesto(prov, mes);
+    document.getElementById('resumenPedido').style.display = 'block';
+    actualizarResumenPedido();
     console.log('✅ Renderizado completado');
   } catch(e) {
     console.error('❌ Error en renderPedido:', e);
@@ -817,17 +911,23 @@ function renderPedido() {
   }
 }
 
-window.validarYActualizar = (ref, nombre, precio, cantidad) => {
+window.actualizarLineaPedido = (ref, nombre, precio, cantidad) => {
   let cant = parseFloat(cantidad) || 0;
+  
   const prodManual = productosCache.find(p => p.ref === ref);
   const minInfo = prodManual && prodManual.minimo ? { minimo: prodManual.minimo, unidad: prodManual.unidadMinimo, tipo: prodManual.tipoPedido } : getMinimo(ref);
+  
   if (minInfo && cant > 0) {
     const minimo = minInfo.minimo;
     const tipo = minInfo.tipo || 'unidades';
     let valido = true;
     let mensaje = '';
+    
     if (tipo === 'cajas') {
-      if (!Number.isInteger(cant) || cant < 1) { valido = false; mensaje = `Este producto se pide por cajas enteras.\n\nHas introducido: ${cant}\nDebe ser: 1, 2, 3... cajas\n\n${minInfo.unidad || ''}`; }
+      if (!Number.isInteger(cant) || cant < 1) {
+        valido = false;
+        mensaje = `Este producto se pide por cajas enteras.\n\nHas introducido: ${cant}\nDebe ser: 1, 2, 3... cajas\n\n${minInfo.unidad || ''}`;
+      }
     } else if (tipo === 'litros') {
       if (cant % minimo !== 0) {
         const multiploInf = Math.floor(cant / minimo) * minimo;
@@ -843,79 +943,90 @@ window.validarYActualizar = (ref, nombre, precio, cantidad) => {
         const multiploInf = Math.floor(cant / minimo) * minimo;
         const multiploSup = multiploInf + minimo;
         const valorFinal = ((cant - multiploInf) <= (multiploSup - cant) ? multiploInf : multiploSup) || multiploSup;
-        const confirmar = confirm(`️ ${nombre}\n\nEl pedido mínimo es de ${minimo} uds (${minInfo.unidad || ''}).\n\nHas introducido: ${cant} uds\nMúltiplos válidos: ${multiploInf} o ${multiploSup}\n\n¿Redondear a ${valorFinal} uds?\n\n• Aceptar = ${valorFinal} uds\n• Cancelar = 0 uds`);
+        const confirmar = confirm(`⚠️ ${nombre}\n\nEl pedido mínimo es de ${minimo} uds (${minInfo.unidad || ''}).\n\nHas introducido: ${cant} uds\nMúltiplos válidos: ${multiploInf} o ${multiploSup}\n\n¿Redondear a ${valorFinal} uds?\n\n• Aceptar = ${valorFinal} uds\n• Cancelar = 0 uds`);
         cant = confirmar ? valorFinal : 0;
         const input = document.getElementById(`cant-${ref}`);
         if (input) input.value = cant;
       }
     }
-    if (!valido) { alert(mensaje); cant = 0; const input = document.getElementById(`cant-${ref}`); if (input) input.value = 0; }
-  }
-  if (cant > 0) {
-    const provActual = document.getElementById('filtroProveedorPedido').value;
-    const similar = buscarProductoSimilar(nombre, provActual, ref);
-    if (similar) {
-      const diff = precio - similar.precio;
-      const diffPct = ((Math.abs(diff) / Math.min(precio, similar.precio)) * 100).toFixed(0);
-      const esMasCaroAqui = diff > 0;
-      const ahorroTotal = (Math.abs(diff) * cant).toFixed(2);
-      if (diffPct >= 10) {
-        let titulo, mensaje;
-        if (esMasCaroAqui) {
-          titulo = `💰 ¡ATENCIÓN! Más barato en ${similar.proveedor}`;
-          mensaje = `📦 ${nombre}\n Similar en ${similar.proveedor}: "${similar.nombre}" (Ref: ${similar.ref || 'N/A'})\n📊 Similitud: ${Math.round(similar.similitud * 100)}%\n\n💸 Precio aquí (${provActual}): ${formatearMoneda(precio)}\n💚 Precio en ${similar.proveedor}: ${formatearMoneda(similar.precio)}\n\n📉 ${diffPct}% más barato en ${similar.proveedor}\n💰 AHORRO TOTAL en ${cant}: ${formatearMoneda(parseFloat(ahorroTotal))}\n\n¿Dónde quieres pedirlo?\n\n• Aceptar = Mantener en ${provActual} (${formatearMoneda(precio * cant)})\n• Cancelar = Quitar del pedido (0)`;
-        } else {
-          titulo = `✅ Buen precio en ${provActual}`;
-          mensaje = `📦 ${nombre}\n🔍 También en ${similar.proveedor}: "${similar.nombre}"\n\n💚 Precio aquí (${provActual}): ${formatearMoneda(precio)} ← MÁS BARATO\n Precio en ${similar.proveedor}: ${formatearMoneda(similar.precio)}\n\n ${diffPct}% más barato aquí\n💰 Ahorras ${formatearMoneda(parseFloat(ahorroTotal))}\n\n¿Confirmas el pedido en ${provActual}?`;
-        }
-        const confirmar = confirm(`${titulo}\n\n${mensaje}`);
-        if (!confirmar) { cant = 0; const input = document.getElementById(`cant-${ref}`); if (input) input.value = 0; }
-      }
+    
+    if (!valido) {
+      alert(mensaje);
+      cant = 0;
+      const input = document.getElementById(`cant-${ref}`);
+      if (input) input.value = 0;
     }
   }
-  actualizarPedido(ref, nombre, precio, cant);
-};
-
-window.onCambiarProveedorPedido = () => { pedidoActual = []; document.getElementById('totalPedido').textContent = '0,00 €'; renderPedido(); };
-window.onCambiarMesPedido = () => renderPedido();
-
-window.actualizarPedido = (ref, nombre, precio, cantidad) => {
-  const cant = parseFloat(cantidad) || 0;
+  
+  // Actualizar total de la línea
   const importe = cant * precio;
-  const el = document.querySelector(`.importe-${ref}`);
-  if (el) el.textContent = formatearMoneda(importe);
+  const elTotal = document.getElementById(`total-${ref}`);
+  if (elTotal) elTotal.textContent = formatearMoneda(importe);
+  
+  // Actualizar pedidoActual
   const idx = pedidoActual.findIndex(p => p.ref === ref);
-  if (cant > 0) { if (idx >= 0) pedidoActual[idx] = { ref, nombre, precio, cantidad: cant }; else pedidoActual.push({ ref, nombre, precio, cantidad: cant }); }
-  else { if (idx >= 0) pedidoActual.splice(idx, 1); }
-  actualizarTotalPedido();
+  if (cant > 0) {
+    if (idx >= 0) pedidoActual[idx] = { ref, nombre, precio, cantidad: cant };
+    else pedidoActual.push({ ref, nombre, precio, cantidad: cant });
+  } else {
+    if (idx >= 0) pedidoActual.splice(idx, 1);
+  }
+  
+  actualizarResumenPedido();
 };
 
-function actualizarTotalPedido() {
-  const total = pedidoActual.reduce((s,p) => s + p.cantidad*p.precio, 0);
+function actualizarResumenPedido() {
+  const subtotal = pedidoActual.reduce((s,p) => s + p.cantidad*p.precio, 0);
+  const iva = subtotal * IVA_PORCENTAJE;
+  const total = subtotal + iva;
+  
+  document.getElementById('subtotalPedido').textContent = formatearMoneda(subtotal);
+  document.getElementById('ivaPedido').textContent = formatearMoneda(iva);
   document.getElementById('totalPedido').textContent = formatearMoneda(total);
-  actualizarBarraPresupuesto(document.getElementById('filtroProveedorPedido').value, document.getElementById('mesPedido').value);
+  
+  actualizarBarraPresupuesto(total);
 }
 
-function actualizarBarraPresupuesto(prov, mes) {
-  const yaGastado = albaranesCache.filter(a => a.proveedor === prov && a.fecha && a.fecha.startsWith(mes)).reduce((s,a) => s + (a.lineas || []).reduce((ss,l) => ss + (l.cantidad || 0) * (l.precio || 0), 0), 0);
-  const pedidoTotal = pedidoActual.reduce((s,p) => s + p.cantidad*p.precio, 0);
-  const total = yaGastado + pedidoTotal;
-  const pct = Math.min(100, (total/LIMITE*100)).toFixed(0);
+function actualizarBarraPresupuesto(totalConIVA) {
+  const pct = Math.min(100, (totalConIVA/LIMITE*100)).toFixed(0);
   const barra = document.getElementById('barraPresupuesto');
   barra.style.width = pct + '%';
   barra.textContent = pct + '%';
   barra.className = 'progress-fill' + (pct > 90 ? ' danger' : pct > 75 ? ' warning' : '');
+  
+  const prov = document.getElementById('filtroProveedorPedido').value;
+  const mes = document.getElementById('mesPedido').value;
+  const yaGastado = albaranesCache.filter(a => a.proveedor === prov && a.fecha && a.fecha.startsWith(mes)).reduce((s,a) => s + (a.lineas || []).reduce((ss,l) => ss + (l.cantidad || 0) * (l.precio || 0), 0), 0) * (1 + IVA_PORCENTAJE);
+  const totalRestante = LIMITE - yaGastado - totalConIVA;
+  
   let alerta = '';
-  if (total > LIMITE) alerta = `<div class="alert alert-danger">❌ Superado el límite: ${formatearMoneda(total)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(total-LIMITE)} € por encima)</div>`;
-  else if (total > LIMITE*0.9) alerta = `<div class="alert alert-warning">️ Cerca del límite: ${formatearMoneda(total)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(LIMITE-total)} € restantes)</div>`;
-  else alerta = `<div class="alert alert-success">✅ Dentro del presupuesto: ${formatearMoneda(total)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(LIMITE-total)} € disponibles)</div>`;
+  if (totalConIVA > LIMITE) alerta = `<div class="alert alert-danger">❌ Superado el límite: ${formatearMoneda(totalConIVA)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(totalConIVA-LIMITE)} € por encima)</div>`;
+  else if (totalConIVA > LIMITE*0.9) alerta = `<div class="alert alert-warning">⚠️ Cerca del límite: ${formatearMoneda(totalConIVA)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(LIMITE-totalConIVA)} € restantes)</div>`;
+  else alerta = `<div class="alert alert-success">✅ Dentro del presupuesto: ${formatearMoneda(totalConIVA)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(LIMITE-totalConIVA)} € disponibles)</div>`;
   document.getElementById('alertaPresupuesto').innerHTML = alerta;
 }
 
-window.limpiarPedido = () => { pedidoActual = []; document.querySelectorAll('#listaPedido input[type="number"]').forEach(i => i.value = 0); document.querySelectorAll('[class^="importe-"]').forEach(e => e.textContent = '0,00 €'); actualizarTotalPedido(); };
+window.onCambiarProveedorPedido = () => { pedidoActual = []; renderPedido(); };
+window.onCambiarMesPedido = () => { pedidoActual = []; renderPedido(); };
+
+window.limpiarPedido = () => { 
+  pedidoActual = []; 
+  document.querySelectorAll('#listaPedido input[type="number"]').forEach(i => i.value = 0); 
+  document.querySelectorAll('[id^="total-"]').forEach(e => e.textContent = '0,00 €'); 
+  actualizarResumenPedido(); 
+};
 
 window.guardarPedido = async () => {
   if (pedidoActual.length === 0) { alert('No hay productos en el pedido'); return; }
+  
+  const subtotal = pedidoActual.reduce((s,p) => s + p.cantidad*p.precio, 0);
+  const totalConIVA = subtotal * (1 + IVA_PORCENTAJE);
+  
+  if (totalConIVA > LIMITE) {
+    alert(`❌ El pedido supera el límite de ${formatearMoneda(LIMITE)} (con IVA).\n\nTotal: ${formatearMoneda(totalConIVA)}\nExceso: ${formatearMoneda(totalConIVA - LIMITE)}`);
+    return;
+  }
+  
   const errores = [];
   pedidoActual.forEach(p => {
     const prodManual = productosCache.find(mp => mp.ref === p.ref);
@@ -926,13 +1037,27 @@ window.guardarPedido = async () => {
       else if (minInfo.tipo === 'unidades' && p.cantidad % minInfo.minimo !== 0) errores.push(`${p.nombre}: ${p.cantidad} uds (mínimo ${minInfo.minimo})`);
     }
   });
+  
   if (errores.length > 0) { alert(`❌ Productos que no cumplen el mínimo:\n\n${errores.join('\n')}`); return; }
+  
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
   const hoy = new Date().toISOString().split('T')[0];
   const numero = 'PED-' + Date.now().toString().slice(-6);
-  await addDoc(collection(db, "albaranes"), { fecha: hoy, proveedor: prov, numero: numero, lineas: pedidoActual, createdAt: new Date().toISOString(), mesPedido: mes });
-  alert(`✅ Pedido guardado: ${numero} con ${pedidoActual.length} productos`);
+  
+  await addDoc(collection(db, "albaranes"), { 
+    fecha: hoy, 
+    proveedor: prov, 
+    numero: numero, 
+    lineas: pedidoActual, 
+    subtotal: subtotal,
+    iva: subtotal * IVA_PORCENTAJE,
+    total: totalConIVA,
+    createdAt: new Date().toISOString(), 
+    mesPedido: mes 
+  });
+  
+  alert(`✅ Pedido guardado: ${numero}\n\nSubtotal: ${formatearMoneda(subtotal)}\nIVA: ${formatearMoneda(subtotal * IVA_PORCENTAJE)}\nTotal: ${formatearMoneda(totalConIVA)}`);
   pedidoActual = [];
   renderPedido();
 };
@@ -970,7 +1095,17 @@ window.cargarPrediccion = async () => {
 window.usarPrediccion = () => {
   const inputs = document.querySelectorAll('.pred-cantidad');
   const prov = document.getElementById('filtroProveedorPedido').value;
-  inputs.forEach(inp => { const cant = parseFloat(inp.value); if (cant > 0) { const ref = inp.dataset.ref; const el = document.querySelector(`#cant-${ref}`); if (el) { el.value = cant; actualizarPedido(ref, inp.dataset.nombre, parseFloat(inp.dataset.precio), cant); } } });
+  inputs.forEach(inp => { 
+    const cant = parseFloat(inp.value); 
+    if (cant > 0) { 
+      const ref = inp.dataset.ref; 
+      const el = document.querySelector(`#cant-${ref}`); 
+      if (el) { 
+        el.value = cant; 
+        actualizarLineaPedido(ref, inp.dataset.nombre, parseFloat(inp.dataset.precio), cant); 
+      } 
+    } 
+  });
   alert(`✅ Predicción aplicada al pedido de ${prov}`);
   document.getElementById('seccion-prediccion').style.display = 'none';
 };
@@ -1063,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (similar) {
         warningDiv.style.display = 'block';
         warningDiv.className = 'alert alert-warning';
-        warningDiv.innerHTML = ` <strong>¡Producto similar en ${similar.proveedor}!</strong><br>"${similar.nombre}" (Ref: ${similar.ref}) - Similitud: ${Math.round(similar.similitud * 100)}%<br>Precio en ${similar.proveedor}: <strong>${formatearMoneda(similar.precio)}</strong>`;
+        warningDiv.innerHTML = `🔍 <strong>¡Producto similar en ${similar.proveedor}!</strong><br>"${similar.nombre}" (Ref: ${similar.ref}) - Similitud: ${Math.round(similar.similitud * 100)}%<br>Precio en ${similar.proveedor}: <strong>${formatearMoneda(similar.precio)}</strong>`;
       } else { warningDiv.style.display = 'none'; }
     });
   }
@@ -1089,7 +1224,7 @@ window.guardarNuevoProducto = async () => {
     renderProductos();
     const seccionActiva = document.querySelector('.seccion.active');
     if (seccionActiva && seccionActiva.id === 'seccion-pedido' && document.getElementById('filtroProveedorPedido').value === proveedor) renderPedido();
-  } catch(e) { alert('❌ Error: ' + e.message); }
+  } catch(e) { alert(' Error: ' + e.message); }
 };
 
 window.editarProducto = (ref) => { const prod = productosCache.find(p => p.ref === ref); if (prod) abrirModalProducto(prod); };
