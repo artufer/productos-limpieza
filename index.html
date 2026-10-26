@@ -962,11 +962,21 @@ window.generarPDFPedido = () => {
   doc.setFont(undefined, 'bold');
   doc.text(`TOTAL:`, 140, finalY + 14);
   doc.text(formatearMoneda(total), 195, finalY + 14, { align: 'right' });
-  doc.setFontSize(9);
-  doc.setTextColor(150, 150, 150);
-  doc.setFont(undefined, 'normal');
-  doc.text('Documento generado automáticamente por Control de Limpieza', 14, 280);
-  doc.text(`Fecha de generación: ${hoy}`, 14, 285);
+// Pie con firma
+doc.setFontSize(11);
+doc.setTextColor(30, 58, 95);
+doc.setFont(undefined, 'bold');
+doc.text('Fdo. Arturo Fernández.', 14, 275);
+doc.setFont(undefined, 'normal');
+doc.setFontSize(10);
+doc.text('Encargado del edificio', 14, 282);
+
+// Fecha y hora
+const ahora = new Date();
+const fechaHora = ahora.toLocaleDateString('es-ES') + ' ' + ahora.toLocaleTimeString('es-ES');
+doc.setFontSize(9);
+doc.setTextColor(150, 150, 150);
+doc.text(fechaHora, 14, 289);
   const nombreArchivo = `pedido-${prov.toLowerCase()}-${mes}.pdf`;
   doc.save(nombreArchivo);
   alert(`✅ PDF generado: ${nombreArchivo}\n\nYa puedes adjuntarlo en un email al proveedor.`);
