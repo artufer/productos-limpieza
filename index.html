@@ -134,7 +134,7 @@
   <button class="tab-btn" data-seccion="productos">📦 Productos</button>
   <button class="tab-btn" data-seccion="evolucion">📈 Evolución Precios</button>
   <button class="tab-btn" data-seccion="pedido">🛒 Preparar Pedido</button>
-  <button class="tab-btn" data-seccion="informes"> Informes</button>
+  <button class="tab-btn" data-seccion="informes">📑 Informes</button>
 </nav>
 
 <div id="floatingTotal" class="floating-total">
@@ -179,7 +179,7 @@
 
   <div id="seccion-productos" class="seccion">
     <div class="card">
-      <h2> Catálogo de Productos</h2>
+      <h2>📦 Catálogo de Productos</h2>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
         <div class="filtros" style="margin-bottom:0;">
           <select id="filtroProvProd" onchange="cargarProductos()">
@@ -192,7 +192,7 @@
         <button onclick="abrirModalProducto()" class="success">➕ Añadir producto nuevo</button>
       </div>
       <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">
-        ℹ️ <strong>Referencia opcional:</strong> Si no la conoces, déjala vacía y se generará automáticamente.
+        ℹ️ <strong>Referencia opcional:</strong> Si no la conoces, déjala vacía y se generará automáticamente. Las referencias que empiezan por "100" se asignan a LIDERA.
       </div>
       <div id="tablaProductos"></div>
     </div>
@@ -208,7 +208,7 @@
           <option value="LUNA">Solo LUNA</option>
           <option value="LIDERA">Solo LIDERA</option>
         </select>
-        <input type="text" id="buscadorEvol" placeholder="🔍 Buscar..." oninput="cargarEvolucion()">
+        <input type="text" id="buscadorEvol" placeholder=" Buscar..." oninput="cargarEvolucion()">
         <button onclick="generarPDFEvolucion()" class="success">📄 Descargar PDF</button>
       </div>
       <div id="tablaEvolucion"></div>
@@ -229,7 +229,7 @@
         </select>
         <label style="font-weight:600;">Mes:</label>
         <input type="month" id="mesPedido" onchange="onCambiarMesPedido()">
-        <button onclick="cargarPrediccion()" class="purple"> Calcular predicción</button>
+        <button onclick="cargarPrediccion()" class="purple">🤖 Calcular predicción</button>
         <button onclick="abrirModalAlbaran()" class="success">➕ Albarán manual</button>
       </div>
       <div id="alertaPresupuesto"></div>
@@ -260,7 +260,7 @@
 
   <div id="seccion-informes" class="seccion">
     <div class="card">
-      <h2>📑 Informes</h2>
+      <h2> Informes</h2>
       <div class="filtros">
         <select id="filtroProvInf">
           <option value="TODOS">Todos los proveedores</option>
@@ -284,8 +284,8 @@
 <div id="modalProducto" class="modal">
   <div class="modal-content">
     <h3 id="modalProductoTitulo" style="margin-bottom:16px;">➕ Añadir Nuevo Producto</h3>
-    <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">💡 La referencia es <strong>opcional</strong>. Se autogenera si se deja vacía.</div>
-    <div class="form-group"><label>Referencia <small style="color:#a0aec0;">(opcional)</small></label><input type="text" id="prodRef" placeholder="Ej: CEL0013"></div>
+    <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">💡 La referencia es <strong>opcional</strong>. Si empieza por "100", se asignará automáticamente a <strong>LIDERA</strong>.</div>
+    <div class="form-group"><label>Referencia <small style="color:#a0aec0;">(opcional)</small></label><input type="text" id="prodRef" placeholder="Ej: CEL0013 o 10002029"></div>
     <div class="form-group"><label>Nombre del producto *</label><input type="text" id="prodNombre" placeholder="Ej: Toalla manos TISSUE"></div>
     <div class="form-group"><label>Proveedor *</label><select id="prodProveedor"><option value="LUNA">LUNA</option><option value="LIDERA">LIDERA</option></select></div>
     <div class="form-group"><label>Precio unitario (€) *</label><input type="number" id="prodPrecio" placeholder="0.00" step="0.0001" min="0"></div>
@@ -301,7 +301,7 @@
 
 <div id="modalAlbaran" class="modal">
   <div class="modal-content">
-    <h3 style="margin-bottom:16px;">➕ Añadir albarán manual</h3>
+    <h3 style="margin-bottom:16px;"> Añadir albarán manual</h3>
     <div class="form-group"><label>Número de albarán</label><input type="text" id="modalNumero"></div>
     <div class="form-group"><label>Fecha</label><input type="date" id="modalFecha"></div>
     <div class="form-group"><label>Proveedor</label><select id="modalProveedor"><option value="LUNA">LUNA</option><option value="LIDERA">LIDERA</option></select></div>
@@ -332,40 +332,56 @@ const db = getFirestore(app);
 const LIMITE = 500;
 const IVA_PORCENTAJE = 0.21;
 
+// ===== FUNCIÓN PARA DETECTAR PROVEEDOR POR REFERENCIA =====
+function detectarProveedorPorRef(ref) {
+  if (!ref) return null;
+  const refStr = String(ref).trim();
+  // Si empieza por "100" → LIDERA (cubre 10002029, 1003129L, 100312XL, etc.)
+  if (refStr.startsWith('100')) return 'LIDERA';
+  // Si son solo números → LIDERA (para 2654876, 2060, etc.)
+  if (/^\d+$/.test(refStr)) return 'LIDERA';
+  // Resto (alfanuméricas) → LUNA
+  return 'LUNA';
+}
+
+// ===== FUNCIÓN PARA OBTENER EL PROVEEDOR DE UN ALBARÁN =====
+function getProveedorAlbaran(albaran) {
+  if (albaran.proveedor && albaran.proveedor.toUpperCase() === 'LIDERA') return 'LIDERA';
+  if (albaran.proveedor && albaran.proveedor.toUpperCase() === 'LUNA') return 'LUNA';
+  // Si no tiene proveedor definido, inferirlo por la primera referencia
+  if (albaran.lineas && albaran.lineas.length > 0) {
+    return detectarProveedorPorRef(albaran.lineas[0].ref);
+  }
+  return null;
+}
+
+// ===== FUNCIÓN PARA OBTENER EL PROVEEDOR DE UN PRODUCTO =====
+function getProveedorProducto(ref, proveedorExplicito) {
+  if (proveedorExplicito && proveedorExplicito.toUpperCase() === 'LIDERA') return 'LIDERA';
+  if (proveedorExplicito && proveedorExplicito.toUpperCase() === 'LUNA') return 'LUNA';
+  return detectarProveedorPorRef(ref);
+}
+
 const MINIMOS_PEDIDO = {
+  // ===== LUNA =====
   'CEL0013': { minimo: 20, unidad: 'caja de 20 uds', tipo: 'unidades' },
   'DT294': { minimo: 5, unidad: '5L (1 garrafa)', tipo: 'litros' },
   'HER/100012': { minimo: 12, unidad: '12L (6 botellas × 2L)', tipo: 'litros' },
-  '210197': { minimo: 1, unidad: 'caja de 50 rollos', tipo: 'cajas' },
-  '00830': { minimo: 1, unidad: 'bolsa de 12 bayetas', tipo: 'cajas' },
-  '00832': { minimo: 1, unidad: 'bolsa de 12 bayetas', tipo: 'cajas' },
-  '5332P': { minimo: 1, unidad: 'bolsa 12 pares T.S', tipo: 'cajas' },
+  '210197': { minimo: 50, unidad: 'caja de 50 rollos', tipo: 'cajas' },
+  '00830': { minimo: 12, unidad: 'bolsa de 12 bayetas', tipo: 'cajas' },
+  '00832': { minimo: 12, unidad: 'bolsa de 12 bayetas', tipo: 'cajas' },
+  '5332P': { minimo: 12, unidad: 'bolsa 12 pares', tipo: 'cajas' },
   'CEL0007': { minimo: 18, unidad: 'fardo de 18 uds', tipo: 'unidades' },
   'GD21BM': { minimo: 1, unidad: 'caja de 100 uds T/M', tipo: 'cajas' },
   'GD21BXL': { minimo: 1, unidad: 'caja de 100 uds T/XL', tipo: 'cajas' },
   'GD21BL': { minimo: 1, unidad: 'caja de 100 uds T/L', tipo: 'cajas' },
   '5094': { minimo: 2, unidad: 'paquete de 2', tipo: 'unidades' },
   'HER/100045': { minimo: 12, unidad: '12L (6 botellas × 2L)', tipo: 'litros' },
-  '276006': { minimo: 1, unidad: 'caja de 30 rollos', tipo: 'cajas' },
+  '276006': { minimo: 30, unidad: 'caja de 30 rollos', tipo: 'cajas' },
   '2060': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '14454': { minimo: 1, unidad: 'bolsa de 12 uds', tipo: 'cajas' },
-  '121ENV': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'CEL0016': { minimo: 1, unidad: 'pack 6 ud', tipo: 'unidades' },
-  'BBA005': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'LE-04641': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '921': { minimo: 25, unidad: 'caja 25 uds', tipo: 'cajas' },
-  'TEX 5104': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'TEX 5003': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'TEX 5103': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '04710': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '04980': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '11255': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '0786250': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '512234': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'ESCAL': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'LIM 0770': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'LEP 1700': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  'TTC 2100': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '14454': { minimo: 12, unidad: 'bolsa de 12 uds', tipo: 'cajas' },
+  
+  // ===== LIDERA =====
   '10002029': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
   '10030037': { minimo: 108, unidad: 'fardo de 108 uds', tipo: 'unidades' },
   '10032567': { minimo: 20, unidad: '20L (4 garrafas × 5L)', tipo: 'litros' },
@@ -375,46 +391,20 @@ const MINIMOS_PEDIDO = {
   '10033342': { minimo: 6, unidad: 'fardo de 6 uds', tipo: 'unidades' },
   '10006043': { minimo: 1, unidad: 'caja de 12 paquetes', tipo: 'cajas' },
   '10005181': { minimo: 18, unidad: 'fardo de 18 uds', tipo: 'unidades' },
-  '10020381': { minimo: 1, unidad: 'paquete de 12 uds', tipo: 'cajas' },
-  '10023300': { minimo: 1, unidad: 'caja de 20 uds', tipo: 'cajas' },
-  '10025386': { minimo: 1, unidad: 'caja de 50 uds', tipo: 'cajas' },
-  '10031291': { minimo: 1, unidad: 'paquete de 100 uds T.M', tipo: 'cajas' },
-  '10031292': { minimo: 1, unidad: 'paquete de 100 uds T.L', tipo: 'cajas' },
-  '10031293': { minimo: 1, unidad: 'paquete de 100 uds T.XL', tipo: 'cajas' },
+  '10020381': { minimo: 12, unidad: 'paquete de 12 uds', tipo: 'cajas' },
+  '10023300': { minimo: 20, unidad: 'caja de 20 uds', tipo: 'cajas' },
+  '10025386': { minimo: 50, unidad: 'caja de 50 uds', tipo: 'cajas' },
+  '10031291': { minimo: 100, unidad: 'paquete de 100 uds T.M', tipo: 'cajas' },
+  '1003129L': { minimo: 100, unidad: 'paquete de 100 uds T.L', tipo: 'cajas' },
+  '100312XL': { minimo: 100, unidad: 'paquete de 100 uds T.XL', tipo: 'cajas' },
   '10003348': { minimo: 5, unidad: '5L (1 garrafa)', tipo: 'litros' },
   '10032104': { minimo: 1, unidad: '1L (1 embase)', tipo: 'litros' },
-  '10033491': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10003491': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
   '10023961': { minimo: 5, unidad: 'paquete de 5 uds', tipo: 'unidades' },
   '2654876': { minimo: 10, unidad: '10L (2×5L)', tipo: 'litros' },
   '10033901': { minimo: 1, unidad: 'caja 2×5L', tipo: 'cajas' },
   '10031086': { minimo: 2, unidad: 'paquete de 2 uds', tipo: 'unidades' },
-  '10019091': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10005183': { minimo: 108, unidad: 'fardo de 108 uds', tipo: 'unidades' },
-  '10005196': { minimo: 6, unidad: 'fardo de 6 uds', tipo: 'unidades' },
-  '10024448': { minimo: 12, unidad: 'caja de 12 botellas', tipo: 'cajas' },
-  '10023318': { minimo: 12, unidad: 'caja de 12×1L', tipo: 'cajas' },
-  '10030427': { minimo: 18, unidad: 'fardo de 18 uds', tipo: 'unidades' },
-  '10028926': { minimo: 10, unidad: 'paquete de 10 uds', tipo: 'cajas' },
-  '10003491': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10029411': { minimo: 12, unidad: 'caja de 12×0.75L', tipo: 'cajas' },
-  '10032024': { minimo: 1, unidad: 'caja 2×5L', tipo: 'cajas' },
-  '10026431': { minimo: 1, unidad: 'caja 2×5L', tipo: 'cajas' },
-  '10030518': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10001053': { minimo: 20, unidad: '20L (4×5L)', tipo: 'litros' },
-  '10001108': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10006690': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10017972': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10023427': { minimo: 12, unidad: 'caja de 12 uds', tipo: 'cajas' },
-  '10025069': { minimo: 10, unidad: 'rollo de 10 uds', tipo: 'cajas' },
-  '10028031': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10029491': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10030118': { minimo: 6, unidad: 'pack 6 uds', tipo: 'cajas' },
-  '10034620': { minimo: 1, unidad: 'paquete de 100 uds', tipo: 'cajas' },
-  '10034972': { minimo: 12, unidad: 'caja de 12 uds', tipo: 'cajas' },
-  '10018192': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10021088': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
-  '10029005': { minimo: 10, unidad: 'paquete de 10 uds', tipo: 'cajas' },
-  '10033339': { minimo: 6, unidad: 'fardo de 6 uds', tipo: 'unidades' }
+  '10019091': { minimo: 1, unidad: 'ud', tipo: 'unidades' }
 };
 
 let productosEquivalentes = [];
@@ -503,12 +493,12 @@ function buscarProductoSimilar(nombre, proveedorActual, excluirRef = null) {
   if (equivManual) {
     const refAlt = equivManual.ref1 === excluirRef ? equivManual.ref2 : equivManual.ref1;
     const provAlt2 = equivManual.ref1 === excluirRef ? equivManual.prov2 : equivManual.prov1;
-    const prodAlt = albaranesCache.find(a => a.proveedor === provAlt2 && (a.lineas || []).some(l => l.ref === refAlt));
+    const prodAlt = albaranesCache.find(a => getProveedorAlbaran(a) === provAlt2 && (a.lineas || []).some(l => l.ref === refAlt));
     if (prodAlt) { const linea = prodAlt.lineas.find(l => l.ref === refAlt); return { ref: refAlt, nombre: linea.producto, proveedor: provAlt2, precio: linea.precio, similitud: 1.0 }; }
   }
   const refsVistos = new Set();
   albaranesCache.forEach(a => {
-    if (a.proveedor !== provAlt) return;
+    if (getProveedorAlbaran(a) !== provAlt) return;
     (a.lineas || []).forEach(l => {
       if (refsVistos.has(l.ref)) return;
       refsVistos.add(l.ref);
@@ -518,7 +508,8 @@ function buscarProductoSimilar(nombre, proveedorActual, excluirRef = null) {
     });
   });
   productosCache.forEach(p => {
-    if (p.proveedor !== provAlt) return;
+    const provProd = getProveedorProducto(p.ref, p.proveedor);
+    if (provProd !== provAlt) return;
     if (excluirRef && p.ref === excluirRef) return;
     let sim = calcularSimilitud(nombre, p.nombre);
     if (sim < UMBRAL) sim = Math.max(sim, detectarPorCategorias(nombre, p.nombre));
@@ -527,22 +518,17 @@ function buscarProductoSimilar(nombre, proveedorActual, excluirRef = null) {
   return mejor;
 }
 
-// Función para obtener el nombre correcto de un producto
 function obtenerNombreProducto(ref, nombreAlbaran, prov) {
-  // 1. Si el albarán tiene nombre válido, úsalo
   if (nombreAlbaran && nombreAlbaran.trim() !== '' && !nombreAlbaran.startsWith('Producto ')) {
     return nombreAlbaran;
   }
-  // 2. Buscar en productos manuales
   const prodManual = productosCache.find(p => p.ref === ref);
   if (prodManual) return prodManual.nombre;
-  // 3. Buscar en otros albaranes del mismo proveedor
   for (const a of albaranesCache) {
-    if (a.proveedor !== prov) continue;
+    if (getProveedorAlbaran(a) !== prov) continue;
     const linea = (a.lineas || []).find(l => l.ref === ref && l.producto && l.producto.trim() !== '' && !l.producto.startsWith('Producto '));
     if (linea) return linea.producto;
   }
-  // 4. Fallback: usar la referencia sin prefijo
   return ref;
 }
 
@@ -563,7 +549,7 @@ async function cargarProductosDesdeFirestore() {
   try {
     const snap = await getDocs(collection(db, "productos"));
     productosCache = [];
-    snap.forEach(d => { const data = d.data(); productosCache.push({ ref: d.id, nombre: data.nombre, proveedor: data.proveedor, precio: data.precio, minimo: data.minimo || null, unidadMinimo: data.unidadMinimo || null, tipoPedido: data.tipoPedido || 'unidades' }); });
+    snap.forEach(d => { const data = d.data(); productosCache.push({ ref: d.id, nombre: data.nombre, proveedor: data.proveedor || detectarProveedorPorRef(d.id), precio: data.precio, minimo: data.minimo || null, unidadMinimo: data.unidadMinimo || null, tipoPedido: data.tipoPedido || 'unidades' }); });
   } catch(e) { console.error(e); }
 }
 async function cargarEquivalentesDesdeFirestore() {
@@ -617,12 +603,17 @@ function renderAlbaranes() {
   const busq = (document.getElementById('buscadorAlb').value || '').toLowerCase();
   const anio = document.getElementById('filtroAnioAlb').value;
   let filtrados = albaranesCache;
-  if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
+  if (prov !== 'TODOS') filtrados = filtrados.filter(a => getProveedorAlbaran(a) === prov);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
   if (busq) filtrados = filtrados.filter(a => (a.numero || '').toLowerCase().includes(busq) || (a.lineas || []).some(l => (l.producto || '').toLowerCase().includes(busq)));
   if (filtrados.length === 0) { document.getElementById('tablaAlbaranes').innerHTML = '<div class="empty">No se encontraron albaranes</div>'; return; }
   let html = '<table><thead><tr><th>Fecha</th><th>Nº</th><th>Proveedor</th><th>Líneas</th><th>Total</th></tr></thead><tbody>';
-  filtrados.forEach(a => { const total = (a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0); const badge = a.proveedor === 'LUNA' ? 'badge-luna' : 'badge-lidera'; html += `<tr><td>${formatearFecha(a.fecha)}</td><td><strong>${a.numero || ''}</strong></td><td><span class="badge ${badge}">${a.proveedor || ''}</span></td><td>${(a.lineas || []).length}</td><td><strong>${formatearMoneda(total)}</strong></td></tr>`; });
+  filtrados.forEach(a => { 
+    const total = (a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0); 
+    const provReal = getProveedorAlbaran(a) || a.proveedor || '?';
+    const badge = provReal === 'LUNA' ? 'badge-luna' : 'badge-lidera'; 
+    html += `<tr><td>${formatearFecha(a.fecha)}</td><td><strong>${a.numero || ''}</strong></td><td><span class="badge ${badge}">${provReal}</span></td><td>${(a.lineas || []).length}</td><td><strong>${formatearMoneda(total)}</strong></td></tr>`; 
+  });
   html += '</tbody></table>';
   document.getElementById('tablaAlbaranes').innerHTML = html;
 }
@@ -632,10 +623,11 @@ function renderProductos() {
   const busq = (document.getElementById('buscadorProd').value || '').toLowerCase();
   const productosHistoricos = {};
   albaranesCache.forEach(a => {
-    if (prov !== 'TODOS' && a.proveedor !== prov) return;
+    const provAlb = getProveedorAlbaran(a);
+    if (prov !== 'TODOS' && provAlb !== prov) return;
     (a.lineas || []).forEach(l => {
-      if (!productosHistoricos[l.ref]) productosHistoricos[l.ref] = { nombre: obtenerNombreProducto(l.ref, l.producto, prov), ref: l.ref, proveedores: new Set(), ultimoPrecio: l.precio, ultimaFecha: a.fecha, totalCantidad: 0, totalImporte: 0, esManual: false };
-      productosHistoricos[l.ref].proveedores.add(a.proveedor);
+      if (!productosHistoricos[l.ref]) productosHistoricos[l.ref] = { nombre: obtenerNombreProducto(l.ref, l.producto, provAlb), ref: l.ref, proveedores: new Set(), ultimoPrecio: l.precio, ultimaFecha: a.fecha, totalCantidad: 0, totalImporte: 0, esManual: false, proveedorDetectado: provAlb };
+      productosHistoricos[l.ref].proveedores.add(provAlb);
       if (a.fecha >= productosHistoricos[l.ref].ultimaFecha) { productosHistoricos[l.ref].ultimoPrecio = l.precio; productosHistoricos[l.ref].ultimaFecha = a.fecha; }
       productosHistoricos[l.ref].totalCantidad += l.cantidad || 0;
       productosHistoricos[l.ref].totalImporte += (l.cantidad || 0) * (l.precio || 0);
@@ -643,8 +635,9 @@ function renderProductos() {
   });
   const productosManuales = {};
   productosCache.forEach(p => {
-    if (prov !== 'TODOS' && p.proveedor !== prov) return;
-    if (!productosManuales[p.ref]) productosManuales[p.ref] = { nombre: p.nombre, ref: p.ref, proveedores: new Set([p.proveedor]), ultimoPrecio: p.precio, ultimaFecha: '-', totalCantidad: 0, totalImporte: 0, esManual: true, minimo: p.minimo, unidadMinimo: p.unidadMinimo, tipoPedido: p.tipoPedido || 'unidades' };
+    const provProd = getProveedorProducto(p.ref, p.proveedor);
+    if (prov !== 'TODOS' && provProd !== prov) return;
+    if (!productosManuales[p.ref]) productosManuales[p.ref] = { nombre: p.nombre, ref: p.ref, proveedores: new Set([provProd]), ultimoPrecio: p.precio, ultimaFecha: '-', totalCantidad: 0, totalImporte: 0, esManual: true, minimo: p.minimo, unidadMinimo: p.unidadMinimo, tipoPedido: p.tipoPedido || 'unidades' };
   });
   const todos = { ...productosHistoricos, ...productosManuales };
   let lista = Object.values(todos);
@@ -656,7 +649,7 @@ function renderProductos() {
     const provs = Array.from(p.proveedores).map(x => `<span class="badge ${x==='LUNA'?'badge-luna':'badge-lidera'}">${x}</span>`).join(' ');
     const badgeManual = p.esManual ? '<span class="badge-manual" style="margin-left:5px;">MANUAL</span>' : '';
     const minInfo = p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo, tipo: p.tipoPedido } : getMinimo(p.ref);
-    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? '📦 Cajas' : minInfo.tipo === 'litros' ? '💧 Litros' : '🔢 Uds') : '🔢 Uds';
+    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? ' Cajas' : minInfo.tipo === 'litros' ? '💧 Litros' : ' Uds') : '🔢 Uds';
     const minTexto = minInfo ? `<span class="badge-minimo">${minInfo.minimo} ${minInfo.unidad || ''}</span>` : '<span style="color:#a0aec0;font-size:11px;">Sin mínimo</span>';
     const totalTexto = p.esManual ? '<span style="color:#a0aec0;">Sin pedidos</span>' : `${formatearMoneda(p.totalImporte)} (${p.totalCantidad})`;
     const refTexto = p.ref ? p.ref : '<span class="ref-vacia">auto</span>';
@@ -671,7 +664,7 @@ function renderProductos() {
 
 window.marcarEquivalente = (ref, prov) => {
   const provAlt = prov === 'LUNA' ? 'LIDERA' : 'LUNA';
-  const nombreProducto = albaranesCache.find(a => a.proveedor === prov && (a.lineas || []).some(l => l.ref === ref))?.lineas?.find(l => l.ref === ref)?.producto || 'Producto';
+  const nombreProducto = albaranesCache.find(a => getProveedorAlbaran(a) === prov && (a.lineas || []).some(l => l.ref === ref))?.lineas?.find(l => l.ref === ref)?.producto || 'Producto';
   const refAlternativa = prompt(`Introduce la referencia del producto equivalente en ${provAlt}:\n\nProducto actual: ${nombreProducto} (${ref})\n\nReferencia en ${provAlt}:`);
   if (refAlternativa && refAlternativa.trim()) {
     const refAlt = refAlternativa.trim();
@@ -686,9 +679,16 @@ function renderEvolucion() {
   const prov = document.getElementById('filtroProvEvol').value;
   const busq = (document.getElementById('buscadorEvol').value || '').toLowerCase();
   let filtrados = albaranesCache;
-  if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
+  if (prov !== 'TODOS') filtrados = filtrados.filter(a => getProveedorAlbaran(a) === prov);
   const productos = {};
-  filtrados.forEach(alb => { (alb.lineas || []).forEach(lin => { const key = lin.ref; if (!productos[key]) productos[key] = { nombre: obtenerNombreProducto(lin.ref, lin.producto, prov), ref: lin.ref, cambios: [] }; productos[key].cambios.push({ fecha: alb.fecha, precio: lin.precio, numero: alb.numero, proveedor: alb.proveedor }); }); });
+  filtrados.forEach(alb => { 
+    const provAlb = getProveedorAlbaran(alb);
+    (alb.lineas || []).forEach(lin => { 
+      const key = lin.ref; 
+      if (!productos[key]) productos[key] = { nombre: obtenerNombreProducto(lin.ref, lin.producto, provAlb), ref: lin.ref, cambios: [] }; 
+      productos[key].cambios.push({ fecha: alb.fecha, precio: lin.precio, numero: alb.numero, proveedor: provAlb }); 
+    }); 
+  });
   let html = '<table><thead><tr><th>Producto</th><th>Ref</th><th>Fecha</th><th>Precio Anterior</th><th>Precio Nuevo</th><th>Cambio</th><th>Albarán</th></tr></thead><tbody>';
   let totalCambios = 0;
   Object.values(productos).sort((a,b) => (a.nombre || '').localeCompare(b.nombre || '')).forEach(prod => {
@@ -699,7 +699,7 @@ function renderEvolucion() {
       if (precioAnterior !== null && Math.abs(c.precio - precioAnterior) > 0.0001) {
         const cambio = ((c.precio - precioAnterior) / precioAnterior * 100).toFixed(1);
         const clase = cambio > 0 ? 'cambio-up' : 'cambio-down';
-        html += `<tr><td><strong>${prod.nombre}</strong></td><td>${prod.ref}</td><td>${formatearFecha(c.fecha)}</td><td>${precioAnterior.toFixed(4)} €</td><td><strong>${c.precio.toFixed(4)} €</strong></td><td class="${clase}">${cambio > 0 ? '🔴' : '🟢'} ${cambio > 0 ? '+' : ''}${cambio}%</td><td>${c.numero}</td></tr>`;
+        html += `<tr><td><strong>${prod.nombre}</strong></td><td>${prod.ref}</td><td>${formatearFecha(c.fecha)}</td><td>${precioAnterior.toFixed(4)} €</td><td><strong>${c.precio.toFixed(4)} €</strong></td><td class="${clase}">${cambio > 0 ? '🔴' : ''} ${cambio > 0 ? '+' : ''}${cambio}%</td><td>${c.numero}</td></tr>`;
         totalCambios++;
       }
       precioAnterior = c.precio;
@@ -717,9 +717,16 @@ window.generarPDFEvolucion = () => {
   doc.setFontSize(18); doc.text('Informe de Evolución de Precios', 14, 20);
   doc.setFontSize(11); doc.text(`Proveedor: ${prov} | Fecha: ${new Date().toLocaleDateString('es-ES')}`, 14, 30);
   let filtrados = albaranesCache;
-  if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
+  if (prov !== 'TODOS') filtrados = filtrados.filter(a => getProveedorAlbaran(a) === prov);
   const productos = {};
-  filtrados.forEach(alb => { (alb.lineas || []).forEach(lin => { if (!productos[lin.ref]) productos[lin.ref] = { nombre: obtenerNombreProducto(lin.ref, lin.producto, prov), primeraFecha: alb.fecha, ultimaFecha: alb.fecha, ultimoPrecio: lin.precio }; if (alb.fecha < productos[lin.ref].primeraFecha) productos[lin.ref].primeraFecha = alb.fecha; if (alb.fecha > productos[lin.ref].ultimaFecha) { productos[lin.ref].ultimaFecha = alb.fecha; productos[lin.ref].ultimoPrecio = lin.precio; } }); });
+  filtrados.forEach(alb => { 
+    const provAlb = getProveedorAlbaran(alb);
+    (alb.lineas || []).forEach(lin => { 
+      if (!productos[lin.ref]) productos[lin.ref] = { nombre: obtenerNombreProducto(lin.ref, lin.producto, provAlb), primeraFecha: alb.fecha, ultimaFecha: alb.fecha, ultimoPrecio: lin.precio }; 
+      if (alb.fecha < productos[lin.ref].primeraFecha) productos[lin.ref].primeraFecha = alb.fecha; 
+      if (alb.fecha > productos[lin.ref].ultimaFecha) { productos[lin.ref].ultimaFecha = alb.fecha; productos[lin.ref].ultimoPrecio = lin.precio; } 
+    }); 
+  });
   const filas = Object.values(productos).map(p => [p.nombre, p.primeraFecha, p.ultimaFecha, p.ultimoPrecio.toFixed(4) + ' €']);
   doc.autoTable({ startY: 40, head: [['Producto', 'Primera compra', 'Última compra', 'Precio actual']], body: filas, styles: { fontSize: 9 }, headStyles: { fillColor: [44, 82, 130] } });
   doc.addPage(); doc.setFontSize(14); doc.text('Histórico de cambios', 14, 20);
@@ -738,7 +745,7 @@ function renderPedido() {
     const prov = document.getElementById('filtroProveedorPedido').value;
     const mes = document.getElementById('mesPedido').value;
     const productos = {};
-    const albaranesFiltrados = albaranesCache.filter(a => a.proveedor && a.proveedor.toUpperCase() === prov.toUpperCase());
+    const albaranesFiltrados = albaranesCache.filter(a => getProveedorAlbaran(a) === prov);
     albaranesFiltrados.forEach(a => {
       (a.lineas || []).forEach(l => {
         if (!l.ref) return;
@@ -756,13 +763,14 @@ function renderPedido() {
       });
     });
     productosCache.forEach(p => {
-      if (p.proveedor && p.proveedor.toUpperCase() === prov.toUpperCase() && !productos[p.ref]) {
+      const provProd = getProveedorProducto(p.ref, p.proveedor);
+      if (provProd === prov && !productos[p.ref]) {
         productos[p.ref] = { nombre: p.nombre, ref: p.ref, ultimoPrecio: p.precio, ultimaFecha: '-', esManual: true, minimo: p.minimo, unidadMinimo: p.unidadMinimo, tipoPedido: p.tipoPedido || 'unidades' };
       }
     });
     const listaProductos = Object.values(productos).sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
     if (listaProductos.length === 0) {
-      document.getElementById('listaPedido').innerHTML = `<div class="empty"><p>No hay productos para <strong>${prov}</strong>.</p><button onclick="abrirModalProducto()" class="success" style="margin-top:15px;"> Añadir primer producto</button></div>`;
+      document.getElementById('listaPedido').innerHTML = `<div class="empty"><p>No hay productos para <strong>${prov}</strong>.</p><button onclick="abrirModalProducto()" class="success" style="margin-top:15px;">➕ Añadir primer producto</button></div>`;
       document.getElementById('resumenPedido').style.display = 'none';
       document.getElementById('floatingTotal').classList.remove('visible');
       return;
@@ -815,7 +823,7 @@ window.actualizarLineaPedido = (ref, nombre, precio, cantidad) => {
         const multiploInf = Math.floor(cant / minimo) * minimo;
         const multiploSup = multiploInf + minimo;
         const valorFinal = ((cant - multiploInf) <= (multiploSup - cant) ? multiploInf : multiploSup) || multiploSup;
-        const confirmar = confirm(` ${nombre}\n\nEl pedido mínimo es de ${minimo}L (${minInfo.unidad || ''}).\n\nHas introducido: ${cant}L\nMúltiplos válidos: ${multiploInf}L o ${multiploSup}L\n\n¿Redondear a ${valorFinal}L?\n\n• Aceptar = ${valorFinal}L\n• Cancelar = 0L`);
+        const confirmar = confirm(`💧 ${nombre}\n\nEl pedido mínimo es de ${minimo}L (${minInfo.unidad || ''}).\n\nHas introducido: ${cant}L\nMúltiplos válidos: ${multiploInf}L o ${multiploSup}L\n\n¿Redondear a ${valorFinal}L?\n\n• Aceptar = ${valorFinal}L\n• Cancelar = 0L`);
         cant = confirmar ? valorFinal : 0;
         const input = document.getElementById(`cant-${ref}`);
         if (input) input.value = cant;
@@ -867,7 +875,7 @@ function actualizarBarraPresupuesto(totalConIVA) {
   document.getElementById('ftPct').textContent = `${pct}% de ${formatearMoneda(LIMITE)}`;
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
-  const yaGastado = albaranesCache.filter(a => a.proveedor === prov && a.fecha && a.fecha.startsWith(mes)).reduce((s,a) => s + (a.lineas || []).reduce((ss,l) => ss + (l.cantidad || 0) * (l.precio || 0), 0), 0) * (1 + IVA_PORCENTAJE);
+  const yaGastado = albaranesCache.filter(a => getProveedorAlbaran(a) === prov && a.fecha && a.fecha.startsWith(mes)).reduce((s,a) => s + (a.lineas || []).reduce((ss,l) => ss + (l.cantidad || 0) * (l.precio || 0), 0), 0) * (1 + IVA_PORCENTAJE);
   let alerta = '';
   if (totalConIVA > LIMITE) alerta = `<div class="alert alert-danger">❌ Superado el límite: ${formatearMoneda(totalConIVA)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(totalConIVA-LIMITE)} € por encima)</div>`;
   else if (totalConIVA > LIMITE*0.9) alerta = `<div class="alert alert-warning">⚠️ Cerca del límite: ${formatearMoneda(totalConIVA)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(LIMITE-totalConIVA)} € restantes)</div>`;
@@ -916,7 +924,6 @@ window.generarPDFPedido = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   
-  // Cabecera
   doc.setFontSize(20);
   doc.setTextColor(30, 58, 95);
   doc.text('PEDIDO DE MATERIAL DE LIMPIEZA', 14, 20);
@@ -933,7 +940,6 @@ window.generarPDFPedido = () => {
   doc.text(`Fecha: ${hoy}`, 14, 58);
   doc.text(`Periodo: ${mes}`, 14, 64);
   
-  // Tabla
   const filas = pedidoActual.map((p, idx) => [
     idx + 1,
     p.nombre,
@@ -960,7 +966,6 @@ window.generarPDFPedido = () => {
     }
   });
   
-  // Totales alineados con columna Importe
   const finalY = doc.lastAutoTable.finalY + 10;
   const colImporteX = 195;
   
@@ -978,7 +983,6 @@ window.generarPDFPedido = () => {
   doc.text('TOTAL:', colImporteX - 55, finalY + 14);
   doc.text(formatearMoneda(total), colImporteX, finalY + 14, { align: 'right' });
   
-  // Firma
   doc.setFontSize(11);
   doc.setTextColor(30, 58, 95);
   doc.setFont(undefined, 'bold');
@@ -1045,14 +1049,20 @@ window.copiarPedido = async () => {
 window.cargarPrediccion = async () => {
   const prov = document.getElementById('filtroProveedorPedido').value;
   document.getElementById('seccion-prediccion').style.display = 'block';
-  document.getElementById('tablaPrediccion').innerHTML = '<div class="loading"> Calculando...</div>';
-  const albsProv = albaranesCache.filter(a => a.proveedor === prov);
+  document.getElementById('tablaPrediccion').innerHTML = '<div class="loading">⏳ Calculando...</div>';
+  const albsProv = albaranesCache.filter(a => getProveedorAlbaran(a) === prov);
   const hoy = new Date();
   const hace6meses = new Date();
   hace6meses.setMonth(hoy.getMonth() - 6);
   const albsRecientes = albsProv.filter(a => new Date(a.fecha) >= hace6meses);
   const productos = {};
-  albsRecientes.forEach(alb => { (alb.lineas || []).forEach(lin => { if (!productos[lin.ref]) productos[lin.ref] = { nombre: obtenerNombreProducto(lin.ref, lin.producto, prov), totalCantidad: 0, ultimoPrecio: lin.precio }; productos[lin.ref].totalCantidad += lin.cantidad || 0; }); });
+  albsRecientes.forEach(alb => { 
+    const provAlb = getProveedorAlbaran(alb);
+    (alb.lineas || []).forEach(lin => { 
+      if (!productos[lin.ref]) productos[lin.ref] = { nombre: obtenerNombreProducto(lin.ref, lin.producto, provAlb), totalCantidad: 0, ultimoPrecio: lin.precio }; 
+      productos[lin.ref].totalCantidad += lin.cantidad || 0; 
+    }); 
+  });
   const meses = Math.max(1, Math.ceil(albsRecientes.length));
   let html = '<table><thead><tr><th>Producto</th><th>Consumo 6m</th><th>Media/mes</th><th>Precio</th><th>Sugerencia</th></tr></thead><tbody>';
   Object.entries(productos).sort((a,b) => b[1].totalCantidad - a[1].totalCantidad).forEach(([ref, p]) => {
@@ -1084,15 +1094,22 @@ window.generarInforme = () => {
   const prov = document.getElementById('filtroProvInf').value;
   const anio = document.getElementById('filtroAnioInf').value;
   let filtrados = albaranesCache;
-  if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
+  if (prov !== 'TODOS') filtrados = filtrados.filter(a => getProveedorAlbaran(a) === prov);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
   const calcTotal = (albs) => albs.reduce((s,a) => s + (a.lineas || []).reduce((ss,l) => ss + (l.cantidad || 0) * (l.precio || 0), 0), 0);
   const total = calcTotal(filtrados);
   const meses = {};
   filtrados.forEach(a => { if (!a.fecha) return; const m = a.fecha.slice(0,7); if (!meses[m]) meses[m] = 0; meses[m] += (a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0); });
   const productos = {};
-  filtrados.forEach(a => { (a.lineas || []).forEach(l => { if (!productos[l.ref]) productos[l.ref] = { nombre: obtenerNombreProducto(l.ref, l.producto, prov), cantidad: 0, importe: 0 }; productos[l.ref].cantidad += l.cantidad || 0; productos[l.ref].importe += (l.cantidad || 0) * (l.precio || 0); }); });
-  let html = `<div class="grid"><div class="stat"><div class="label">Total periodo</div><div class="value">${formatearMoneda(total)}</div><div class="sub">${filtrados.length} albaranes</div></div><div class="stat green"><div class="label">Media mensual</div><div class="value">${formatearMoneda(total/Math.max(1,Object.keys(meses).length))}</div></div></div><h3>📅 Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table><h3> Top 10 productos</h3><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>${Object.values(productos).sort((a,b) => b.importe - a.importe).slice(0,10).map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td><strong>${formatearMoneda(p.importe)}</strong></td></tr>`).join('')}</tbody></table>`;
+  filtrados.forEach(a => { 
+    const provAlb = getProveedorAlbaran(a);
+    (a.lineas || []).forEach(l => { 
+      if (!productos[l.ref]) productos[l.ref] = { nombre: obtenerNombreProducto(l.ref, l.producto, provAlb), cantidad: 0, importe: 0 }; 
+      productos[l.ref].cantidad += l.cantidad || 0; 
+      productos[l.ref].importe += (l.cantidad || 0) * (l.precio || 0); 
+    }); 
+  });
+  let html = `<div class="grid"><div class="stat"><div class="label">Total periodo</div><div class="value">${formatearMoneda(total)}</div><div class="sub">${filtrados.length} albaranes</div></div><div class="stat green"><div class="label">Media mensual</div><div class="value">${formatearMoneda(total/Math.max(1,Object.keys(meses).length))}</div></div></div><h3>📅 Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table><h3>📦 Top 10 productos</h3><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>${Object.values(productos).sort((a,b) => b.importe - a.importe).slice(0,10).map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td><strong>${formatearMoneda(p.importe)}</strong></td></tr>`).join('')}</tbody></table>`;
   document.getElementById('contenidoInforme').innerHTML = html;
 };
 
@@ -1104,9 +1121,9 @@ window.generarPDFInforme = () => {
   doc.setFontSize(18); doc.text('Informe de Gasto - Diputación de León', 14, 20);
   doc.setFontSize(11); doc.text(`Proveedor: ${prov} | Año: ${anio} | Fecha: ${new Date().toLocaleDateString('es-ES')}`, 14, 30);
   let filtrados = albaranesCache;
-  if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
+  if (prov !== 'TODOS') filtrados = filtrados.filter(a => getProveedorAlbaran(a) === prov);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
-  doc.autoTable({ startY: 40, head: [['Fecha', 'Nº Albarán', 'Proveedor', 'Líneas', 'Total']], body: filtrados.sort((a,b) => (a.fecha || '').localeCompare(b.fecha || '')).map(a => [ formatearFecha(a.fecha), a.numero || '', a.proveedor || '', (a.lineas || []).length, formatearMoneda((a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0)) ]), styles: { fontSize: 9 }, headStyles: { fillColor: [44, 82, 130] } });
+  doc.autoTable({ startY: 40, head: [['Fecha', 'Nº Albarán', 'Proveedor', 'Líneas', 'Total']], body: filtrados.sort((a,b) => (a.fecha || '').localeCompare(b.fecha || '')).map(a => { const provReal = getProveedorAlbaran(a) || a.proveedor || ''; return [ formatearFecha(a.fecha), a.numero || '', provReal, (a.lineas || []).length, formatearMoneda((a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0)) ]; }), styles: { fontSize: 9 }, headStyles: { fillColor: [44, 82, 130] } });
   doc.save(`informe-${prov.toLowerCase()}-${anio}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
@@ -1121,6 +1138,33 @@ window.onCambiarTipoPedido = () => {
   else { formMinimo.style.display = 'none'; }
 };
 
+// Auto-detectar proveedor al escribir la referencia
+document.addEventListener('DOMContentLoaded', () => {
+  const inputRef = document.getElementById('prodRef');
+  if (inputRef) {
+    inputRef.addEventListener('input', () => {
+      const ref = inputRef.value.trim();
+      const provDetectado = detectarProveedorPorRef(ref);
+      if (provDetectado) {
+        document.getElementById('prodProveedor').value = provDetectado;
+      }
+    });
+  }
+  
+  const inputNombre = document.getElementById('prodNombre');
+  if (inputNombre) {
+    inputNombre.addEventListener('input', () => {
+      const nombre = inputNombre.value.trim();
+      const proveedor = document.getElementById('prodProveedor').value;
+      const warningDiv = document.getElementById('similarWarning');
+      if (nombre.length < 5) { warningDiv.style.display = 'none'; return; }
+      const similar = buscarProductoSimilar(nombre, proveedor);
+      if (similar) { warningDiv.style.display = 'block'; warningDiv.className = 'alert alert-warning'; warningDiv.innerHTML = `🔍 <strong>¡Producto similar en ${similar.proveedor}!</strong><br>"${similar.nombre}" (Ref: ${similar.ref}) - Similitud: ${Math.round(similar.similitud * 100)}%<br>Precio en ${similar.proveedor}: <strong>${formatearMoneda(similar.precio)}</strong>`; }
+      else { warningDiv.style.display = 'none'; }
+    });
+  }
+});
+
 window.abrirModalProducto = (productoEditar = null) => {
   editandoRefAntigua = null;
   document.getElementById('similarWarning').style.display = 'none';
@@ -1128,7 +1172,7 @@ window.abrirModalProducto = (productoEditar = null) => {
     document.getElementById('modalProductoTitulo').textContent = '✏️ Editar Producto';
     document.getElementById('prodRef').value = productoEditar.ref;
     document.getElementById('prodNombre').value = productoEditar.nombre;
-    document.getElementById('prodProveedor').value = productoEditar.proveedor;
+    document.getElementById('prodProveedor').value = getProveedorProducto(productoEditar.ref, productoEditar.proveedor);
     document.getElementById('prodPrecio').value = productoEditar.precio;
     document.getElementById('prodTipoPedido').value = productoEditar.tipoPedido || 'unidades';
     editandoRefAntigua = productoEditar.ref;
@@ -1153,37 +1197,28 @@ window.abrirModalProducto = (productoEditar = null) => {
 
 window.cerrarModalProducto = () => { document.getElementById('modalProducto').classList.remove('active'); editandoRefAntigua = null; };
 
-document.addEventListener('DOMContentLoaded', () => {
-  const inputNombre = document.getElementById('prodNombre');
-  if (inputNombre) {
-    inputNombre.addEventListener('input', () => {
-      const nombre = inputNombre.value.trim();
-      const proveedor = document.getElementById('prodProveedor').value;
-      const warningDiv = document.getElementById('similarWarning');
-      if (nombre.length < 5) { warningDiv.style.display = 'none'; return; }
-      const similar = buscarProductoSimilar(nombre, proveedor);
-      if (similar) { warningDiv.style.display = 'block'; warningDiv.className = 'alert alert-warning'; warningDiv.innerHTML = `🔍 <strong>¡Producto similar en ${similar.proveedor}!</strong><br>"${similar.nombre}" (Ref: ${similar.ref}) - Similitud: ${Math.round(similar.similitud * 100)}%<br>Precio en ${similar.proveedor}: <strong>${formatearMoneda(similar.precio)}</strong>`; }
-      else { warningDiv.style.display = 'none'; }
-    });
-  }
-});
-
 window.guardarNuevoProducto = async () => {
   let ref = document.getElementById('prodRef').value.trim();
   const nombre = document.getElementById('prodNombre').value.trim();
-  const proveedor = document.getElementById('prodProveedor').value;
+  let proveedor = document.getElementById('prodProveedor').value;
   const precio = parseFloat(document.getElementById('prodPrecio').value);
   const tipoPedido = document.getElementById('prodTipoPedido').value;
   const minimo = tipoPedido !== 'unidades' ? parseInt(document.getElementById('prodMinimo').value) : null;
   const unidadMinimo = tipoPedido !== 'unidades' ? document.getElementById('prodUnidadMinimo').value.trim() : null;
   if (!nombre || !proveedor || isNaN(precio) || precio <= 0) { alert('❌ Completa los campos obligatorios'); return; }
   if (!ref) ref = 'PROD-' + Date.now().toString().slice(-8);
+  // Auto-detectar proveedor por referencia si no se ha seleccionado explícitamente
+  const provDetectado = detectarProveedorPorRef(ref);
+  if (provDetectado && !productosCache.some(p => p.ref === ref)) {
+    proveedor = provDetectado;
+    document.getElementById('prodProveedor').value = provDetectado;
+  }
   if (productosCache.some(p => p.ref === ref)) { alert(`❌ Ya existe la referencia "${ref}"`); return; }
   try {
     await setDoc(doc(db, "productos", ref), { nombre, proveedor, precio, minimo: minimo || null, unidadMinimo: unidadMinimo || null, tipoPedido, createdAt: new Date().toISOString() });
     productosCache.push({ ref, nombre, proveedor, precio, minimo, unidadMinimo, tipoPedido });
     if (minimo) MINIMOS_PEDIDO[ref] = { minimo, unidad: unidadMinimo, tipo: tipoPedido };
-    alert(`✅ Producto "${nombre}" guardado\nReferencia: ${ref}`);
+    alert(`✅ Producto "${nombre}" guardado\nReferencia: ${ref}\nProveedor: ${proveedor}`);
     cerrarModalProducto();
     renderProductos();
     const seccionActiva = document.querySelector('.seccion.active');
@@ -1197,13 +1232,16 @@ window.actualizarProductoExistente = async () => {
   if (!editandoRefAntigua) return;
   const nuevaRef = document.getElementById('prodRef').value.trim();
   const nombre = document.getElementById('prodNombre').value.trim();
-  const proveedor = document.getElementById('prodProveedor').value;
+  let proveedor = document.getElementById('prodProveedor').value;
   const precio = parseFloat(document.getElementById('prodPrecio').value);
   const tipoPedido = document.getElementById('prodTipoPedido').value;
   const minimo = tipoPedido !== 'unidades' ? parseInt(document.getElementById('prodMinimo').value) : null;
   const unidadMinimo = tipoPedido !== 'unidades' ? document.getElementById('prodUnidadMinimo').value.trim() : null;
   if (!nombre || !proveedor || isNaN(precio) || precio <= 0) { alert('❌ Completa los campos obligatorios'); return; }
   const refFinal = nuevaRef || editandoRefAntigua;
+  // Auto-detectar proveedor por referencia
+  const provDetectado = detectarProveedorPorRef(refFinal);
+  if (provDetectado) proveedor = provDetectado;
   if (refFinal !== editandoRefAntigua && productosCache.some(p => p.ref === refFinal)) { alert(`❌ Ya existe la referencia "${refFinal}"`); return; }
   try {
     if (refFinal !== editandoRefAntigua) { await deleteDoc(doc(db, "productos", editandoRefAntigua)); if (MINIMOS_PEDIDO[editandoRefAntigua]) delete MINIMOS_PEDIDO[editandoRefAntigua]; }
@@ -1211,7 +1249,7 @@ window.actualizarProductoExistente = async () => {
     const idx = productosCache.findIndex(p => p.ref === editandoRefAntigua);
     if (idx >= 0) productosCache[idx] = { ref: refFinal, nombre, proveedor, precio, minimo, unidadMinimo, tipoPedido };
     if (minimo) MINIMOS_PEDIDO[refFinal] = { minimo, unidad: unidadMinimo, tipo: tipoPedido }; else delete MINIMOS_PEDIDO[refFinal];
-    alert(`✅ Producto actualizado\nReferencia: ${refFinal}`);
+    alert(`✅ Producto actualizado\nReferencia: ${refFinal}\nProveedor: ${proveedor}`);
     cerrarModalProducto();
     renderProductos();
   } catch(e) { alert('❌ Error: ' + e.message); }
@@ -1223,7 +1261,7 @@ window.cerrarModal = () => document.getElementById('modalAlbaran').classList.rem
 window.agregarLineaModal = () => {
   const div = document.createElement('div');
   div.className = 'linea-item';
-  div.innerHTML = `<input type="text" placeholder="Producto" class="modal-prod" style="flex:2; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="text" placeholder="Ref (opcional)" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Cant" class="modal-cant" min="0" value="1" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Precio" class="modal-precio" min="0" step="0.01" style="width:100px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><button onclick="this.parentElement.remove()" class="danger">️</button>`;
+  div.innerHTML = `<input type="text" placeholder="Producto" class="modal-prod" style="flex:2; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="text" placeholder="Ref (opcional)" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Cant" class="modal-cant" min="0" value="1" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Precio" class="modal-precio" min="0" step="0.01" style="width:100px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><button onclick="this.parentElement.remove()" class="danger">🗑️</button>`;
   document.getElementById('modalLineas').appendChild(div);
 };
 
@@ -1258,11 +1296,12 @@ window._debug = {
   get productosCache() { return productosCache; },
   get productosEquivalentes() { return productosEquivalentes; },
   MINIMOS_PEDIDO,
-  getAlbaranesLuna: () => albaranesCache.filter(a => a.proveedor === 'LUNA'),
-  getAlbaranesLidera: () => albaranesCache.filter(a => a.proveedor === 'LIDERA'),
+  detectarProveedorPorRef,
+  getAlbaranesLuna: () => albaranesCache.filter(a => getProveedorAlbaran(a) === 'LUNA'),
+  getAlbaranesLidera: () => albaranesCache.filter(a => getProveedorAlbaran(a) === 'LIDERA'),
   buscarLineasSinNombre: (prov) => {
     const resultados = [];
-    albaranesCache.filter(a => a.proveedor === prov).forEach(a => {
+    albaranesCache.filter(a => getProveedorAlbaran(a) === prov).forEach(a => {
       (a.lineas || []).forEach(l => {
         if (!l.producto || l.producto.trim() === '') {
           resultados.push({ albaran: a.numero, fecha: a.fecha, ref: l.ref, producto: l.producto, precio: l.precio });
