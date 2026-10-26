@@ -952,7 +952,11 @@ window.generarPDFPedido = () => {
   doc.setTextColor(30, 58, 95);
   doc.text(`Proveedor: ${prov}`, 14, 52);
   doc.text(`Fecha: ${hoy}`, 14, 58);
-  doc.text(`Periodo: ${mes}`, 14, 64);
+  // Convertir mes numérico a texto
+const mesesTexto = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const [anioMes, mesNum] = mes.split('-');
+const mesEnLetra = mesesTexto[parseInt(mesNum) - 1] || mes;
+doc.text(`Pedido del mes de ${mesEnLetra} de ${anioMes}`, 14, 64);
   
   const filas = pedidoActual.map((p, idx) => [
     idx + 1,
@@ -1000,7 +1004,9 @@ window.generarPDFPedido = () => {
   doc.setFontSize(11);
   doc.setTextColor(30, 58, 95);
   doc.setFont(undefined, 'bold');
-  doc.text('Fdo. Arturo Fernández.', 14, 275);
+  doc.text('Solicitado por:', 14, 275);
+doc.text('Arturo Fernández.', 14, 282);
+doc.text('Encargado del edificio', 14, 289);
   doc.setFont(undefined, 'normal');
   doc.setFontSize(10);
   doc.text('Encargado del edificio', 14, 282);
@@ -1009,7 +1015,7 @@ window.generarPDFPedido = () => {
   const fechaHora = ahora.toLocaleDateString('es-ES') + ' ' + ahora.toLocaleTimeString('es-ES');
   doc.setFontSize(9);
   doc.setTextColor(150, 150, 150);
-  doc.text(fechaHora, 14, 289);
+  doc.text(fechaHora, 14, 296);
   
   const nombreArchivo = `pedido-${prov.toLowerCase()}-${mes}.pdf`;
   doc.save(nombreArchivo);
