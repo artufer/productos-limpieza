@@ -12,10 +12,10 @@
   header { background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%); color: white; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
   header h1 { font-size: 24px; margin-bottom: 5px; }
   header p { opacity: 0.9; font-size: 14px; }
-  nav { background: white; padding: 10px 20px; display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-  .tab-btn { background: #edf2f7; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
-  .tab-btn:hover { background: #e2e8f0; }
-  .tab-btn.active { background: #2c5282; color: white; }
+  nav { background: white; padding: 10px 20px; display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .tab-btn { background: #f1f5f9; color: #1e293b; border: 2px solid #cbd5e1; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+  .tab-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+  .tab-btn.active { background: #1e3a5f; color: white; border-color: #1e3a5f; }
   main { padding: 20px; max-width: 1400px; margin: 0 auto; }
   .seccion { display: none; animation: fadeIn 0.3s; }
   .seccion.active { display: block; }
@@ -49,6 +49,7 @@
   .badge-minimo { background: #fef3c7; color: #92400e; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
   .badge-manual { background: #d1fae5; color: #065f46; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
   .badge-similar { background: #ede9fe; color: #5b21b6; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+  .badge-ref { background: #e2e8f0; color: #475569; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
   .alert { padding: 12px 16px; border-radius: 6px; margin: 10px 0; font-size: 14px; }
   .alert-warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
   .alert-danger { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
@@ -94,23 +95,27 @@
   .equivalente-btn { background: #7c3aed; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-left: 8px; }
   .equivalente-btn:hover { background: #6d28d9; }
   
-  /* NUEVO: Estilos para pedido simplificado */
+  /* Pedido simplificado */
   .pedido-linea { 
     display: grid; 
     grid-template-columns: 1fr 100px 120px; 
     gap: 12px; 
     align-items: center;
-    padding: 12px;
+    padding: 14px 16px;
     border-bottom: 1px solid #e2e8f0;
+    transition: background 0.15s;
   }
-  .pedido-linea:hover { background: #f7fafc; }
-  .pedido-linea .producto-nombre { font-weight: 500; }
-  .pedido-linea .producto-tipo { font-size: 11px; color: #718096; margin-top: 2px; }
-  .pedido-linea input[type="number"] { width: 100%; text-align: right; }
-  .pedido-linea .linea-total { text-align: right; font-weight: bold; color: #1e3a5f; }
+  .pedido-linea:hover { background: #f8fafc; }
+  .pedido-linea .producto-nombre { font-weight: 600; font-size: 15px; color: #1e293b; }
+  .pedido-linea .producto-ref { font-family: monospace; font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+  .pedido-linea .producto-tipo { font-size: 12px; color: #64748b; margin-top: 4px; }
+  .pedido-linea .producto-precio { font-size: 12px; color: #16a34a; font-weight: 600; margin-top: 2px; }
+  .pedido-linea input[type="number"] { width: 100%; text-align: right; font-size: 16px; padding: 8px; border: 2px solid #cbd5e0; border-radius: 6px; }
+  .pedido-linea input[type="number"]:focus { border-color: #2c5282; outline: none; }
+  .pedido-linea .linea-total { text-align: right; font-weight: bold; color: #1e3a5f; font-size: 16px; }
   
   .resumen-pedido {
-    background: #f7fafc;
+    background: #f8fafc;
     padding: 20px;
     border-radius: 8px;
     margin-top: 20px;
@@ -132,12 +137,73 @@
   }
   .resumen-linea.iva { color: #718096; }
   
+  /* VENTANA FLOTANTE DE GASTO */
+  .floating-total {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: white;
+    border: 2px solid #1e3a5f;
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 99;
+    min-width: 220px;
+    display: none;
+  }
+  .floating-total.visible { display: block; }
+  .floating-total h4 { 
+    color: #1e3a5f; 
+    font-size: 13px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 6px;
+  }
+  .floating-total .ft-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 14px;
+  }
+  .floating-total .ft-total {
+    border-top: 2px solid #1e3a5f;
+    margin-top: 8px;
+    padding-top: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1e3a5f;
+  }
+  .floating-total .ft-bar {
+    margin-top: 10px;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .floating-total .ft-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #16a34a, #10b981);
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+  .floating-total .ft-bar-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .floating-total .ft-bar-fill.danger { background: linear-gradient(90deg, #dc2626, #ef4444); }
+  .floating-total .ft-pct {
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+  
   @media (max-width: 768px) {
     header h1 { font-size: 18px; }
     .tab-btn { padding: 8px 12px; font-size: 12px; }
     table { font-size: 12px; }
     table th, table td { padding: 6px; }
-    .pedido-linea { grid-template-columns: 1fr 80px 100px; gap: 8px; }
+    .pedido-linea { grid-template-columns: 1fr 80px 100px; gap: 8px; padding: 10px; }
+    .floating-total { top: auto; bottom: 10px; right: 10px; left: 10px; min-width: auto; }
   }
 </style>
 </head>
@@ -149,18 +215,28 @@
 </header>
 
 <nav>
-  <button class="tab-btn active" data-seccion="dashboard"> Dashboard</button>
-  <button class="tab-btn" data-seccion="albaranes"> Albaranes</button>
-  <button class="tab-btn" data-seccion="productos"> Productos</button>
-  <button class="tab-btn" data-seccion="evolucion">📈 Evolución Precios</button>
-  <button class="tab-btn" data-seccion="pedido"> Preparar Pedido</button>
-  <button class="tab-btn" data-seccion="informes"> Informes</button>
+  <button class="tab-btn active" data-seccion="dashboard">📊 Dashboard</button>
+  <button class="tab-btn" data-seccion="albaranes">📋 Albaranes</button>
+  <button class="tab-btn" data-seccion="productos">📦 Productos</button>
+  <button class="tab-btn" data-seccion="evolucion"> Evolución Precios</button>
+  <button class="tab-btn" data-seccion="pedido">🛒 Preparar Pedido</button>
+  <button class="tab-btn" data-seccion="informes">📑 Informes</button>
 </nav>
+
+<!-- VENTANA FLOTANTE DE GASTO -->
+<div id="floatingTotal" class="floating-total">
+  <h4>🛒 Pedido actual</h4>
+  <div class="ft-line"><span>Subtotal:</span><span id="ftSubtotal">0,00 €</span></div>
+  <div class="ft-line"><span>IVA (21%):</span><span id="ftIva">0,00 €</span></div>
+  <div class="ft-line ft-total"><span>TOTAL:</span><span id="ftTotal">0,00 €</span></div>
+  <div class="ft-bar"><div class="ft-bar-fill" id="ftBarFill" style="width:0%"></div></div>
+  <div class="ft-pct" id="ftPct">0% de 500 €</div>
+</div>
 
 <main>
   <div id="seccion-dashboard" class="seccion active">
     <div class="card">
-      <h2>📊 Dashboard</h2>
+      <h2> Dashboard</h2>
       <div class="grid" id="dashboardStats"><div class="loading">Cargando...</div></div>
       <h3>📅 Gasto por mes (últimos 12 meses)</h3>
       <div id="graficoMensual"></div>
@@ -190,7 +266,7 @@
 
   <div id="seccion-productos" class="seccion">
     <div class="card">
-      <h2> Catálogo de Productos</h2>
+      <h2>📦 Catálogo de Productos</h2>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
         <div class="filtros" style="margin-bottom:0;">
           <select id="filtroProvProd" onchange="cargarProductos()">
@@ -228,7 +304,7 @@
 
   <div id="seccion-pedido" class="seccion">
     <div class="card">
-      <h2>🛒 Preparar Pedido</h2>
+      <h2> Preparar Pedido</h2>
       <div class="alert alert-warning" style="margin-bottom:15px;">
         ℹ️ <strong>Cajas</strong>: se piden por cajas (1, 2, 3...). <strong>Líquidos</strong>: se piden por litros (mínimo = contenido de 1 caja). <strong>Unidades</strong>: múltiplos del mínimo.
       </div>
@@ -265,7 +341,7 @@
       </div>
       <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
         <button onclick="guardarPedido()" class="success">💾 Guardar pedido</button>
-        <button onclick="limpiarPedido()" class="secondary">🗑️ Limpiar</button>
+        <button onclick="limpiarPedido()" class="secondary">️ Limpiar</button>
       </div>
     </div>
     <div id="seccion-prediccion" class="card" style="display:none;">
@@ -350,7 +426,7 @@
 <!-- MODAL ALBARÁN MANUAL -->
 <div id="modalAlbaran" class="modal">
   <div class="modal-content">
-    <h3 style="margin-bottom:16px;"> Añadir albarán manual</h3>
+    <h3 style="margin-bottom:16px;">➕ Añadir albarán manual</h3>
     <div class="form-group"><label>Número de albarán</label><input type="text" id="modalNumero"></div>
     <div class="form-group"><label>Fecha</label><input type="date" id="modalFecha"></div>
     <div class="form-group">
@@ -387,36 +463,85 @@ const db = getFirestore(app);
 const LIMITE = 500;
 const IVA_PORCENTAJE = 0.21;
 
+// MÍNIMOS ACTUALIZADOS SEGÚN TABLAS REALES
 const MINIMOS_PEDIDO = {
+  // LUNA
   'CEL0013': { minimo: 20, unidad: 'caja de 20 uds', tipo: 'unidades' },
+  'DT294': { minimo: 5, unidad: '5L (1 garrafa)', tipo: 'litros' },
   'HER/100012': { minimo: 12, unidad: '12L (6 botellas × 2L)', tipo: 'litros' },
-  '210197': { minimo: 50, unidad: 'caja de 50 rollos', tipo: 'cajas' },
-  '00830': { minimo: 12, unidad: 'bolsa de 12 uds', tipo: 'cajas' },
-  '5332P': { minimo: 12, unidad: 'bolsa 12 pares', tipo: 'cajas' },
+  '210197': { minimo: 1, unidad: 'caja de 50 rollos', tipo: 'cajas' },
+  '00830': { minimo: 1, unidad: 'bolsa de 12 bayetas', tipo: 'cajas' },
+  '5332P': { minimo: 1, unidad: 'bolsa 12 pares T.S', tipo: 'cajas' },
   'CEL0007': { minimo: 18, unidad: 'fardo de 18 uds', tipo: 'unidades' },
+  'GD21BM': { minimo: 1, unidad: 'caja de 100 uds T/M', tipo: 'cajas' },
+  'GD21BXL': { minimo: 1, unidad: 'caja de 100 uds T/XL', tipo: 'cajas' },
+  'GD21BL': { minimo: 1, unidad: 'caja de 100 uds T/L', tipo: 'cajas' },
   '5094': { minimo: 2, unidad: 'paquete de 2', tipo: 'unidades' },
   'HER/100045': { minimo: 12, unidad: '12L (6 botellas × 2L)', tipo: 'litros' },
-  '276006': { minimo: 30, unidad: 'caja de 30 rollos', tipo: 'cajas' },
-  '14454': { minimo: 12, unidad: 'bolsa de 12 uds', tipo: 'cajas' },
-  'GD21BM': { minimo: 1, unidad: 'caja de 100 uds', tipo: 'cajas' },
-  'GD21BXL': { minimo: 1, unidad: 'caja de 100 uds', tipo: 'cajas' },
-  'GD21BG': { minimo: 1, unidad: 'caja de 100 uds', tipo: 'cajas' },
+  '276006': { minimo: 1, unidad: 'caja de 30 rollos', tipo: 'cajas' },
+  '2060': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '14454': { minimo: 1, unidad: 'bolsa de 12 uds', tipo: 'cajas' },
+  '121ENV': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  'CEL0016': { minimo: 1, unidad: 'pack 6 ud', tipo: 'unidades' },
+  'BBA005': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  'LE-04641': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '921': { minimo: 25, unidad: 'caja 25 uds', tipo: 'cajas' },
+  
+  // LIDERA
+  '10002029': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
   '10030037': { minimo: 108, unidad: 'fardo de 108 uds', tipo: 'unidades' },
   '10032567': { minimo: 20, unidad: '20L (4 garrafas × 5L)', tipo: 'litros' },
   '10014448': { minimo: 9, unidad: '9L (12 botellas × 750ml)', tipo: 'litros' },
+  '10001019': { minimo: 5, unidad: '5L (1 garrafa)', tipo: 'litros' },
+  '10018602': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
   '10033342': { minimo: 6, unidad: 'fardo de 6 uds', tipo: 'unidades' },
   '10006043': { minimo: 1, unidad: 'caja de 12 paquetes', tipo: 'cajas' },
   '10005181': { minimo: 18, unidad: 'fardo de 18 uds', tipo: 'unidades' },
   '10020381': { minimo: 1, unidad: 'paquete de 12 uds', tipo: 'cajas' },
-  '10023300': { minimo: 20, unidad: 'caja de 20 uds', tipo: 'cajas' },
-  '10025386': { minimo: 50, unidad: 'caja de 50 uds', tipo: 'cajas' },
+  '10023300': { minimo: 1, unidad: 'caja de 20 uds', tipo: 'cajas' },
+  '10025386': { minimo: 1, unidad: 'caja de 50 uds', tipo: 'cajas' },
+  '10031291': { minimo: 1, unidad: 'paquete de 100 uds T.M', tipo: 'cajas' },
+  '10031292': { minimo: 1, unidad: 'paquete de 100 uds T.L', tipo: 'cajas' },
+  '10031293': { minimo: 1, unidad: 'paquete de 100 uds T.XL', tipo: 'cajas' },
+  '10003348': { minimo: 5, unidad: '5L (1 garrafa)', tipo: 'litros' },
+  '10032104': { minimo: 1, unidad: '1L (1 embase)', tipo: 'litros' },
+  '10033491': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
   '10023961': { minimo: 5, unidad: 'paquete de 5 uds', tipo: 'unidades' },
+  '2654876': { minimo: 10, unidad: '10L (2×5L)', tipo: 'litros' },
+  '10033901': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
   '10031086': { minimo: 2, unidad: 'paquete de 2 uds', tipo: 'unidades' },
+  '10019091': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
   '10005183': { minimo: 108, unidad: 'fardo de 108 uds', tipo: 'unidades' },
   '10005196': { minimo: 6, unidad: 'fardo de 6 uds', tipo: 'unidades' },
+  '10024448': { minimo: 12, unidad: 'caja de 12 botellas', tipo: 'cajas' },
+  '10023318': { minimo: 12, unidad: 'caja de 12×1L', tipo: 'cajas' },
+  '10030427': { minimo: 18, unidad: 'fardo de 18 uds', tipo: 'unidades' },
+  '10028926': { minimo: 10, unidad: 'paquete de 10 uds', tipo: 'cajas' },
+  '10003491': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10029411': { minimo: 12, unidad: 'caja de 12×0.75L', tipo: 'cajas' },
+  '10032024': { minimo: 1, unidad: 'caja 2×5L', tipo: 'cajas' },
+  '10026431': { minimo: 1, unidad: 'caja 2×5L', tipo: 'cajas' },
+  '10030518': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10001053': { minimo: 20, unidad: '20L (4×5L)', tipo: 'litros' },
+  '10001108': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10006690': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10017972': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10023427': { minimo: 12, unidad: 'caja de 12 uds', tipo: 'cajas' },
+  '10025069': { minimo: 10, unidad: 'rollo de 10 uds', tipo: 'cajas' },
+  '10028031': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10029491': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10030118': { minimo: 6, unidad: 'pack 6 uds', tipo: 'cajas' },
+  '10033901': { minimo: 1, unidad: 'caja 2×5L', tipo: 'cajas' },
+  '10034620': { minimo: 1, unidad: 'paquete de 100 uds', tipo: 'cajas' },
+  '10034972': { minimo: 12, unidad: 'caja de 12 uds', tipo: 'cajas' },
+  '10018192': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10019091': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10021088': { minimo: 1, unidad: 'ud', tipo: 'unidades' },
+  '10029005': { minimo: 10, unidad: 'paquete de 10 uds', tipo: 'cajas' },
   '10031291': { minimo: 1, unidad: 'paquete de 100 uds', tipo: 'cajas' },
   '10031292': { minimo: 1, unidad: 'paquete de 100 uds', tipo: 'cajas' },
-  '10031293': { minimo: 1, unidad: 'paquete de 100 uds', tipo: 'cajas' }
+  '10031293': { minimo: 1, unidad: 'paquete de 100 uds', tipo: 'cajas' },
+  '10033339': { minimo: 6, unidad: 'fardo de 6 uds', tipo: 'unidades' }
 };
 
 let productosEquivalentes = [];
@@ -434,17 +559,12 @@ const formatearFecha = (f) => {
 const formatearMoneda = (n) => new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR'}).format(n || 0);
 const getMinimo = (ref) => MINIMOS_PEDIDO[ref] || null;
 
-// ===== SIMILITUD DE TEXTO ULTRA ESTRICTA =====
+// ===== SIMILITUD ULTRA ESTRICTA =====
 function normalizarTexto(texto) {
   if (!texto) return '';
-  return texto.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // quitar tildes
-    .replace(/[^a-z0-9\s]/g, '')                        // quitar símbolos
-    .replace(/\s+/g, ' ')
-    .trim();
+  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 }
 
-// Convertir plural a singular (reglas básicas)
 function singularizar(palabra) {
   if (palabra.endsWith('s') && palabra.length > 3) {
     if (palabra.endsWith('es')) return palabra.slice(0, -2);
@@ -482,15 +602,12 @@ function distanciaLevenshtein(a, b) {
 function palabrasSimilares(p1, p2) {
   if (p1 === p2) return true;
   if (p1.length < 3 || p2.length < 3) return false;
-  // Singularizar ambas palabras
   const s1 = singularizar(p1);
   const s2 = singularizar(p2);
   if (s1 === s2) return true;
-  // Distancia Levenshtein
   return (distanciaLevenshtein(s1, s2) / Math.max(s1.length, s2.length)) < 0.25;
 }
 
-// Extraer dimensiones de bolsas de basura
 function extraerDimensiones(texto) {
   const match = texto.match(/(\d{2,3})\s*[xX*]\s*(\d{2,3})/);
   if (match) return `${match[1]}x${match[2]}`;
@@ -525,27 +642,17 @@ function detectarPorCategorias(t1, t2) {
   const p1 = new Set(obtenerPalabrasSignificativas(t1));
   const p2 = new Set(obtenerPalabrasSignificativas(t2));
   
-  // Verificar si son bolsas de basura con mismas dimensiones
   const dim1 = extraerDimensiones(t1);
   const dim2 = extraerDimensiones(t2);
-  if (dim1 && dim2 && dim1 === dim2) {
-    // Mismas dimensiones → muy similares
-    return 0.85;
-  }
-  if (dim1 && dim2 && dim1 !== dim2) {
-    // Diferentes dimensiones → no similares
-    return 0;
-  }
+  if (dim1 && dim2 && dim1 === dim2) return 0.85;
+  if (dim1 && dim2 && dim1 !== dim2) return 0;
   
-  // Verificar higiénico industrial vs doméstico
   const esIndustrial1 = n1.includes('industrial') || n1.includes('indust') || n1.includes('t45');
   const esIndustrial2 = n2.includes('industrial') || n2.includes('indust') || n2.includes('t45');
   const esDomestico1 = n1.includes('domestico') || n1.includes('doméstico') || n1.includes('strong');
   const esDomestico2 = n2.includes('domestico') || n2.includes('doméstico') || n2.includes('strong');
   
-  if ((esIndustrial1 && esDomestico2) || (esDomestico1 && esIndustrial2)) {
-    return 0; // Diferentes tipos de higiénico
-  }
+  if ((esIndustrial1 && esDomestico2) || (esDomestico1 && esIndustrial2)) return 0;
   
   const categorias = {
     'higienico_papel': { palabras: ['higienico','papel','t45','tisoft','gof','fardo','rollo','wc','cel0007','cel0013'], min: 2 },
@@ -579,7 +686,7 @@ function buscarProductoSimilar(nombre, proveedorActual, excluirRef = null) {
   const provAlt = proveedorActual === 'LUNA' ? 'LIDERA' : 'LUNA';
   let mejor = null;
   let mejorSim = 0;
-  const UMBRAL = 0.55; // Más estricto
+  const UMBRAL = 0.55;
   
   const equivManual = productosEquivalentes.find(e => 
     (e.ref1 === excluirRef && e.prov1 === proveedorActual) ||
@@ -843,12 +950,11 @@ window.generarPDFEvolucion = () => {
   doc.save(`evolucion-precios-${prov.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-// ===== PREPARAR PEDIDO SIMPLIFICADO =====
+// ===== PREPARAR PEDIDO SIMPLIFICADO CON REFERENCIA Y PRECIO =====
 function renderPedido() {
   try {
     const prov = document.getElementById('filtroProveedorPedido').value;
     const mes = document.getElementById('mesPedido').value;
-    console.log('🔄 Renderizando pedido:', prov, mes);
     
     const productos = {};
     albaranesCache.forEach(a => {
@@ -868,8 +974,11 @@ function renderPedido() {
     if (listaProductos.length === 0) {
       document.getElementById('listaPedido').innerHTML = `<div class="empty"><p>No hay productos para <strong>${prov}</strong>.</p><button onclick="abrirModalProducto()" class="success" style="margin-top:15px;">➕ Añadir primer producto</button></div>`;
       document.getElementById('resumenPedido').style.display = 'none';
+      document.getElementById('floatingTotal').classList.remove('visible');
       return;
     }
+    
+    document.getElementById('floatingTotal').classList.add('visible');
     
     let html = `<p style="color:#666; margin-bottom:15px;"><strong>${listaProductos.length} productos</strong> disponibles de <strong>${prov}</strong></p>`;
     html += '<div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">';
@@ -882,19 +991,22 @@ function renderPedido() {
         const minimo = tieneMinimo ? minInfo.minimo : 1;
         
         let tipoTexto = '';
-        if (tipo === 'cajas') tipoTexto = `📦 Cajas (mín. ${minimo})`;
-        else if (tipo === 'litros') tipoTexto = `💧 Litros (mín. ${minimo}L)`;
-        else tipoTexto = `🔢 Uds (mín. ${minimo})`;
+        if (tipo === 'cajas') tipoTexto = `📦 Cajas (mín. ${minimo}) · ${minInfo.unidad || ''}`;
+        else if (tipo === 'litros') tipoTexto = `💧 Litros (mín. ${minimo}L) · ${minInfo.unidad || ''}`;
+        else tipoTexto = `🔢 Uds (mín. ${minimo}) · ${minInfo.unidad || 'ud'}`;
         
         const similar = buscarProductoSimilar(p.nombre, prov, p.ref);
         const badgeSimilar = similar ? ' <span class="badge-similar">SIMILAR</span>' : '';
+        const refDisplay = p.ref || 'auto';
         
         html += `<div class="pedido-linea">
           <div>
             <div class="producto-nombre">${p.nombre}${badgeSimilar}</div>
-            <div class="producto-tipo">${tipoTexto} · ${formatearMoneda(p.ultimoPrecio)}/ud</div>
+            <div class="producto-ref">Ref: ${refDisplay}</div>
+            <div class="producto-tipo">${tipoTexto}</div>
+            <div class="producto-precio">${formatearMoneda(p.ultimoPrecio)} /ud</div>
           </div>
-          <input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${(p.nombre || '').replace(/'/g,"\\'")}', ${p.ultimoPrecio}, this.value)" placeholder="0" style="width:100%; text-align:right;">
+          <input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${(p.nombre || '').replace(/'/g,"\\'")}', ${p.ultimoPrecio}, this.value)" placeholder="0">
           <div class="linea-total" id="total-${p.ref}">0,00 €</div>
         </div>`;
       } catch(e) { console.error('Error producto', p.ref, e); }
@@ -904,9 +1016,8 @@ function renderPedido() {
     document.getElementById('listaPedido').innerHTML = html;
     document.getElementById('resumenPedido').style.display = 'block';
     actualizarResumenPedido();
-    console.log('✅ Renderizado completado');
   } catch(e) {
-    console.error('❌ Error en renderPedido:', e);
+    console.error(' Error en renderPedido:', e);
     document.getElementById('listaPedido').innerHTML = `<div class="alert alert-danger">❌ Error al cargar productos: ${e.message}</div>`;
   }
 }
@@ -958,12 +1069,10 @@ window.actualizarLineaPedido = (ref, nombre, precio, cantidad) => {
     }
   }
   
-  // Actualizar total de la línea
   const importe = cant * precio;
   const elTotal = document.getElementById(`total-${ref}`);
   if (elTotal) elTotal.textContent = formatearMoneda(importe);
   
-  // Actualizar pedidoActual
   const idx = pedidoActual.findIndex(p => p.ref === ref);
   if (cant > 0) {
     if (idx >= 0) pedidoActual[idx] = { ref, nombre, precio, cantidad: cant };
@@ -980,9 +1089,15 @@ function actualizarResumenPedido() {
   const iva = subtotal * IVA_PORCENTAJE;
   const total = subtotal + iva;
   
+  // Resumen inferior
   document.getElementById('subtotalPedido').textContent = formatearMoneda(subtotal);
   document.getElementById('ivaPedido').textContent = formatearMoneda(iva);
   document.getElementById('totalPedido').textContent = formatearMoneda(total);
+  
+  // Ventana flotante
+  document.getElementById('ftSubtotal').textContent = formatearMoneda(subtotal);
+  document.getElementById('ftIva').textContent = formatearMoneda(iva);
+  document.getElementById('ftTotal').textContent = formatearMoneda(total);
   
   actualizarBarraPresupuesto(total);
 }
@@ -994,10 +1109,15 @@ function actualizarBarraPresupuesto(totalConIVA) {
   barra.textContent = pct + '%';
   barra.className = 'progress-fill' + (pct > 90 ? ' danger' : pct > 75 ? ' warning' : '');
   
+  // Barra flotante
+  const ftBar = document.getElementById('ftBarFill');
+  ftBar.style.width = pct + '%';
+  ftBar.className = 'ft-bar-fill' + (pct > 90 ? ' danger' : pct > 75 ? ' warning' : '');
+  document.getElementById('ftPct').textContent = `${pct}% de ${formatearMoneda(LIMITE)}`;
+  
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
   const yaGastado = albaranesCache.filter(a => a.proveedor === prov && a.fecha && a.fecha.startsWith(mes)).reduce((s,a) => s + (a.lineas || []).reduce((ss,l) => ss + (l.cantidad || 0) * (l.precio || 0), 0), 0) * (1 + IVA_PORCENTAJE);
-  const totalRestante = LIMITE - yaGastado - totalConIVA;
   
   let alerta = '';
   if (totalConIVA > LIMITE) alerta = `<div class="alert alert-danger">❌ Superado el límite: ${formatearMoneda(totalConIVA)} de ${formatearMoneda(LIMITE)} (${formatearMoneda(totalConIVA-LIMITE)} € por encima)</div>`;
@@ -1046,9 +1166,7 @@ window.guardarPedido = async () => {
   const numero = 'PED-' + Date.now().toString().slice(-6);
   
   await addDoc(collection(db, "albaranes"), { 
-    fecha: hoy, 
-    proveedor: prov, 
-    numero: numero, 
+    fecha: hoy, proveedor: prov, numero: numero, 
     lineas: pedidoActual, 
     subtotal: subtotal,
     iva: subtotal * IVA_PORCENTAJE,
@@ -1123,7 +1241,7 @@ window.generarInforme = () => {
   const productos = {};
   filtrados.forEach(a => { (a.lineas || []).forEach(l => { if (!productos[l.ref]) productos[l.ref] = { nombre: l.producto, cantidad: 0, importe: 0 }; productos[l.ref].cantidad += l.cantidad || 0; productos[l.ref].importe += (l.cantidad || 0) * (l.precio || 0); }); });
   let html = `<div class="grid"><div class="stat"><div class="label">Total periodo</div><div class="value">${formatearMoneda(total)}</div><div class="sub">${filtrados.length} albaranes</div></div><div class="stat green"><div class="label">Media mensual</div><div class="value">${formatearMoneda(total/Math.max(1,Object.keys(meses).length))}</div></div></div>
-  <h3>📅 Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table>
+  <h3> Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table>
   <h3>📦 Top 10 productos</h3><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>${Object.values(productos).sort((a,b) => b.importe - a.importe).slice(0,10).map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td><strong>${formatearMoneda(p.importe)}</strong></td></tr>`).join('')}</tbody></table>`;
   document.getElementById('contenidoInforme').innerHTML = html;
 };
@@ -1158,7 +1276,7 @@ window.abrirModalProducto = (productoEditar = null) => {
   editandoRefAntigua = null;
   document.getElementById('similarWarning').style.display = 'none';
   if (productoEditar) {
-    document.getElementById('modalProductoTitulo').textContent = '✏️ Editar Producto';
+    document.getElementById('modalProductoTitulo').textContent = '️ Editar Producto';
     document.getElementById('prodRef').value = productoEditar.ref;
     document.getElementById('prodNombre').value = productoEditar.nombre;
     document.getElementById('prodProveedor').value = productoEditar.proveedor;
@@ -1212,7 +1330,7 @@ window.guardarNuevoProducto = async () => {
   const tipoPedido = document.getElementById('prodTipoPedido').value;
   const minimo = tipoPedido !== 'unidades' ? parseInt(document.getElementById('prodMinimo').value) : null;
   const unidadMinimo = tipoPedido !== 'unidades' ? document.getElementById('prodUnidadMinimo').value.trim() : null;
-  if (!nombre || !proveedor || isNaN(precio) || precio <= 0) { alert('❌ Completa los campos obligatorios'); return; }
+  if (!nombre || !proveedor || isNaN(precio) || precio <= 0) { alert(' Completa los campos obligatorios'); return; }
   if (!ref) ref = 'PROD-' + Date.now().toString().slice(-8);
   if (productosCache.some(p => p.ref === ref)) { alert(`❌ Ya existe la referencia "${ref}"`); return; }
   try {
@@ -1224,7 +1342,7 @@ window.guardarNuevoProducto = async () => {
     renderProductos();
     const seccionActiva = document.querySelector('.seccion.active');
     if (seccionActiva && seccionActiva.id === 'seccion-pedido' && document.getElementById('filtroProveedorPedido').value === proveedor) renderPedido();
-  } catch(e) { alert(' Error: ' + e.message); }
+  } catch(e) { alert('❌ Error: ' + e.message); }
 };
 
 window.editarProducto = (ref) => { const prod = productosCache.find(p => p.ref === ref); if (prod) abrirModalProducto(prod); };
@@ -1238,7 +1356,7 @@ window.actualizarProductoExistente = async () => {
   const tipoPedido = document.getElementById('prodTipoPedido').value;
   const minimo = tipoPedido !== 'unidades' ? parseInt(document.getElementById('prodMinimo').value) : null;
   const unidadMinimo = tipoPedido !== 'unidades' ? document.getElementById('prodUnidadMinimo').value.trim() : null;
-  if (!nombre || !proveedor || isNaN(precio) || precio <= 0) { alert('❌ Completa los campos obligatorios'); return; }
+  if (!nombre || !proveedor || isNaN(precio) || precio <= 0) { alert(' Completa los campos obligatorios'); return; }
   const refFinal = nuevaRef || editandoRefAntigua;
   if (refFinal !== editandoRefAntigua && productosCache.some(p => p.ref === refFinal)) { alert(`❌ Ya existe la referencia "${refFinal}"`); return; }
   try {
@@ -1259,7 +1377,7 @@ window.cerrarModal = () => document.getElementById('modalAlbaran').classList.rem
 window.agregarLineaModal = () => {
   const div = document.createElement('div');
   div.className = 'linea-item';
-  div.innerHTML = `<input type="text" placeholder="Producto" class="modal-prod" style="flex:2; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="text" placeholder="Ref (opcional)" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Cant" class="modal-cant" min="0" value="1" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Precio" class="modal-precio" min="0" step="0.01" style="width:100px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><button onclick="this.parentElement.remove()" class="danger">🗑️</button>`;
+  div.innerHTML = `<input type="text" placeholder="Producto" class="modal-prod" style="flex:2; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="text" placeholder="Ref (opcional)" class="modal-ref" style="flex:1; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Cant" class="modal-cant" min="0" value="1" style="width:80px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><input type="number" placeholder="Precio" class="modal-precio" min="0" step="0.01" style="width:100px; padding:6px; border:1px solid #cbd5e0; border-radius:4px;"><button onclick="this.parentElement.remove()" class="danger">️</button>`;
   document.getElementById('modalLineas').appendChild(div);
 };
 
