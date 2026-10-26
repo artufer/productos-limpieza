@@ -708,94 +708,119 @@ function renderPedido() {
     const prov = document.getElementById('filtroProveedorPedido').value;
     const mes = document.getElementById('mesPedido').value;
     const productos = {};
+    
+    // Función auxiliar para obtener el nombre correcto
+    const obtenerNombre = (ref, nombreAlbaran) => {
+      // 1. Si el albarán tiene nombre válido, úsalo
+      if (nombreAlbaran && nombreAlbaran !== 'Sin nombre' && nombreAlbaran.trim() !== '') {
+        return nombreAlbaran;
+      }
+      // 2. Buscar en productos manuales
+      const prodManual = productosCache.find(p => p.ref === ref);
+      if (prodManual) return prodManual.nombre;
+      // 3. Buscar en histórico de albaranes (otro albarán podría tener el nombre)
+      for (const a of albaranesCache) {
+        if (a.proveedor !== prov) continue;
+        const linea = (a.lineas || []).find(l => l.ref === ref && l.producto && l.producto.trim() !== '');
+        if (linea) return linea.producto;
+      }
+      // 4. Si no hay nombre, usar la referencia
+      return `Producto ${ref}`;
+    };
+    
     albaranesCache.forEach(a => {
       if (a.proveedor !== prov) return;
       (a.lineas || []).forEach(l => {
         if (!l.ref) return;
-        if (!productos[l.ref]) productos[l.ref] = { nombre: l.producto || 'Sin nombre', ref: l.ref, ultimoPrecio: l.precio || 0, ultimaFecha: a.fecha, esManual: false, tipoPedido: 'unidades' };
-        if (a.fecha >= (productos[l.ref].ultimaFecha || '')) { productos[l.ref].ultimoPrecio = l.precio || 0; productos[l.ref].ultimaFecha = a.fecha; }
+        const nombreCorrecto = obtenerNombre(l.ref, l.producto);
+        if (!productos[l.ref]) {
+          productos[l.ref] = { 
+            nombre: nombreCorrecto, 
+            ref: l.ref, 
+            ultimoPrecio: l.precio || 0, 
+            ultimaFecha: a.fecha, 
+            esManual: false, 
+            tipoPedido: 'unidades' 
+          };
+        }
+        if (a.fecha >= (productos[l.ref].ultimaFecha || '')) { 
+          productos[l.ref].ultimoPrecio = l.precio || 0; 
+          productos[l.ref].ultimaFecha = a.fecha;
+          // Actualizar nombre si el anterior era genérico
+          if (productos[l.ref].nombre.startsWith('Producto ') && !nombreCorrecto.startsWith('Producto ')) {
+            productos[l.ref].nombre = nombreCorrecto;
+          }
+        }
       });
     });
+    
     productosCache.forEach(p => {
-      if (p.proveedor === prov && !productos[p.ref]) productos[p.ref] = { nombre: p.nombre, ref: p.ref, ultimoPrecio: p.precio, ultimaFecha: '-', esManual: true, minimo: p.minimo, unidadMinimo: p.unidadMinimo, tipoPedido: p.tipoPedido || 'unidades' };
+      if (p.proveedor === prov && !productos[p.ref]) {
+        productos[p.ref] = { 
+          nombre: p.nombre, 
+          ref: p.ref, 
+          ultimoPrecio: p.precio, 
+          ultimaFecha: '-', 
+          esManual: true, 
+          minimo: p.minimo, 
+          unidadMinimo: p.unidadMinimo, 
+          tipoPedido: p.tipoPedido || 'unidades' 
+        };
+      }
     });
+    
     const listaProductos = Object.values(productos).sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
+    
     if (listaProductos.length === 0) {
       document.getElementById('listaPedido').innerHTML = `<div class="empty"><p>No hay productos para <strong>${prov}</strong>.</p><button onclick="abrirModalProducto()" class="success" style="margin-top:15px;">➕ Añadir primer producto</button></div>`;
       document.getElementById('resumenPedido').style.display = 'none';
       document.getElementById('floatingTotal').classList.remove('visible');
       return;
     }
+    
     document.getElementById('floatingTotal').classList.add('visible');
+    
     let html = `<p style="color:#666; margin-bottom:15px;"><strong>${listaProductos.length} productos</strong> disponibles de <strong>${prov}</strong></p>`;
     html += '<div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">';
+    
     listaProductos.forEach(p => {
       try {
         const minInfo = p.esManual && p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo || '', tipo: p.tipoPedido || 'unidades' } : (getMinimo(p.ref) || null);
         const tieneMinimo = minInfo !== null;
         const tipo = tieneMinimo ? (minInfo.tipo || 'unidades') : 'unidades';
         const minimo = tieneMinimo ? minInfo.minimo : 1;
+        
         let tipoTexto = '';
         if (tipo === 'cajas') tipoTexto = `📦 Cajas (mín. ${minimo}) · ${minInfo.unidad || ''}`;
-        else if (tipo === 'litros') tipoTexto = `💧 Litros (mín. ${minimo}L) · ${minInfo.unidad || ''}`;
+        else if (tipo === 'litros') tipoTexto = ` Litros (mín. ${minimo}L) · ${minInfo.unidad || ''}`;
         else tipoTexto = `🔢 Uds (mín. ${minimo}) · ${minInfo.unidad || 'ud'}`;
+        
         const similar = buscarProductoSimilar(p.nombre, prov, p.ref);
         const badgeSimilar = similar ? ' <span class="badge-similar">SIMILAR</span>' : '';
         const refDisplay = p.ref || 'auto';
-        html += `<div class="pedido-linea"><div><div class="producto-nombre">${p.nombre}${badgeSimilar}</div><div class="producto-ref">Ref: ${refDisplay}</div><div class="producto-tipo">${tipoTexto}</div><div class="producto-precio">${formatearMoneda(p.ultimoPrecio)} /ud</div></div><input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${(p.nombre || '').replace(/'/g,"\\'")}', ${p.ultimoPrecio}, this.value)" placeholder="0"><div class="linea-total" id="total-${p.ref}">0,00 €</div></div>`;
+        
+        html += `<div class="pedido-linea">
+          <div>
+            <div class="producto-nombre">${p.nombre}${badgeSimilar}</div>
+            <div class="producto-ref">Ref: ${refDisplay}</div>
+            <div class="producto-tipo">${tipoTexto}</div>
+            <div class="producto-precio">${formatearMoneda(p.ultimoPrecio)} /ud</div>
+          </div>
+          <input type="number" min="0" value="0" id="cant-${p.ref}" step="1" onchange="actualizarLineaPedido('${p.ref}', '${(p.nombre || '').replace(/'/g,"\\'")}', ${p.ultimoPrecio}, this.value)" placeholder="0">
+          <div class="linea-total" id="total-${p.ref}">0,00 €</div>
+        </div>`;
       } catch(e) { console.error('Error producto', p.ref, e); }
     });
+    
     html += '</div>';
     document.getElementById('listaPedido').innerHTML = html;
     document.getElementById('resumenPedido').style.display = 'block';
     actualizarResumenPedido();
   } catch(e) {
-    console.error(' Error en renderPedido:', e);
+    console.error('❌ Error en renderPedido:', e);
     document.getElementById('listaPedido').innerHTML = `<div class="alert alert-danger">❌ Error al cargar productos: ${e.message}</div>`;
   }
 }
-
-window.actualizarLineaPedido = (ref, nombre, precio, cantidad) => {
-  let cant = parseFloat(cantidad) || 0;
-  const prodManual = productosCache.find(p => p.ref === ref);
-  const minInfo = prodManual && prodManual.minimo ? { minimo: prodManual.minimo, unidad: prodManual.unidadMinimo, tipo: prodManual.tipoPedido } : getMinimo(ref);
-  if (minInfo && cant > 0) {
-    const minimo = minInfo.minimo;
-    const tipo = minInfo.tipo || 'unidades';
-    let valido = true;
-    let mensaje = '';
-    if (tipo === 'cajas') { if (!Number.isInteger(cant) || cant < 1) { valido = false; mensaje = `Este producto se pide por cajas enteras.\n\nHas introducido: ${cant}\nDebe ser: 1, 2, 3... cajas\n\n${minInfo.unidad || ''}`; } }
-    else if (tipo === 'litros') {
-      if (cant % minimo !== 0) {
-        const multiploInf = Math.floor(cant / minimo) * minimo;
-        const multiploSup = multiploInf + minimo;
-        const valorFinal = ((cant - multiploInf) <= (multiploSup - cant) ? multiploInf : multiploSup) || multiploSup;
-        const confirmar = confirm(`💧 ${nombre}\n\nEl pedido mínimo es de ${minimo}L (${minInfo.unidad || ''}).\n\nHas introducido: ${cant}L\nMúltiplos válidos: ${multiploInf}L o ${multiploSup}L\n\n¿Redondear a ${valorFinal}L?\n\n• Aceptar = ${valorFinal}L\n• Cancelar = 0L`);
-        cant = confirmar ? valorFinal : 0;
-        const input = document.getElementById(`cant-${ref}`);
-        if (input) input.value = cant;
-      }
-    } else {
-      if (cant % minimo !== 0) {
-        const multiploInf = Math.floor(cant / minimo) * minimo;
-        const multiploSup = multiploInf + minimo;
-        const valorFinal = ((cant - multiploInf) <= (multiploSup - cant) ? multiploInf : multiploSup) || multiploSup;
-        const confirmar = confirm(`⚠️ ${nombre}\n\nEl pedido mínimo es de ${minimo} uds (${minInfo.unidad || ''}).\n\nHas introducido: ${cant} uds\nMúltiplos válidos: ${multiploInf} o ${multiploSup}\n\n¿Redondear a ${valorFinal} uds?\n\n• Aceptar = ${valorFinal} uds\n• Cancelar = 0 uds`);
-        cant = confirmar ? valorFinal : 0;
-        const input = document.getElementById(`cant-${ref}`);
-        if (input) input.value = cant;
-      }
-    }
-    if (!valido) { alert(mensaje); cant = 0; const input = document.getElementById(`cant-${ref}`); if (input) input.value = 0; }
-  }
-  const importe = cant * precio;
-  const elTotal = document.getElementById(`total-${ref}`);
-  if (elTotal) elTotal.textContent = formatearMoneda(importe);
-  const idx = pedidoActual.findIndex(p => p.ref === ref);
-  if (cant > 0) { if (idx >= 0) pedidoActual[idx] = { ref, nombre, precio, cantidad: cant }; else pedidoActual.push({ ref, nombre, precio, cantidad: cant }); }
-  else { if (idx >= 0) pedidoActual.splice(idx, 1); }
-  actualizarResumenPedido();
-};
 
 function actualizarResumenPedido() {
   const subtotal = pedidoActual.reduce((s,p) => s + p.cantidad*p.precio, 0);
