@@ -1226,11 +1226,11 @@ window.cargarAlbaranes = renderAlbaranes;
 window.cargarProductos = renderProductos;
 window.cargarEvolucion = renderEvolucion;
 
-// Exponer variables a la consola para diagnóstico
+// Exponer variables a la consola para diagnóstico (se actualiza después de cargar)
 window._debug = {
-  albaranesCache,
-  productosCache,
-  productosEquivalentes,
+  get albaranesCache() { return albaranesCache; },
+  get productosCache() { return productosCache; },
+  get productosEquivalentes() { return productosEquivalentes; },
   MINIMOS_PEDIDO,
   getAlbaranesLuna: () => albaranesCache.filter(a => a.proveedor === 'LUNA'),
   getAlbaranesLidera: () => albaranesCache.filter(a => a.proveedor === 'LIDERA'),
@@ -1249,6 +1249,15 @@ window._debug = {
 };
 
 await cargarAlbaranes();
+
+// Actualizar window._debug con los datos cargados
+console.log(' Datos cargados. Actualizando debug...');
+console.log('Albaranes:', albaranesCache.length);
+if (albaranesCache.length > 0) {
+  console.log('Primer albarán:', albaranesCache[0]);
+  console.log('Campos:', Object.keys(albaranesCache[0]));
+}
+
 renderDashboard();
 </script>
 
