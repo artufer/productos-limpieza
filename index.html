@@ -927,56 +927,85 @@ window.generarPDFPedido = () => {
   const total = subtotal + iva;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  
+  // Cabecera
   doc.setFontSize(20);
   doc.setTextColor(30, 58, 95);
   doc.text('PEDIDO DE MATERIAL DE LIMPIEZA', 14, 20);
+  
   doc.setFontSize(11);
   doc.setTextColor(100, 100, 100);
   doc.text('Diputación Provincial de León', 14, 28);
   doc.text('Complejo San Cayetano', 14, 34);
   doc.text('Carretera de Carbajal, 60 - 24008 León', 14, 40);
+  
+  // Datos del pedido
   doc.setFontSize(12);
   doc.setTextColor(30, 58, 95);
   doc.text(`Proveedor: ${prov}`, 14, 52);
   doc.text(`Fecha: ${hoy}`, 14, 58);
   doc.text(`Periodo: ${mes}`, 14, 64);
-  const filas = pedidoActual.map((p, idx) => [idx + 1, p.nombre, p.ref || '-', p.cantidad, formatearMoneda(p.precio), formatearMoneda(p.cantidad * p.precio)]);
+  
+  // Tabla de productos - columnas ajustadas
+  const filas = pedidoActual.map((p, idx) => [
+    idx + 1,
+    p.nombre,
+    p.ref || '-',
+    p.cantidad,
+    formatearMoneda(p.precio),
+    formatearMoneda(p.cantidad * p.precio)
+  ]);
+  
   doc.autoTable({
     startY: 72,
-    head: [['#', 'Producto', 'Ref', 'Cantidad', 'Precio ud.', 'Importe']],
+    head: [['#', 'Producto', 'Ref.', 'Cantidad', 'Precio ud.', 'Importe']],
     body: filas,
     styles: { fontSize: 10, cellPadding: 4 },
     headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold' },
     alternateRowStyles: { fillColor: [245, 247, 250] },
-    columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 70 }, 2: { cellWidth: 25, halign: 'center' }, 3: { cellWidth: 20, halign: 'center' }, 4: { cellWidth: 25, halign: 'right' }, 5: { cellWidth: 25, halign: 'right' } }
+    columnStyles: {
+      0: { cellWidth: 10, halign: 'center' },
+      1: { cellWidth: 70 },
+      2: { cellWidth: 22, halign: 'center' },
+      3: { cellWidth: 22, halign: 'center' },
+      4: { cellWidth: 24, halign: 'right' },
+      5: { cellWidth: 27, halign: 'right' }
+    }
   });
+  
+  // Totales alineados con la columna Importe
   const finalY = doc.lastAutoTable.finalY + 10;
+  const colImporteX = 195; // Alineado con la columna Importe
+  
   doc.setFontSize(11);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Subtotal:`, 140, finalY);
-  doc.text(formatearMoneda(subtotal), 195, finalY, { align: 'right' });
-  doc.text(`IVA (21%):`, 140, finalY + 6);
-  doc.text(formatearMoneda(iva), 195, finalY + 6, { align: 'right' });
+  doc.text('Subtotal:', colImporteX - 55, finalY);
+  doc.text(formatearMoneda(subtotal), colImporteX, finalY, { align: 'right' });
+  
+  doc.text('IVA (21%):', colImporteX - 55, finalY + 6);
+  doc.text(formatearMoneda(iva), colImporteX, finalY + 6, { align: 'right' });
+  
   doc.setFontSize(13);
   doc.setTextColor(30, 58, 95);
   doc.setFont(undefined, 'bold');
-  doc.text(`TOTAL:`, 140, finalY + 14);
-  doc.text(formatearMoneda(total), 195, finalY + 14, { align: 'right' });
-// Pie con firma
-doc.setFontSize(11);
-doc.setTextColor(30, 58, 95);
-doc.setFont(undefined, 'bold');
-doc.text('Fdo. Arturo Fernández.', 14, 275);
-doc.setFont(undefined, 'normal');
-doc.setFontSize(10);
-doc.text('Encargado del edificio', 14, 282);
-
-// Fecha y hora
-const ahora = new Date();
-const fechaHora = ahora.toLocaleDateString('es-ES') + ' ' + ahora.toLocaleTimeString('es-ES');
-doc.setFontSize(9);
-doc.setTextColor(150, 150, 150);
-doc.text(fechaHora, 14, 289);
+  doc.text('TOTAL:', colImporteX - 55, finalY + 14);
+  doc.text(formatearMoneda(total), colImporteX, finalY + 14, { align: 'right' });
+  
+  // Pie con firma
+  doc.setFontSize(11);
+  doc.setTextColor(30, 58, 95);
+  doc.setFont(undefined, 'bold');
+  doc.text('Fdo. Arturo Fernández.', 14, 275);
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(10);
+  doc.text('Encargado del edificio', 14, 282);
+  
+  const ahora = new Date();
+  const fechaHora = ahora.toLocaleDateString('es-ES') + ' ' + ahora.toLocaleTimeString('es-ES');
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text(fechaHora, 14, 289);
+  
   const nombreArchivo = `pedido-${prov.toLowerCase()}-${mes}.pdf`;
   doc.save(nombreArchivo);
   alert(`✅ PDF generado: ${nombreArchivo}\n\nYa puedes adjuntarlo en un email al proveedor.`);
