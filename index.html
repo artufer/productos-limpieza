@@ -69,7 +69,7 @@
   .modal-content { background: white; padding: 24px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
   .form-group { margin-bottom: 12px; }
   .form-group label { display: block; margin-bottom: 4px; font-weight: 500; font-size: 13px; color: #4a5568; }
-  .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
   .form-group small { color: #718096; font-size: 12px; }
   .chart-bar { display: flex; align-items: center; margin-bottom: 8px; }
   .chart-bar .label { width: 80px; font-size: 13px; }
@@ -124,6 +124,17 @@
   .detalle-close { position: absolute; top: 16px; right: 16px; background: #dc2626; padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; color: white; cursor: pointer; }
   .detalle-close:hover { background: #b91c1c; }
   
+  /* Formulario nuevo albarán */
+  .form-nuevo label { display: block; margin-bottom: 6px; font-weight: 500; color: #4a5568; font-size: 13px; }
+  .form-nuevo input, .form-nuevo select, .form-nuevo textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; margin-bottom: 12px; }
+  .form-nuevo textarea { font-family: monospace; font-size: 13px; }
+  .preview-img { max-width: 100%; max-height: 300px; border-radius: 6px; margin: 10px 0; border: 1px solid #e2e8f0; }
+  
+  /* Detalle albarán */
+  .total-section { background: #1e3a5f; color: white; padding: 16px; border-radius: 6px; margin-top: 16px; }
+  .total-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 16px; }
+  .total-row.grand-total { border-top: 2px solid white; margin-top: 8px; padding-top: 8px; font-size: 20px; font-weight: bold; }
+  
   @media (max-width: 768px) {
     header h1 { font-size: 18px; }
     .tab-btn { padding: 8px 12px; font-size: 12px; }
@@ -143,8 +154,9 @@
 </header>
 
 <nav>
-  <button class="tab-btn active" data-seccion="dashboard">📊 Dashboard</button>
-  <button class="tab-btn" data-seccion="albaranes">📋 Albaranes</button>
+  <button class="tab-btn active" data-seccion="dashboard"> Dashboard</button>
+  <button class="tab-btn" data-seccion="nuevo-albaran">📥 Nuevo Albarán</button>
+  <button class="tab-btn" data-seccion="listado-albaranes">📋 Listado Albaranes</button>
   <button class="tab-btn" data-seccion="productos">📦 Productos</button>
   <button class="tab-btn" data-seccion="evolucion">📈 Evolución Precios</button>
   <button class="tab-btn" data-seccion="pedido">🛒 Preparar Pedido</button>
@@ -161,74 +173,124 @@
 </div>
 
 <main>
+  <!-- DASHBOARD -->
   <div id="seccion-dashboard" class="seccion active">
     <div class="card">
-      <h2> Dashboard</h2>
+      <h2>📊 Dashboard</h2>
       <div class="grid" id="dashboardStats"><div class="loading">Cargando...</div></div>
       <h3>📅 Gasto por mes (últimos 12 meses)</h3>
       <div id="graficoMensual"></div>
     </div>
   </div>
 
-  <div id="seccion-albaranes" class="seccion">
+  <!-- NUEVO ALBARÁN -->
+  <div id="seccion-nuevo-albaran" class="seccion">
     <div class="card">
-      <h2>📋 Histórico de Albaranes</h2>
-      <div class="filtros">
-        <select id="filtroProvAlb" onchange="cargarAlbaranes()">
-          <option value="TODOS">Todos los proveedores</option>
-          <option value="LUNA">Solo LUNA</option>
-          <option value="LIDERA">Solo LIDERA</option>
-        </select>
-        <input type="text" id="buscadorAlb" placeholder="🔍 Buscar..." oninput="cargarAlbaranes()">
-        <select id="filtroAnioAlb" onchange="cargarAlbaranes()">
-          <option value="TODOS">Todos los años</option>
-          <option value="2022">2022</option><option value="2023">2023</option>
-          <option value="2024">2024</option><option value="2025">2025</option>
-          <option value="2026">2026</option>
-        </select>
+      <h2>📥 Registrar Nuevo Albarán</h2>
+      <div class="alert alert-info">
+        ℹ️ Completa los datos del albarán. Puedes subir una imagen de referencia.
       </div>
-      <div id="tablaAlbaranes"></div>
+      <form id="formNuevoAlbaran" class="form-nuevo" onsubmit="guardarNuevoAlbaran(event)">
+        <label>Proveedor:</label>
+        <select id="nuevoProv" required>
+          <option value="">Selecciona...</option>
+          <option value="LIDERA">LIDERA</option>
+          <option value="LUNA">LUNA</option>
+        </select>
+
+        <label>Número de Albarán:</label>
+        <input type="text" id="nuevoNumero" required placeholder="Ej: 2005220">
+
+        <label>Fecha de Entrega:</label>
+        <input type="date" id="nuevoFecha" required>
+
+        <label>Imagen del Albarán (opcional):</label>
+        <input type="file" id="nuevoImagen" accept="image/*,.pdf" onchange="previewImage(this)">
+        <img id="previewImagen" class="preview-img" style="display:none;">
+
+        <label>Base Imponible (€):</label>
+        <input type="number" id="nuevoBase" step="0.01" required placeholder="0.00">
+
+        <label>IVA (%):</label>
+        <input type="number" id="nuevoIvaPct" value="21" step="0.01" required>
+
+        <label>Total (€):</label>
+        <input type="number" id="nuevoTotal" step="0.01" required placeholder="0.00">
+
+        <label>Líneas de Productos (una por línea):</label>
+        <textarea id="nuevoLineas" rows="10" required placeholder="10001019 | G3 GEL DE MANOS | 1 | 0.9510&#10;10005183 | HIGIENICO ESTANDAR | 4 | 0.1100"></textarea>
+        <small>Formato: <code>Referencia | Nombre del producto | Cantidad | Precio unitario</code></small>
+
+        <button type="submit" class="success" style="margin-top:10px;">💾 Guardar Albarán</button>
+      </form>
     </div>
   </div>
 
+  <!-- LISTADO ALBARANES -->
+  <div id="seccion-listado-albaranes" class="seccion">
+    <div class="card">
+      <h2>📋 Listado de Albaranes</h2>
+      <div class="filtros">
+        <select id="filtroProvList" onchange="renderListadoAlbaranes()">
+          <option value="TODOS">Todos los proveedores</option>
+          <option value="LIDERA">Solo LIDERA</option>
+          <option value="LUNA">Solo LUNA</option>
+        </select>
+        <select id="filtroAnioList" onchange="renderListadoAlbaranes()">
+          <option value="TODOS">Todos los años</option>
+          <option value="2022">2022</option>
+          <option value="2023">2023</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+        <input type="text" id="buscadorList" placeholder="🔍 Buscar..." oninput="renderListadoAlbaranes()">
+      </div>
+      <div id="tablaListadoAlbaranes"></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTOS -->
   <div id="seccion-productos" class="seccion">
     <div class="card">
       <h2>📦 Catálogo de Productos</h2>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
         <div class="filtros" style="margin-bottom:0;">
-          <select id="filtroProvProd" onchange="cargarProductos()">
+          <select id="filtroProvProd" onchange="renderProductos()">
             <option value="TODOS">Todos los proveedores</option>
             <option value="LUNA">Solo LUNA</option>
             <option value="LIDERA">Solo LIDERA</option>
           </select>
-          <input type="text" id="buscadorProd" placeholder="🔍 Buscar producto..." oninput="cargarProductos()">
+          <input type="text" id="buscadorProd" placeholder="🔍 Buscar producto..." oninput="renderProductos()">
         </div>
         <button onclick="abrirModalProducto()" class="success">➕ Añadir producto nuevo</button>
       </div>
       <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">
-        ️ <strong>Referencia opcional:</strong> Si no la conoces, déjala vacía y se generará automáticamente. Las referencias que empiezan por "100" se asignan a LIDERA.
+        ℹ️ <strong>Referencia opcional:</strong> Si no la conoces, déjala vacía y se generará automáticamente. Las referencias que empiezan por "100" se asignan a LIDERA.
       </div>
       <div id="tablaProductos"></div>
     </div>
   </div>
 
+  <!-- EVOLUCIÓN -->
   <div id="seccion-evolucion" class="seccion">
     <div class="card">
-      <h2> Evolución de Precios</h2>
+      <h2>📈 Evolución de Precios</h2>
       <p style="color:#666; margin-bottom:16px;">Seguimiento histórico de cambios de precio</p>
       <div class="filtros">
-        <select id="filtroProvEvol" onchange="cargarEvolucion()">
+        <select id="filtroProvEvol" onchange="renderEvolucion()">
           <option value="TODOS">Todos los proveedores</option>
           <option value="LUNA">Solo LUNA</option>
           <option value="LIDERA">Solo LIDERA</option>
         </select>
-        <input type="text" id="buscadorEvol" placeholder="🔍 Buscar..." oninput="cargarEvolucion()">
+        <input type="text" id="buscadorEvol" placeholder="🔍 Buscar..." oninput="renderEvolucion()">
         <button onclick="generarPDFEvolucion()" class="success">📄 Descargar PDF</button>
       </div>
       <div id="tablaEvolucion"></div>
     </div>
   </div>
 
+  <!-- PEDIDO -->
   <div id="seccion-pedido" class="seccion">
     <div class="card">
       <h2>🛒 Preparar Pedido</h2>
@@ -265,9 +327,10 @@
     </div>
   </div>
 
+  <!-- INFORMES -->
   <div id="seccion-informes" class="seccion">
     <div class="card">
-      <h2> Informes</h2>
+      <h2>📑 Informes</h2>
       <div class="filtros">
         <select id="filtroProvInf">
           <option value="TODOS">Todos los proveedores</option>
@@ -276,8 +339,10 @@
         </select>
         <select id="filtroAnioInf">
           <option value="TODOS">Todos los años</option>
-          <option value="2022">2022</option><option value="2023">2023</option>
-          <option value="2024">2024</option><option value="2025">2025</option>
+          <option value="2022">2022</option>
+          <option value="2023">2023</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
           <option value="2026">2026</option>
         </select>
         <button onclick="generarInforme()">📊 Generar informe</button>
@@ -324,6 +389,15 @@
     <div style="display:flex; gap:10px; margin-top:16px;">
       <button onclick="cerrarModalCargarPedido()" class="secondary">❌ Cerrar</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE ALBARÁN -->
+<div id="modalDetalleAlbaran" class="modal">
+  <div class="modal-content" style="max-width:900px;">
+    <button class="detalle-close" onclick="cerrarModalDetalleAlbaran()">✕ Cerrar</button>
+    <h3 id="modalDetalleTitulo">Detalle del Albarán</h3>
+    <div id="modalDetalleContenido"></div>
   </div>
 </div>
 
@@ -545,7 +619,7 @@ function obtenerNombreProducto(ref, nombreAlbaran, prov) {
   return ref;
 }
 
-async function cargarAlbaranes() {
+async function cargarDatos() {
   if (datosCargados) return;
   try {
     const snap = await getDocs(collection(db, "albaranes"));
@@ -562,7 +636,7 @@ async function cargarProductosDesdeFirestore() {
   try {
     const snap = await getDocs(collection(db, "productos"));
     productosCache = [];
-    snap.forEach(d => { const data = d.data(); productosCache.push({ ref: d.id, nombre: data.nombre, proveedor: data.proveedor || detectarProveedorPorRef(d.id), precio: data.precio, minimo: data.minimo || null, unidadMinimo: data.unidadMinimo || null, tipoPedido: data.tipoPedido || 'unidades' }); });
+    snap.forEach(d => { const data = d.data(); productosCache.push({ ref: data.ref || d.id, nombre: data.nombre, proveedor: data.proveedor || detectarProveedorPorRef(data.ref || d.id), precio: data.precio, minimo: data.minimo || null, unidadMinimo: data.unidadMinimo || null, tipoPedido: data.tipoPedido || 'unidades' }); });
   } catch(e) { console.error(e); }
 }
 async function cargarEquivalentesDesdeFirestore() {
@@ -574,14 +648,15 @@ async function cargarEquivalentesDesdeFirestore() {
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.seccion').forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
     const seccion = btn.dataset.seccion;
     document.getElementById('seccion-' + seccion).classList.add('active');
+    await cargarDatos();
     if (seccion === 'dashboard') renderDashboard();
-    if (seccion === 'albaranes') renderAlbaranes();
+    if (seccion === 'listado-albaranes') renderListadoAlbaranes();
     if (seccion === 'productos') renderProductos();
     if (seccion === 'evolucion') renderEvolucion();
     if (seccion === 'pedido') { if (!document.getElementById('mesPedido').value) document.getElementById('mesPedido').value = new Date().toISOString().slice(0,7); renderPedido(); }
@@ -686,7 +761,7 @@ window.mostrarDetalleMes = () => {
         ${tablaProductos(productosLuna, 'LUNA')}
       </div>
       <div class="detalle-col lidera">
-        <h4>🟡 LIDERA - Productos de ${mesActual}</h4>
+        <h4> LIDERA - Productos de ${mesActual}</h4>
         ${tablaProductos(productosLidera, 'LIDERA')}
       </div>
     </div>
@@ -761,7 +836,7 @@ window.mostrarDetalleHistorico = () => {
   const contenido = `
     <div class="detalle-grid">
       <div class="detalle-col luna">
-        <h4>🔵 LUNA - Importe por año</h4>
+        <h4> LUNA - Importe por año</h4>
         ${tablaAnual('LUNA')}
       </div>
       <div class="detalle-col lidera">
@@ -812,7 +887,7 @@ window.mostrarDetalleProductos = () => {
   const contenido = `
     <div class="detalle-grid">
       <div class="detalle-col luna">
-        <h4> LUNA - Catálogo (${Object.keys(productosLuna).length} productos)</h4>
+        <h4>🔵 LUNA - Catálogo (${Object.keys(productosLuna).length} productos)</h4>
         ${tablaProductos(productosLuna)}
       </div>
       <div class="detalle-col lidera">
@@ -825,26 +900,157 @@ window.mostrarDetalleProductos = () => {
   mostrarDetalle(`📦 Catálogo de productos`, contenido);
 };
 
-function renderAlbaranes() {
-  const prov = document.getElementById('filtroProvAlb').value;
-  const busq = (document.getElementById('buscadorAlb').value || '').toLowerCase();
-  const anio = document.getElementById('filtroAnioAlb').value;
+// ===== NUEVO ALBARÁN =====
+window.previewImage = (input) => {
+  const preview = document.getElementById('previewImagen');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+};
+
+window.guardarNuevoAlbaran = async (event) => {
+  event.preventDefault();
+  
+  const proveedor = document.getElementById('nuevoProv').value;
+  const numero = document.getElementById('nuevoNumero').value;
+  const fecha = document.getElementById('nuevoFecha').value;
+  const base = parseFloat(document.getElementById('nuevoBase').value);
+  const ivaPct = parseFloat(document.getElementById('nuevoIvaPct').value);
+  const total = parseFloat(document.getElementById('nuevoTotal').value);
+  const lineasText = document.getElementById('nuevoLineas').value;
+  
+  const lineas = [];
+  lineasText.split('\n').forEach(linea => {
+    if (linea.trim()) {
+      const partes = linea.split('|').map(p => p.trim());
+      if (partes.length >= 4) {
+        const cantidad = parseFloat(partes[2]);
+        const precio = parseFloat(partes[3]);
+        lineas.push({
+          ref: partes[0],
+          producto: partes[1],
+          cantidad: cantidad,
+          precio: precio,
+          importe: cantidad * precio
+        });
+      }
+    }
+  });
+  
+  if (lineas.length === 0) {
+    alert('❌ Debes añadir al menos una línea de producto');
+    return;
+  }
+  
+  try {
+    await addDoc(collection(db, 'albaranes'), {
+      numero: numero,
+      fecha: fecha,
+      proveedor: proveedor,
+      base: base,
+      iva: base * (ivaPct / 100),
+      total: total,
+      lineas: lineas,
+      mesPedido: fecha.slice(0, 7),
+      createdAt: new Date().toISOString()
+    });
+    
+    alert(`✅ Albarán ${numero} guardado correctamente\n\n${lineas.length} productos\nTotal: ${formatearMoneda(total)}`);
+    document.getElementById('formNuevoAlbaran').reset();
+    document.getElementById('previewImagen').style.display = 'none';
+    
+    datosCargados = false;
+    await cargarDatos();
+  } catch (error) {
+    alert('❌ Error al guardar: ' + error.message);
+  }
+};
+
+// ===== LISTADO ALBARANES =====
+window.renderListadoAlbaranes = () => {
+  const prov = document.getElementById('filtroProvList').value;
+  const anio = document.getElementById('filtroAnioList').value;
+  const busq = (document.getElementById('buscadorList').value || '').toLowerCase();
+  const contenedor = document.getElementById('tablaListadoAlbaranes');
+  
   let filtrados = albaranesCache;
-  if (prov !== 'TODOS') filtrados = filtrados.filter(a => getProveedorAlbaran(a) === prov);
+  if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
   if (busq) filtrados = filtrados.filter(a => (a.numero || '').toLowerCase().includes(busq) || (a.lineas || []).some(l => (l.producto || '').toLowerCase().includes(busq)));
-  if (filtrados.length === 0) { document.getElementById('tablaAlbaranes').innerHTML = '<div class="empty">No se encontraron albaranes</div>'; return; }
-  let html = '<table><thead><tr><th>Fecha</th><th>Nº</th><th>Proveedor</th><th>Líneas</th><th>Total</th></tr></thead><tbody>';
-  filtrados.forEach(a => { 
-    const total = (a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0); 
-    const provReal = getProveedorAlbaran(a) || a.proveedor || '?';
-    const badge = provReal === 'LUNA' ? 'badge-luna' : 'badge-lidera'; 
-    html += `<tr><td>${formatearFecha(a.fecha)}</td><td><strong>${a.numero || ''}</strong></td><td><span class="badge ${badge}">${provReal}</span></td><td>${(a.lineas || []).length}</td><td><strong>${formatearMoneda(total)}</strong></td></tr>`; 
+  
+  if (filtrados.length === 0) {
+    contenedor.innerHTML = '<div class="empty">No se encontraron albaranes</div>';
+    return;
+  }
+  
+  let html = '<table><thead><tr><th>Nº Albarán</th><th>Fecha</th><th>Proveedor</th><th>Líneas</th><th style="text-align:right;">Total</th></tr></thead><tbody>';
+  filtrados.forEach(a => {
+    const total = (a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0);
+    const provReal = a.proveedor || getProveedorAlbaran(a) || '?';
+    const badge = provReal === 'LUNA' ? 'badge-luna' : 'badge-lidera';
+    html += `<tr onclick="verDetalleAlbaran('${a.numero}', '${provReal}')">
+      <td><strong>${a.numero || ''}</strong></td>
+      <td>${formatearFecha(a.fecha)}</td>
+      <td><span class="badge ${badge}">${provReal}</span></td>
+      <td>${(a.lineas || []).length}</td>
+      <td style="text-align:right;"><strong>${formatearMoneda(total)}</strong></td>
+    </tr>`;
   });
   html += '</tbody></table>';
-  document.getElementById('tablaAlbaranes').innerHTML = html;
-}
+  
+  contenedor.innerHTML = html;
+};
 
+window.verDetalleAlbaran = (numero, proveedor) => {
+  const alb = albaranesCache.find(a => a.numero === numero && a.proveedor === proveedor);
+  if (!alb) return;
+  
+  const modal = document.getElementById('modalDetalleAlbaran');
+  const titulo = document.getElementById('modalDetalleTitulo');
+  const contenido = document.getElementById('modalDetalleContenido');
+  
+  titulo.textContent = `Albarán ${alb.numero} - ${alb.proveedor} (${formatearFecha(alb.fecha)})`;
+  
+  let html = '<table><thead><tr><th>Referencia</th><th>Producto</th><th style="text-align:center;">Cantidad</th><th style="text-align:right;">Precio Unit.</th><th style="text-align:right;">Importe</th></tr></thead><tbody>';
+  
+  let subtotal = 0;
+  (alb.lineas || []).forEach(linea => {
+    html += `<tr>
+      <td><code style="background:#f1f5f9; padding:2px 4px; border-radius:3px;">${linea.ref}</code></td>
+      <td>${linea.producto}</td>
+      <td style="text-align:center;">${linea.cantidad}</td>
+      <td style="text-align:right;">${formatearMoneda(linea.precio)}</td>
+      <td style="text-align:right;"><strong>${formatearMoneda(linea.importe || linea.cantidad * linea.precio)}</strong></td>
+    </tr>`;
+    subtotal += linea.importe || linea.cantidad * linea.precio;
+  });
+  
+  html += '</tbody></table>';
+  
+  html += `<div class="total-section">
+    <div class="total-row"><span>Base Imponible:</span><span>${formatearMoneda(alb.base || subtotal)}</span></div>
+    <div class="total-row"><span>IVA:</span><span>${formatearMoneda(alb.iva || 0)}</span></div>
+    <div class="total-row grand-total"><span>TOTAL:</span><span>${formatearMoneda(alb.total)}</span></div>
+  </div>`;
+  
+  contenido.innerHTML = html;
+  modal.classList.add('active');
+};
+
+window.cerrarModalDetalleAlbaran = () => {
+  document.getElementById('modalDetalleAlbaran').classList.remove('active');
+};
+
+document.getElementById('modalDetalleAlbaran').addEventListener('click', (e) => {
+  if (e.target.id === 'modalDetalleAlbaran') cerrarModalDetalleAlbaran();
+});
+
+// ===== PRODUCTOS =====
 function renderProductos() {
   const prov = document.getElementById('filtroProvProd').value;
   const busq = (document.getElementById('buscadorProd').value || '').toLowerCase();
@@ -882,13 +1088,11 @@ function renderProductos() {
     const provs = Array.from(p.proveedores).map(x => `<span class="badge ${x==='LUNA'?'badge-luna':'badge-lidera'}">${x}</span>`).join(' ');
     const badgeManual = p.esManual ? '<span class="badge-manual" style="margin-left:5px;">MANUAL</span>' : '';
     const minInfo = p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo, tipo: p.tipoPedido } : getMinimo(p.ref);
-    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? '📦 Cajas' : minInfo.tipo === 'litros' ? '💧 Litros' : '🔢 Uds') : ' Uds';
+    const tipoTexto = minInfo ? (minInfo.tipo === 'cajas' ? ' Cajas' : minInfo.tipo === 'litros' ? '💧 Litros' : ' Uds') : '🔢 Uds';
     const minTexto = minInfo ? `<span class="badge-minimo">${minInfo.minimo} ${minInfo.unidad || ''}</span>` : '<span style="color:#a0aec0;font-size:11px;">Sin mínimo</span>';
     const totalTexto = p.esManual ? '<span style="color:#a0aec0;">Sin pedidos</span>' : `${formatearMoneda(p.totalImporte)} (${p.totalCantidad})`;
     const refTexto = p.ref ? p.ref : '<span class="ref-vacia">auto</span>';
     const provArray = Array.from(p.proveedores);
-    const equiv = productosEquivalentes.find(e => (e.ref1 === p.ref && e.prov1 === provArray[0]) || (e.ref2 === p.ref && e.prov2 === provArray[0]));
-    const equivTexto = equiv ? `<span class="badge-similar">✓ Equiv.</span>` : `<button onclick="marcarEquivalente('${p.ref}', '${provArray[0]}')" class="equivalente-btn">Marcar</button>`;
     html += `<tr style="${p.esManual ? 'background:#f0fff4;' : ''}"><td><strong>${p.nombre}</strong>${badgeManual}</td><td>${refTexto}</td><td>${provs}</td><td>${tipoTexto}</td><td>${minTexto}</td><td>${formatearMoneda(p.ultimoPrecio)}</td><td>${formatearFecha(p.ultimaFecha)}</td><td>${totalTexto}</td><td>${p.esManual ? `<button onclick="editarProducto('${p.ref}')" style="padding:4px 8px; font-size:12px;">✏️</button>` : ''}</td></tr>`;
   });
   html += '</tbody></table>';
@@ -936,7 +1140,7 @@ function renderEvolucion() {
       if (precioAnterior !== null && Math.abs(c.precio - precioAnterior) > 0.0001) {
         const cambio = ((c.precio - precioAnterior) / precioAnterior * 100).toFixed(1);
         const clase = cambio > 0 ? 'cambio-up' : 'cambio-down';
-        html += `<tr><td><strong>${prod.nombre}</strong></td><td>${prod.ref}</td><td>${formatearFecha(c.fecha)}</td><td>${precioAnterior.toFixed(4)} €</td><td><strong>${c.precio.toFixed(4)} €</strong></td><td class="${clase}">${cambio > 0 ? '🔴' : '🟢'} ${cambio > 0 ? '+' : ''}${cambio}%</td><td>${c.numero}</td></tr>`;
+        html += `<tr><td><strong>${prod.nombre}</strong></td><td>${prod.ref}</td><td>${formatearFecha(c.fecha)}</td><td>${precioAnterior.toFixed(4)} €</td><td><strong>${c.precio.toFixed(4)} €</strong></td><td class="${clase}">${cambio > 0 ? '' : '🟢'} ${cambio > 0 ? '+' : ''}${cambio}%</td><td>${c.numero}</td></tr>`;
         totalCambios++;
       }
       precioAnterior = c.precio;
@@ -966,17 +1170,10 @@ window.generarPDFEvolucion = () => {
   });
   const filas = Object.values(productos).map(p => [p.nombre, p.primeraFecha, p.ultimaFecha, p.ultimoPrecio.toFixed(4) + ' €']);
   doc.autoTable({ startY: 40, head: [['Producto', 'Primera compra', 'Última compra', 'Precio actual']], body: filas, styles: { fontSize: 9 }, headStyles: { fillColor: [44, 82, 130] } });
-  doc.addPage(); doc.setFontSize(14); doc.text('Histórico de cambios', 14, 20);
-  const cambiosFilas = [];
-  Object.values(productos).forEach(prod => {
-    const albsOrdenados = filtrados.filter(a => (a.lineas || []).some(l => l.ref === prod.ref)).sort((a,b) => (a.fecha || '').localeCompare(b.fecha || ''));
-    let precioAnt = null;
-    albsOrdenados.forEach(alb => { const lin = alb.lineas.find(l => l.ref === prod.ref); if (lin) { if (precioAnt !== null && Math.abs(lin.precio - precioAnt) > 0.0001) { const cambio = ((lin.precio - precioAnt) / precioAnt * 100).toFixed(1); cambiosFilas.push([prod.nombre, alb.fecha, precioAnt.toFixed(4), lin.precio.toFixed(4), (cambio > 0 ? '+' : '') + cambio + '%']); } precioAnt = lin.precio; } });
-  });
-  if (cambiosFilas.length > 0) doc.autoTable({ startY: 30, head: [['Producto', 'Fecha', 'Precio Ant.', 'Precio Nuevo', 'Cambio']], body: cambiosFilas, styles: { fontSize: 8 }, headStyles: { fillColor: [44, 82, 130] } });
   doc.save(`evolucion-precios-${prov.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
+// ===== PEDIDO =====
 function renderPedido() {
   try {
     const prov = document.getElementById('filtroProveedorPedido').value;
@@ -1025,7 +1222,6 @@ function renderPedido() {
       try {
         const minInfo = p.esManual && p.minimo ? { minimo: p.minimo, unidad: p.unidadMinimo || '', tipo: p.tipoPedido || 'unidades' } : (getMinimo(p.ref) || null);
         const tieneMinimo = minInfo !== null;
-        const tipo = tieneMinimo ? (minInfo.tipo || 'unidades') : 'unidades';
         const minimo = tieneMinimo ? minInfo.minimo : 1;
         let badgeSimilar = '';
         try {
@@ -1076,7 +1272,7 @@ window.actualizarLineaPedido = (ref, nombre, precio, cantidad) => {
         const multiploInf = Math.floor(cant / minimo) * minimo;
         const multiploSup = multiploInf + minimo;
         const valorFinal = ((cant - multiploInf) <= (multiploSup - cant) ? multiploInf : multiploSup) || multiploSup;
-        const confirmar = confirm(`💧 ${nombre}\n\nEl pedido mínimo es de ${minimo}L (${minInfo.unidad || ''}).\n\nHas introducido: ${cant}L\nMúltiplos válidos: ${multiploInf}L o ${multiploSup}L\n\n¿Redondear a ${valorFinal}L?\n\n• Aceptar = ${valorFinal}L\n• Cancelar = 0L`);
+        const confirmar = confirm(` ${nombre}\n\nEl pedido mínimo es de ${minimo}L (${minInfo.unidad || ''}).\n\nHas introducido: ${cant}L\nMúltiplos válidos: ${multiploInf}L o ${multiploSup}L\n\n¿Redondear a ${valorFinal}L?\n\n• Aceptar = ${valorFinal}L\n• Cancelar = 0L`);
         cant = confirmar ? valorFinal : 0;
         const input = document.getElementById(`cant-${ref}`);
         if (input) input.value = cant;
@@ -1145,17 +1341,6 @@ window.guardarPedido = async () => {
   const subtotal = pedidoActual.reduce((s,p) => s + p.cantidad*p.precio, 0);
   const totalConIVA = subtotal * (1 + IVA_PORCENTAJE);
   if (totalConIVA > LIMITE) { alert(`❌ El pedido supera el límite de ${formatearMoneda(LIMITE)} (con IVA).\n\nTotal: ${formatearMoneda(totalConIVA)}\nExceso: ${formatearMoneda(totalConIVA - LIMITE)}`); return; }
-  const errores = [];
-  pedidoActual.forEach(p => {
-    const prodManual = productosCache.find(mp => mp.ref === p.ref);
-    const minInfo = prodManual && prodManual.minimo ? { minimo: prodManual.minimo, tipo: prodManual.tipoPedido } : getMinimo(p.ref);
-    if (minInfo) {
-      if (minInfo.tipo === 'cajas' && (!Number.isInteger(p.cantidad) || p.cantidad < 1)) errores.push(`${p.nombre}: debe ser número entero de cajas`);
-      else if (minInfo.tipo === 'litros' && p.cantidad % minInfo.minimo !== 0) errores.push(`${p.nombre}: ${p.cantidad}L (mínimo ${minInfo.minimo}L)`);
-      else if (minInfo.tipo === 'unidades' && p.cantidad % minInfo.minimo !== 0) errores.push(`${p.nombre}: ${p.cantidad} uds (mínimo ${minInfo.minimo})`);
-    }
-  });
-  if (errores.length > 0) { alert(`❌ Productos que no cumplen el mínimo:\n\n${errores.join('\n')}`); return; }
   const prov = document.getElementById('filtroProveedorPedido').value;
   const mes = document.getElementById('mesPedido').value;
   const hoy = new Date().toISOString().split('T')[0];
@@ -1383,13 +1568,8 @@ window.borrarPedido = async (numero, fecha) => {
     alert(`✅ Pedido ${numero} borrado correctamente.`);
     
     cargarListaPedidos();
-    
-    if (document.getElementById('seccion-dashboard').classList.contains('active')) {
-      renderDashboard();
-    }
-    if (document.getElementById('seccion-albaranes').classList.contains('active')) {
-      renderAlbaranes();
-    }
+    renderDashboard();
+    renderListadoAlbaranes();
   } catch(e) {
     console.error('Error al borrar:', e);
     alert('❌ Error al borrar el pedido: ' + e.message);
@@ -1437,6 +1617,7 @@ window.recuperarPedido = (numero) => {
   alert(`✅ Pedido ${numero} cargado correctamente.\n\n${pedido.lineas.length} productos\nTotal: ${formatearMoneda(totalLineas * (1 + IVA_PORCENTAJE))}`);
 };
 
+// ===== INFORMES =====
 window.generarInforme = () => {
   const prov = document.getElementById('filtroProvInf').value;
   const anio = document.getElementById('filtroAnioInf').value;
@@ -1456,7 +1637,7 @@ window.generarInforme = () => {
       productos[l.ref].importe += (l.cantidad || 0) * (l.precio || 0); 
     }); 
   });
-  let html = `<div class="grid"><div class="stat"><div class="label">Total periodo</div><div class="value">${formatearMoneda(total)}</div><div class="sub">${filtrados.length} albaranes</div></div><div class="stat green"><div class="label">Media mensual</div><div class="value">${formatearMoneda(total/Math.max(1,Object.keys(meses).length))}</div></div></div><h3>📅 Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table><h3>📦 Top 10 productos</h3><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>${Object.values(productos).sort((a,b) => b.importe - a.importe).slice(0,10).map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td><strong>${formatearMoneda(p.importe)}</strong></td></tr>`).join('')}</tbody></table>`;
+  let html = `<div class="grid"><div class="stat"><div class="label">Total periodo</div><div class="value">${formatearMoneda(total)}</div><div class="sub">${filtrados.length} albaranes</div></div><div class="stat green"><div class="label">Media mensual</div><div class="value">${formatearMoneda(total/Math.max(1,Object.keys(meses).length))}</div></div></div><h3> Gasto por mes</h3><table><thead><tr><th>Mes</th><th>Albaranes</th><th>Total</th></tr></thead><tbody>${Object.entries(meses).sort().map(([m,t]) => { const albs = filtrados.filter(a => a.fecha && a.fecha.startsWith(m)).length; return `<tr><td>${m}</td><td>${albs}</td><td><strong>${formatearMoneda(t)}</strong></td></tr>`; }).join('')}</tbody></table><h3>📦 Top 10 productos</h3><table><thead><tr><th>Producto</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>${Object.values(productos).sort((a,b) => b.importe - a.importe).slice(0,10).map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td><td><strong>${formatearMoneda(p.importe)}</strong></td></tr>`).join('')}</tbody></table>`;
   document.getElementById('contenidoInforme').innerHTML = html;
 };
 
@@ -1474,7 +1655,6 @@ window.generarPDFInforme = () => {
   doc.save(`informe-${prov.toLowerCase()}-${anio}-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-window.toggleMinimoInput = () => { document.getElementById('formMinimo').style.display = document.getElementById('prodTieneMinimo').value === 'si' ? 'block' : 'none'; };
 window.onCambiarTipoPedido = () => {
   const tipo = document.getElementById('prodTipoPedido').value;
   const formMinimo = document.getElementById('formMinimo');
@@ -1499,7 +1679,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const inputNombre = document.getElementById('prodNombre');
   if (inputNombre) {
-    inputNombre.addEventListener('input', () => {
+    inputNombre.addEventListener('input', async () => {
       const nombre = inputNombre.value.trim();
       const proveedor = document.getElementById('prodProveedor').value;
       const warningDiv = document.getElementById('similarWarning');
@@ -1560,7 +1740,8 @@ window.guardarNuevoProducto = async () => {
   }
   if (productosCache.some(p => p.ref === ref)) { alert(`❌ Ya existe la referencia "${ref}"`); return; }
   try {
-    await setDoc(doc(db, "productos", ref), { nombre, proveedor, precio, minimo: minimo || null, unidadMinimo: unidadMinimo || null, tipoPedido, createdAt: new Date().toISOString() });
+    const docId = ref.replace(/\//g, '_');
+    await setDoc(doc(db, "productos", docId), { ref, nombre, proveedor, precio, minimo: minimo || null, unidadMinimo: unidadMinimo || null, tipoPedido, createdAt: new Date().toISOString() });
     productosCache.push({ ref, nombre, proveedor, precio, minimo, unidadMinimo, tipoPedido });
     if (minimo) MINIMOS_PEDIDO[ref] = { minimo, unidad: unidadMinimo, tipo: tipoPedido };
     alert(`✅ Producto "${nombre}" guardado\nReferencia: ${ref}\nProveedor: ${proveedor}`);
@@ -1568,7 +1749,7 @@ window.guardarNuevoProducto = async () => {
     renderProductos();
     const seccionActiva = document.querySelector('.seccion.active');
     if (seccionActiva && seccionActiva.id === 'seccion-pedido' && document.getElementById('filtroProveedorPedido').value === proveedor) renderPedido();
-  } catch(e) { alert('❌ Error: ' + e.message); }
+  } catch(e) { alert(' Error: ' + e.message); }
 };
 
 window.editarProducto = (ref) => { const prod = productosCache.find(p => p.ref === ref); if (prod) abrirModalProducto(prod); };
@@ -1588,8 +1769,13 @@ window.actualizarProductoExistente = async () => {
   if (provDetectado) proveedor = provDetectado;
   if (refFinal !== editandoRefAntigua && productosCache.some(p => p.ref === refFinal)) { alert(`❌ Ya existe la referencia "${refFinal}"`); return; }
   try {
-    if (refFinal !== editandoRefAntigua) { await deleteDoc(doc(db, "productos", editandoRefAntigua)); if (MINIMOS_PEDIDO[editandoRefAntigua]) delete MINIMOS_PEDIDO[editandoRefAntigua]; }
-    await setDoc(doc(db, "productos", refFinal), { nombre, proveedor, precio, minimo: minimo || null, unidadMinimo: unidadMinimo || null, tipoPedido, updatedAt: new Date().toISOString() });
+    if (refFinal !== editandoRefAntigua) { 
+      const docIdAntiguo = editandoRefAntigua.replace(/\//g, '_');
+      await deleteDoc(doc(db, "productos", docIdAntiguo)); 
+      if (MINIMOS_PEDIDO[editandoRefAntigua]) delete MINIMOS_PEDIDO[editandoRefAntigua]; 
+    }
+    const docId = refFinal.replace(/\//g, '_');
+    await setDoc(doc(db, "productos", docId), { ref: refFinal, nombre, proveedor, precio, minimo: minimo || null, unidadMinimo: unidadMinimo || null, tipoPedido, updatedAt: new Date().toISOString() });
     const idx = productosCache.findIndex(p => p.ref === editandoRefAntigua);
     if (idx >= 0) productosCache[idx] = { ref: refFinal, nombre, proveedor, precio, minimo, unidadMinimo, tipoPedido };
     if (minimo) MINIMOS_PEDIDO[refFinal] = { minimo, unidad: unidadMinimo, tipo: tipoPedido }; else delete MINIMOS_PEDIDO[refFinal];
@@ -1598,10 +1784,6 @@ window.actualizarProductoExistente = async () => {
     renderProductos();
   } catch(e) { alert('❌ Error: ' + e.message); }
 };
-
-window.cargarAlbaranes = renderAlbaranes;
-window.cargarProductos = renderProductos;
-window.cargarEvolucion = renderEvolucion;
 
 window._debug = {
   get albaranesCache() { return albaranesCache; },
@@ -1613,7 +1795,7 @@ window._debug = {
   getAlbaranesLidera: () => albaranesCache.filter(a => getProveedorAlbaran(a) === 'LIDERA')
 };
 
-await cargarAlbaranes();
+await cargarDatos();
 renderDashboard();
 </script>
 
