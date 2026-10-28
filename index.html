@@ -1115,45 +1115,60 @@ window.marcarEquivalente = (ref, prov) => {
   }
 };
 
-function renderEvolucion() {
+window.generarPDFEvolucion = () => {
   const prov = document.getElementById('filtroProvEvol').value;
-  const busq = (document.getElementById('buscadorEvol').value || '').toLowerCase();
-  let filtrados = albaranesCache;
-  if (prov !== 'TODOS') filtrados = filtrados.filter(a => getProveedorAlbaran(a) === prov);
-  const productos = {};
-  filtrados.forEach(alb => { 
-    const provAlb = getProveedorAlbaran(alb);
-    (alb.lineas || []).forEach(lin => { 
-      const key = lin.ref; 
-      if (!productos[key]) productos[key] = { nombre: obtenerNombreProducto(lin.ref, lin.producto, provAlb), ref: lin.ref, cambios: [] }; 
-      productos[key].cambios.push({ fecha: alb.fecha, precio: lin.precio, numero: alb.numero, proveedor: provAlb }); 
-    }); 
-  });
-  let html = '<table><thead><tr><th>Producto</th><th>Ref</th><th>Fecha</th><th>Precio Anterior</th><th>Precio Nuevo</th><th>Cambio</th><th>Albarán</th></tr></thead><tbody>';
-  let totalCambios = 0;
-  Object.values(productos).sort((a,b) => {
-    const nombreA = normalizarParaOrdenar(a.nombre);
-    const nombreB = normalizarParaOrdenar(b.nombre);
-    return nombreA.localeCompare(nombreB);
-  }).forEach(prod => {
-    if (busq && !(prod.nombre || '').toLowerCase().includes(busq)) return;
-    prod.cambios.sort((a,b) => (a.fecha || '').localeCompare(b.fecha || ''));
-    let precioAnterior = null;
-    prod.cambios.forEach(c => {
-      if (precioAnterior !== null && Math.abs(c.precio - precioAnterior) > 0.0001) {
-        const cambio = ((c.precio - precioAnterior) / precioAnterior * 100).toFixed(1);
-        const clase = cambio > 0 ? 'cambio-up' : 'cambio-down';
-        html += `<tr><td><strong>${prod.nombre}</strong></td><td>${prod.ref}</td><td>${formatearFecha(c.fecha)}</td><td>${precioAnterior.toFixed(4)} €</td><td><strong>${c.precio.toFixed(4)} €</strong></td><td class="${clase}">${cambio > 0 ? '' : '🟢'} ${cambio > 0 ? '+' : ''}${cambio}%</td><td>${c.numero}</td></tr>`;
-        totalCambios++;
+  if (!prov) { alert('Selecciona un proveedor primero'); return; }
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('landscape');
+  
+  doc.setFontSize(18);
+  doc.setTextColor(30, 58, 95);
+  doc.text(`Evolución de Precios - ${prov}`, 14, 20);
+  doc.setFontSize(11);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generado: ${new Date().toLocaleDateString('es-ES')} · Último precio registrado por año`, 14, 28);
+  
+  const albsProv = albaranesCache.filter(a => getProveedorAlbaran(a) === prov);
+  const productosMap = {};
+  albsProv.forEach(alb => {
+    const anio = alb.fecha ? alb.fecha.slice(0, 4) : null;
+    if (!anio) return;
+    (alb.lineas || []).forEach(lin => {
+      if (!productosMap[lin.ref]) {
+        productosMap[lin.ref] = { nombre: lin.producto || lin.ref, ref: lin.ref, preciosPorAnio: {}, ultimaFechaAnio: {} };
       }
-      precioAnterior = c.precio;
+      if (!productosMap[lin.ref].ultimaFechaAnio[anio] || alb.fecha > productosMap[lin.ref].ultimaFechaAnio[anio]) {
+        productosMap[lin.ref].ultimaFechaAnio[anio] = alb.fecha;
+        productosMap[lin.ref].preciosPorAnio[anio] = lin.precio;
+      }
     });
   });
-  html += '</tbody></table>';
-  if (totalCambios === 0) html = '<div class="empty">No se encontraron cambios de precio</div>';
-  document.getElementById('tablaEvolucion').innerHTML = html;
-}
-
+  
+  const años = ['2022', '2023', '2024', '2025', '2026'];
+  const lista = Object.values(productosMap).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  
+  const filas = lista.map(p => {
+    const precios = años.map(a => p.preciosPorAnio[a] !== undefined ? p.preciosPorAnio[a].toFixed(4) + ' €' : '-');
+    return [p.ref, p.nombre, ...precios];
+  });
+  
+  doc.autoTable({
+    startY: 35,
+    head: [['Ref.', 'Producto', ...años]],
+    body: filas,
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center' },
+    columnStyles: {
+      0: { cellWidth: 25, halign: 'center' },
+      1: { cellWidth: 90 }
+    },
+    alternateRowStyles: { fillColor: [245, 247, 250] }
+  });
+  
+  doc.save(`evolucion-precios-${prov.toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
+  alert(`✅ PDF generado: evolucion-precios-${prov.toLowerCase()}.pdf`);
+};
 window.generarPDFEvolucion = () => {
   const prov = document.getElementById('filtroProvEvol').value;
   const { jsPDF } = window.jspdf;
