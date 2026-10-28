@@ -274,21 +274,24 @@
 
   <!-- EVOLUCIÓN -->
   <div id="seccion-evolucion" class="seccion">
-    <div class="card">
-      <h2>📈 Evolución de Precios</h2>
-      <p style="color:#666; margin-bottom:16px;">Seguimiento histórico de cambios de precio</p>
-      <div class="filtros">
-        <select id="filtroProvEvol" onchange="renderEvolucion()">
-          <option value="TODOS">Todos los proveedores</option>
-          <option value="LUNA">Solo LUNA</option>
-          <option value="LIDERA">Solo LIDERA</option>
-        </select>
-        <input type="text" id="buscadorEvol" placeholder="🔍 Buscar..." oninput="renderEvolucion()">
-        <button onclick="generarPDFEvolucion()" class="success">📄 Descargar PDF</button>
-      </div>
-      <div id="tablaEvolucion"></div>
+  <div class="card">
+    <h2>📈 Evolución de Precios por Año</h2>
+    <p style="color:#666; margin-bottom:16px;">Historial de precios anuales por producto</p>
+    <div class="alert alert-info" style="margin-bottom:15px; font-size:13px;">
+      ℹ️ Selecciona un proveedor para ver la evolución de precios año a año. Cada fila muestra el <strong>último precio registrado</strong> de ese año.
     </div>
+    <div class="filtros">
+      <select id="filtroProvEvol" onchange="renderEvolucion()">
+        <option value="">-- Selecciona proveedor --</option>
+        <option value="LIDERA">🟡 LIDERA</option>
+        <option value="LUNA">🔵 LUNA</option>
+      </select>
+      <input type="text" id="buscadorEvol" placeholder="🔍 Buscar producto..." oninput="renderEvolucion()">
+      <button onclick="generarPDFEvolucion()" class="success" id="btnPDFEvol" disabled> Descargar PDF</button>
+    </div>
+    <div id="tablaEvolucion"></div>
   </div>
+</div>
 
   <!-- PEDIDO -->
   <div id="seccion-pedido" class="seccion">
