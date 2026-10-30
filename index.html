@@ -890,16 +890,25 @@ window.renderListadoAlbaranes = () => {
   const anio = document.getElementById('filtroAnioList').value;
   const busq = (document.getElementById('buscadorList').value || '').toLowerCase();
   const contenedor = document.getElementById('tablaListadoAlbaranes');
+  
   let filtrados = albaranesCache;
   if (prov !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === prov);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
   if (busq) filtrados = filtrados.filter(a => (a.numero || '').toLowerCase().includes(busq) || (a.lineas || []).some(l => (l.producto || '').toLowerCase().includes(busq)));
-  if (filtrados.length === 0) { contenedor.innerHTML = '<div class="empty">No se encontraron albaranes</div>'; return; }
+  
+  if (filtrados.length === 0) {
+    contenedor.innerHTML = '<div class="empty">No se encontraron albaranes</div>';
+    return;
+  }
+  
   let html = '<table><thead><tr><th>Nº Albarán</th><th>Fecha</th><th>Proveedor</th><th>Líneas</th><th style="text-align:right;">Total</th></tr></thead><tbody>';
+  
   filtrados.forEach(a => {
-    const total = (a.lineas || []).reduce((s,l) => s + (l.cantidad || 0) * (l.precio || 0), 0);
+    // ✅ USAR EL CAMPO total GUARDADO, NO RECALCULAR
+    const total = a.total || 0;
     const provReal = a.proveedor || getProveedorAlbaran(a) || '?';
     const badge = provReal === 'LUNA' ? 'badge-luna' : 'badge-lidera';
+    
     html += `<tr onclick="window.verDetalleAlbaran('${a.numero}', '${provReal}')">
       <td><strong>${a.numero || ''}</strong></td>
       <td>${formatearFecha(a.fecha)}</td>
@@ -908,10 +917,10 @@ window.renderListadoAlbaranes = () => {
       <td style="text-align:right;"><strong>${formatearMoneda(total)}</strong></td>
     </tr>`;
   });
+  
   html += '</tbody></table>';
   contenedor.innerHTML = html;
 };
-
 window.verDetalleAlbaran = (numero, proveedor) => {
   const alb = albaranesCache.find(a => a.numero === numero && a.proveedor === proveedor);
   if (!alb) return;
