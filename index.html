@@ -1121,17 +1121,52 @@ window.generarPDFPedido = () => {
       halign: 'center'
     },
     columnStyles: {
-      0: { halign: 'center', cellWidth: 25 },   // Referencia
-      1: { halign: 'left', cellWidth: 80 },     // Producto
-      2: { halign: 'right', cellWidth: 20 },    // Cantidad
-      3: { halign: 'right', cellWidth: 25 },    // Precio
-      4: { halign: 'right', cellWidth: 25 }     // Importe
+      0: { halign: 'center', cellWidth: 22 },   // Referencia
+      1: { halign: 'left', cellWidth: 75 },     // Producto
+      2: { halign: 'right', cellWidth: 25 },    // Cantidad (aumentado de 20 a 25)
+      3: { halign: 'right', cellWidth: 24 },    // Precio
+      4: { halign: 'right', cellWidth: 24 }     // Importe
     },
     styles: {
       fontSize: 10,
       cellPadding: 3
     }
   });
+  
+  // ===== TOTALES =====
+  const finalY = doc.lastAutoTable.finalY + 10;
+  
+  doc.setFontSize(10);
+  doc.text('Subtotal:', 130, finalY);
+  doc.text(formatearMoneda(subtotal), 190, finalY, { align: 'right' });
+  
+  doc.text('IVA (21%):', 130, finalY + 8);
+  doc.text(formatearMoneda(iva), 190, finalY + 8, { align: 'right' });
+  
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('TOTAL:', 130, finalY + 20);
+  doc.text(formatearMoneda(total), 190, finalY + 20, { align: 'right' });
+  doc.setFont(undefined, 'normal');
+  
+  // ===== PIE CON FIRMA =====
+  const pieY = finalY + 50;
+  
+  doc.setFontSize(11);
+  doc.text('Pedido efectuado por Arturo Fernández', 20, pieY);
+  doc.text('Encargado del edificio', 20, pieY + 8);
+  
+  // Fecha actual
+  const fechaHoy = new Date().toLocaleDateString('es-ES', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  });
+  doc.text(fechaHoy, 20, pieY + 16);
+  
+  // Guardar PDF
+  doc.save(`pedido_${proveedor}_${mes}.pdf`);
+};
   
   // ===== TOTALES =====
   const finalY = doc.lastAutoTable.finalY + 10;
