@@ -12,7 +12,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .header { background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%); color: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 .header h1 { font-size: 24px; margin-bottom: 5px; }
 .header p { font-size: 14px; opacity: 0.9; }
-.nav { background: white; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; gap: 10px; flex-wrap: wrap; }
+.nav { background: white; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; gap: 10px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
 .nav button { padding: 10px 20px; border: none; background: #e2e8f0; color: #4a5568; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
 .nav button:hover { background: #cbd5e0; }
 .nav button.active { background: #1e3a5f; color: white; }
@@ -36,6 +36,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .btn-warning:hover { background: #d97706; }
 .btn-info { background: #3b82f6; color: white; }
 .btn-info:hover { background: #2563eb; }
+.btn-secondary { background: #6b7280; color: white; }
+.btn-secondary:hover { background: #4b5563; }
 .btn-sm { padding: 5px 10px; font-size: 11px; }
 table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
@@ -87,9 +89,14 @@ table tr:hover { background: #f8fafc; }
 .editable-cell:hover { background: #fef3c7; }
 .minimo-input { width: 60px; padding: 4px 8px; border: 2px solid #10b981; border-radius: 4px; font-weight: bold; text-align: center; }
 .ref-input { width: 100px; padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 4px; font-family: monospace; font-size: 12px; }
+.precio-input { width: 80px; padding: 4px 8px; border: 2px solid #f59e0b; border-radius: 4px; font-weight: bold; text-align: right; }
+.nombre-input { width: 100%; padding: 4px 8px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 13px; }
+.nombre-input:focus { border-color: #1e3a5f; outline: none; }
+.empaque-input { width: 120px; padding: 4px 8px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 12px; }
+.tipo-select { padding: 4px 8px; border: 2px solid #8b5cf6; border-radius: 4px; font-size: 12px; cursor: pointer; background: white; }
 .fila-inactiva { background: #f9fafb !important; opacity: 0.6; }
 .fila-inactiva td { color: #9ca3af; }
-.fila-inactiva .minimo-input, .fila-inactiva .ref-input { text-decoration: none; color: #333; opacity: 1; }
+.fila-inactiva .minimo-input, .fila-inactiva .ref-input, .fila-inactiva .precio-input, .fila-inactiva .nombre-input, .fila-inactiva .empaque-input, .fila-inactiva .tipo-select { text-decoration: none; color: #333; opacity: 1; }
 .toggle-activo { cursor: pointer; font-size: 20px; padding: 4px 8px; border-radius: 4px; transition: all 0.2s; display: inline-block; }
 .toggle-activo:hover { background: #e5e7eb; transform: scale(1.1); }
 .fila-resaltada { background: #fef3c7 !important; animation: highlightPulse 1.5s ease-in-out; }
@@ -102,9 +109,26 @@ table tr:hover { background: #f8fafc; }
 .resultado-busqueda { padding: 10px 15px; border-radius: 6px; margin-top: 10px; display: none; }
 .resultado-busqueda.encontrado { display: block; background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
 .resultado-busqueda.no-encontrado { display: block; background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+.celda-editable { position: relative; }
+.celda-editable input:hover, .celda-editable select:hover { background: #fef3c7; }
+.celda-editable input:focus, .celda-editable select:focus { background: #fffbeb; box-shadow: 0 0 0 2px #f59e0b; }
+.guardado-ok { animation: flashGreen 0.5s ease; }
+@keyframes flashGreen { 0% { background: #d1fae5; } 100% { background: transparent; } }
+.btn-subir-arriba {
+  position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%); color: white; border: none;
+  cursor: pointer; font-size: 24px; font-weight: bold; box-shadow: 0 4px 15px rgba(30, 58, 95, 0.4);
+  z-index: 999; opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-subir-arriba.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.btn-subir-arriba:hover { background: linear-gradient(135deg, #2c5282 0%, #1e3a5f 100%); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(30, 58, 95, 0.5); }
+.btn-subir-arriba::before { content: '↑'; font-size: 28px; line-height: 1; }
 </style>
 </head>
 <body>
+
+<button class="btn-subir-arriba" id="btnSubirArriba" title="Subir al inicio" onclick="subirArriba()"></button>
 
 <div class="header">
   <h1>🧹 Control de Limpieza</h1>
@@ -178,7 +202,7 @@ table tr:hover { background: #f8fafc; }
     <div id="tablaAlbaranes"><div class="empty-state"><p>Cargando albaranes...</p></div></div>
   </div>
 
-  <!-- PRODUCTOS -->
+  <!-- PRODUCTOS - COMPLETAMENTE EDITABLE -->
   <div id="productos" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📦 Catálogo de Productos</h2>
     <div class="filter-bar">
@@ -187,8 +211,6 @@ table tr:hover { background: #f8fafc; }
       <button class="btn btn-success" onclick="mostrarModalProducto()">➕ Añadir producto nuevo</button>
       <button class="btn btn-info" onclick="regenerarCatalogo()">🔄 Regenerar desde albaranes</button>
     </div>
-    
-    <!-- BÚSQUEDA POR REFERENCIA EN PRODUCTOS -->
     <div class="buscar-ref-container">
       <label>🔍 Buscar por referencia:</label>
       <input type="text" id="buscarRefProductos" placeholder="Escribe la referencia (Ej: DT294, CEL0013...)" oninput="buscarPorReferenciaProductos()">
@@ -196,14 +218,16 @@ table tr:hover { background: #f8fafc; }
       <button class="btn btn-secondary btn-sm" onclick="limpiarBusquedaProductos()">✕ Limpiar</button>
     </div>
     <div id="resultadoBusquedaProductos" class="resultado-busqueda"></div>
-    
     <div class="alert alert-info">
-      <strong>ℹ️ Cómo gestionar productos:</strong><br>
-      • <strong>Estado</strong>: Haz clic en ✅/❌ para activar/dar de baja. Los dados de baja NO aparecen al hacer pedidos pero se conservan en el histórico.<br>
-      • <strong>Referencia</strong>: Edítala directamente en la tabla. El histórico de albaranes NO se modifica.<br>
-      • <strong>Mínimo</strong>: Cambia el valor directamente y se guarda automáticamente.<br>
-      • <strong>Tipo</strong>: Haz clic en el badge para rotar entre Unidades/Cajas/Litros.<br>
-      • <strong>Buscar</strong>: Escribe una referencia arriba para ir directamente al producto. Si no existe, podrás darlo de alta.
+      <strong>✏️ Tabla completamente editable - Todos los cambios se guardan automáticamente:</strong><br>
+      • <strong>Estado</strong>: Haz clic en ✅/❌ para activar/dar de baja<br>
+      • <strong>Referencia</strong>: Edita directamente (el histórico de albaranes NO se modifica)<br>
+      • <strong>Nombre</strong>: Haz clic para editar el nombre del producto<br>
+      • <strong>Precio</strong>: Edita directamente el precio unitario<br>
+      • <strong>Tipo</strong>: Selecciona entre Unidades/Cajas/Litros<br>
+      • <strong>Mínimo</strong>: Cambia la cantidad mínima<br>
+      • <strong>Empaque</strong>: Edita la descripción del empaque<br>
+      • <strong>Acciones</strong>: ✏️ Editar completo | 🗑️ Eliminar definitivamente
     </div>
     <div id="tablaProductos"><div class="empty-state"><p>Cargando productos...</p></div></div>
   </div>
@@ -211,11 +235,10 @@ table tr:hover { background: #f8fafc; }
   <!-- EVOLUCIÓN PRECIOS -->
   <div id="evolucion-precios" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📈 Evolución de Precios por Año</h2>
-    <p style="color: #64748b; margin-bottom: 20px;">Historial de precios anuales por producto</p>
     <div class="alert alert-info">ℹ️ Selecciona un proveedor para ver la evolución de precios año a año.</div>
     <div class="form-group"><select id="filtroEvolucionProveedor" onchange="cargarEvolucionPrecios()"><option value="">-- Selecciona proveedor --</option><option value="LIDERA">🟡 LIDERA</option><option value="LUNA">🔵 LUNA</option></select></div>
     <button class="btn btn-primary" onclick="descargarEvolucionPDF()">📄 Descargar PDF</button>
-    <div id="tablaEvolucion" style="margin-top: 20px;"><div class="empty-state"><p>Selecciona un proveedor para ver la evolución de precios</p></div></div>
+    <div id="tablaEvolucion" style="margin-top: 20px;"><div class="empty-state"><p>Selecciona un proveedor</p></div></div>
   </div>
 
   <!-- PREPARAR PEDIDO -->
@@ -227,8 +250,6 @@ table tr:hover { background: #f8fafc; }
       <div class="form-group"><label>Mes:</label><input type="month" id="pedidoMes" onchange="verificarLimiteMensual()"></div>
       <div class="progress-bar"><div class="progress-fill" id="pedidoProgreso" style="width: 0%">0% de 500 €</div></div>
       <div class="alert alert-warning">Límite mensual: <strong>500,00 €</strong> (con IVA incluido) por proveedor</div>
-      
-      <!-- BÚSQUEDA POR REFERENCIA EN PEDIDO -->
       <div class="buscar-ref-container" style="margin-top: 20px;">
         <label>🔍 Ir a referencia:</label>
         <input type="text" id="buscarRefPedido" placeholder="Escribe la referencia para ir directamente..." oninput="buscarPorReferenciaPedido()">
@@ -236,7 +257,6 @@ table tr:hover { background: #f8fafc; }
         <button class="btn btn-secondary btn-sm" onclick="limpiarBusquedaPedido()">✕ Limpiar</button>
       </div>
       <div id="resultadoBusquedaPedido" class="resultado-busqueda"></div>
-      
       <h3 style="margin-top: 20px; margin-bottom: 15px;">Productos del pedido:</h3>
       <div id="productosPedidoContainer"><div class="empty-state"><p>Selecciona un proveedor para ver los productos disponibles</p></div></div>
       <div class="stats" style="margin-top: 20px;">
@@ -323,6 +343,14 @@ let albaranesCache = [];
 let productosCache = [];
 let pedidoActual = [];
 
+// BOTÓN FLOTANTE
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('btnSubirArriba');
+  if (window.scrollY > 300) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+});
+window.subirArriba = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
 // Navegación
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -333,6 +361,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     if (btn.dataset.section === 'dashboard') cargarDashboard();
     if (btn.dataset.section === 'listado-albaranes') cargarListadoAlbaranes();
     if (btn.dataset.section === 'productos') cargarProductos();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
 
@@ -534,7 +563,7 @@ window.verDetalleMes = (mes) => {
   document.getElementById('modalDetalleAlbaran').classList.add('active');
 };
 
-// PRODUCTOS
+// PRODUCTOS - TABLA COMPLETAMENTE EDITABLE
 window.cargarProductos = () => {
   const contenedor = document.getElementById('tablaProductos');
   contenedor.innerHTML = '<div class="empty-state"><p>Cargando productos...</p></div>';
@@ -545,90 +574,120 @@ window.cargarProductos = () => {
   if (estado === 'ACTIVOS') filtrados = filtrados.filter(p => p.activo !== false);
   if (estado === 'INACTIVOS') filtrados = filtrados.filter(p => p.activo === false);
   if (filtrados.length === 0) { contenedor.innerHTML = '<div class="empty-state"><p>No hay productos registrados</p></div>'; return; }
-  let html = '<table><thead><tr><th>Estado</th><th>Referencia</th><th>Producto</th><th>Proveedor</th><th>Precio</th><th>Tipo</th><th>Mínimo</th><th>Empaque</th><th>Acciones</th></tr></thead><tbody>';
+  
+  let html = '<table><thead><tr>';
+  html += '<th style="width:60px;">Estado</th>';
+  html += '<th style="width:110px;">Referencia</th>';
+  html += '<th>Producto</th>';
+  html += '<th style="width:90px;">Proveedor</th>';
+  html += '<th style="width:90px;">Precio (€)</th>';
+  html += '<th style="width:110px;">Tipo</th>';
+  html += '<th style="width:80px;">Mínimo</th>';
+  html += '<th style="width:130px;">Empaque</th>';
+  html += '<th style="width:100px;">Acciones</th>';
+  html += '</tr></thead><tbody>';
+  
   filtrados.forEach(p => {
     const badge = p.proveedor === 'LUNA' ? 'badge-luna' : 'badge-lidera';
-    const tipoIcon = p.tipo === 'cajas' ? '📦' : p.tipo === 'litros' ? '💧' : '🔢';
-    const tipoClass = 'tipo-' + (p.tipo || 'unidades');
-    const tipoTexto = p.tipo === 'cajas' ? 'Cajas' : p.tipo === 'litros' ? 'Litros' : 'Unidades';
     const esActivo = p.activo !== false;
     const filaClass = esActivo ? '' : 'fila-inactiva';
     const toggleIcon = esActivo ? '✅' : '❌';
     const toggleTitle = esActivo ? 'Activo - Clic para dar de baja' : 'Dado de baja - Clic para reactivar';
     const estadoBadge = esActivo ? '<span class="badge badge-activo">Activo</span>' : '<span class="badge badge-inactivo">Baja</span>';
-    html += `<tr class="${filaClass}" data-id="${p.id}" data-ref="${(p.ref || '').toUpperCase()}">
-      <td><span class="toggle-activo" onclick="toggleActivoProducto('${p.id}')" title="${toggleTitle}">${toggleIcon}</span> ${estadoBadge}</td>
-      <td><input type="text" class="ref-input" value="${p.ref || ''}" onchange="guardarRefProducto('${p.id}', this.value)" title="Cambia la referencia (el histórico NO se modifica)"></td>
-      <td>${p.nombre || '-'}</td>
-      <td><span class="badge ${badge}">${p.proveedor || '?'}</span></td>
-      <td>${formatearMoneda(p.precio || 0)}</td>
-      <td><span class="editable-cell tipo-badge ${tipoClass}" onclick="editarTipoProducto('${p.id}')" title="Clic para cambiar">${tipoIcon} ${tipoTexto}</span></td>
-      <td><input type="number" class="minimo-input" value="${p.minimo || 1}" step="0.01" min="0.01" onchange="guardarMinimoProducto('${p.id}', this.value)" title="Cambia el mínimo y se guarda automáticamente"></td>
-      <td><input type="text" value="${p.empaque || ''}" style="width: 120px; padding: 4px 8px; border: 1px solid #cbd5e0; border-radius: 4px;" onchange="guardarEmpaqueProducto('${p.id}', this.value)" title="Ej: caja de 20, fardo de 108"></td>
-      <td><button class="btn btn-info btn-sm" onclick="editarProducto('${p.id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="eliminarProducto('${p.id}')">🗑️</button></td>
-    </tr>`;
+    
+    html += `<tr class="${filaClass}" data-id="${p.id}" data-ref="${(p.ref || '').toUpperCase()}">`;
+    
+    // ESTADO
+    html += `<td><span class="toggle-activo" onclick="toggleActivoProducto('${p.id}')" title="${toggleTitle}">${toggleIcon}</span></td>`;
+    
+    // REFERENCIA
+    html += `<td class="celda-editable"><input type="text" class="ref-input" value="${p.ref || ''}" onchange="guardarCampoProducto('${p.id}', 'ref', this.value)" title="Referencia (el histórico NO se modifica)"></td>`;
+    
+    // NOMBRE
+    html += `<td class="celda-editable"><input type="text" class="nombre-input" value="${p.nombre || ''}" onchange="guardarCampoProducto('${p.id}', 'nombre', this.value)" title="Nombre del producto"></td>`;
+    
+    // PROVEEDOR
+    html += `<td><span class="badge ${badge}">${p.proveedor || '?'}</span></td>`;
+    
+    // PRECIO
+    html += `<td class="celda-editable"><input type="number" class="precio-input" value="${p.precio || 0}" step="0.01" min="0" onchange="guardarCampoProducto('${p.id}', 'precio', parseFloat(this.value))" title="Precio unitario en €"></td>`;
+    
+    // TIPO
+    html += `<td class="celda-editable">
+      <select class="tipo-select" onchange="guardarCampoProducto('${p.id}', 'tipo', this.value)" title="Tipo de pedido">
+        <option value="unidades" ${p.tipo === 'unidades' ? 'selected' : ''}>🔢 Uds</option>
+        <option value="cajas" ${p.tipo === 'cajas' ? 'selected' : ''}>📦 Cajas</option>
+        <option value="litros" ${p.tipo === 'litros' ? 'selected' : ''}>💧 Litros</option>
+      </select>
+    </td>`;
+    
+    // MÍNIMO
+    html += `<td class="celda-editable"><input type="number" class="minimo-input" value="${p.minimo || 1}" step="0.01" min="0.01" onchange="guardarCampoProducto('${p.id}', 'minimo', parseFloat(this.value))" title="Cantidad mínima"></td>`;
+    
+    // EMPAQUE
+    html += `<td class="celda-editable"><input type="text" class="empaque-input" value="${p.empaque || ''}" onchange="guardarCampoProducto('${p.id}', 'empaque', this.value)" title="Descripción del empaque"></td>`;
+    
+    // ACCIONES
+    html += `<td>
+      <button class="btn btn-info btn-sm" onclick="editarProducto('${p.id}')" title="Editar completo">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="eliminarProducto('${p.id}')" title="Eliminar definitivamente">🗑️</button>
+    </td>`;
+    
+    html += '</tr>';
   });
   html += '</tbody></table>';
   contenedor.innerHTML = html;
 };
 
-// BÚSQUEDA POR REFERENCIA EN PRODUCTOS
-window.buscarPorReferenciaProductos = () => {
-  const refBuscada = document.getElementById('buscarRefProductos').value.trim().toUpperCase();
-  const resultadoDiv = document.getElementById('resultadoBusquedaProductos');
+// FUNCIÓN GENÉRICA PARA GUARDAR CUALQUIER CAMPO
+window.guardarCampoProducto = async (id, campo, valor) => {
+  const producto = productosCache.find(p => p.id === id);
+  if (!producto) return;
   
-  if (!refBuscada) {
-    resultadoDiv.className = 'resultado-busqueda';
-    resultadoDiv.style.display = 'none';
-    document.querySelectorAll('#tablaProductos tr').forEach(tr => tr.classList.remove('fila-resaltada'));
+  // Validaciones específicas
+  if (campo === 'precio' && (isNaN(valor) || valor < 0)) {
+    alert('El precio debe ser un número válido mayor o igual a 0');
+    cargarProductos();
+    return;
+  }
+  if (campo === 'minimo' && (isNaN(valor) || valor <= 0)) {
+    alert('El mínimo debe ser un número mayor que 0');
+    cargarProductos();
+    return;
+  }
+  if (campo === 'nombre' && (!valor || valor.trim() === '')) {
+    alert('El nombre no puede estar vacío');
+    cargarProductos();
     return;
   }
   
-  // Buscar producto por referencia (coincidencia exacta o parcial)
-  const productoEncontrado = productosCache.find(p => 
-    (p.ref || '').toUpperCase() === refBuscada || 
-    (p.ref || '').toUpperCase().includes(refBuscada)
-  );
+  const valorAnterior = producto[campo];
+  producto[campo] = valor;
   
-  if (productoEncontrado) {
-    // Asegurar que los filtros no oculten el producto
-    document.getElementById('filtroProductosProveedor').value = 'TODOS';
-    document.getElementById('filtroProductosEstado').value = 'TODOS';
-    cargarProductos();
+  try {
+    await updateDoc(doc(db, 'productos', id), { [campo]: valor });
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
     
-    setTimeout(() => {
-      const fila = document.querySelector(`tr[data-ref="${refBuscada}"]`);
-      if (fila) {
-        fila.classList.add('fila-resaltada');
-        fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        resultadoDiv.className = 'resultado-busqueda encontrado';
-        resultadoDiv.innerHTML = `✅ <strong>Producto encontrado:</strong> ${productoEncontrado.nombre} (Ref: ${productoEncontrado.ref}) - ${productoEncontrado.proveedor} - ${formatearMoneda(productoEncontrado.precio)}`;
+    // Feedback visual
+    const fila = document.querySelector(`tr[data-id="${id}"]`);
+    if (fila) {
+      const celda = fila.querySelector(`input[onchange*="${campo}"], select[onchange*="${campo}"]`);
+      if (celda) {
+        celda.classList.add('guardado-ok');
+        setTimeout(() => celda.classList.remove('guardado-ok'), 500);
       }
-    }, 100);
-  } else {
-    resultadoDiv.className = 'resultado-busqueda no-encontrado';
-    resultadoDiv.innerHTML = `❌ <strong>No existe ningún producto con la referencia "${refBuscada}".</strong> 
-      <button class="btn btn-success btn-sm" onclick="darDeAltaReferencia('${refBuscada}')" style="margin-left: 10px;">➕ Dar de alta "${refBuscada}"</button>`;
+    }
+    
+    console.log(`✅ ${campo} actualizado:`, producto.nombre, valorAnterior, '->', valor);
+    
+    // Si cambió el proveedor, recargar para actualizar badges
+    if (campo === 'proveedor') cargarProductos();
+    
+  } catch(e) {
+    alert('❌ Error al guardar: ' + e.message);
+    producto[campo] = valorAnterior; // Revertir
+    cargarProductos();
   }
-};
-
-window.darDeAltaReferencia = (ref) => {
-  document.getElementById('productoRef').value = ref;
-  document.getElementById('productoNombre').value = '';
-  document.getElementById('productoPrecio').value = '';
-  document.getElementById('productoTipo').value = 'unidades';
-  document.getElementById('productoMinimo').value = '1';
-  document.getElementById('productoEmpaque').value = '';
-  document.getElementById('productoActivo').value = 'true';
-  document.getElementById('tituloModalProducto').textContent = '➕ Dar de alta referencia: ' + ref;
-  document.getElementById('modalProducto').classList.add('active');
-  document.getElementById('productoNombre').focus();
-};
-
-window.limpiarBusquedaProductos = () => {
-  document.getElementById('buscarRefProductos').value = '';
-  document.getElementById('resultadoBusquedaProductos').style.display = 'none';
-  document.querySelectorAll('#tablaProductos tr').forEach(tr => tr.classList.remove('fila-resaltada'));
 };
 
 window.toggleActivoProducto = async (id) => {
@@ -640,53 +699,6 @@ window.toggleActivoProducto = async (id) => {
     await updateDoc(doc(db, 'productos', id), { activo: nuevoEstado });
     localStorage.setItem('productosCache', JSON.stringify(productosCache));
     console.log('✅ Estado actualizado:', producto.nombre, '->', nuevoEstado ? 'Activo' : 'Baja');
-    cargarProductos();
-  } catch(e) { alert('❌ Error: ' + e.message); }
-};
-
-window.guardarRefProducto = async (id, nuevaRef) => {
-  const producto = productosCache.find(p => p.id === id);
-  if (!producto) return;
-  producto.ref = nuevaRef;
-  try {
-    await updateDoc(doc(db, 'productos', id), { ref: nuevaRef });
-    localStorage.setItem('productosCache', JSON.stringify(productosCache));
-    console.log('✅ Referencia actualizada:', producto.nombre, '->', nuevaRef);
-  } catch(e) { alert('❌ Error: ' + e.message); cargarProductos(); }
-};
-
-window.guardarMinimoProducto = async (id, nuevoMinimo) => {
-  const minimo = parseFloat(nuevoMinimo);
-  if (isNaN(minimo) || minimo <= 0) { alert('El mínimo debe ser mayor que 0'); cargarProductos(); return; }
-  const producto = productosCache.find(p => p.id === id);
-  if (!producto) return;
-  producto.minimo = minimo;
-  try {
-    await updateDoc(doc(db, 'productos', id), { minimo: minimo });
-    localStorage.setItem('productosCache', JSON.stringify(productosCache));
-  } catch(e) { alert('❌ Error: ' + e.message); cargarProductos(); }
-};
-
-window.guardarEmpaqueProducto = async (id, nuevoEmpaque) => {
-  const producto = productosCache.find(p => p.id === id);
-  if (!producto) return;
-  producto.empaque = nuevoEmpaque;
-  try {
-    await updateDoc(doc(db, 'productos', id), { empaque: nuevoEmpaque });
-    localStorage.setItem('productosCache', JSON.stringify(productosCache));
-  } catch(e) { alert('❌ Error: ' + e.message); }
-};
-
-window.editarTipoProducto = async (id) => {
-  const producto = productosCache.find(p => p.id === id);
-  if (!producto) return;
-  const tipos = ['unidades', 'cajas', 'litros'];
-  const idx = tipos.indexOf(producto.tipo || 'unidades');
-  const nuevoTipo = tipos[(idx + 1) % tipos.length];
-  producto.tipo = nuevoTipo;
-  try {
-    await updateDoc(doc(db, 'productos', id), { tipo: nuevoTipo });
-    localStorage.setItem('productosCache', JSON.stringify(productosCache));
     cargarProductos();
   } catch(e) { alert('❌ Error: ' + e.message); }
 };
@@ -748,10 +760,7 @@ window.guardarProducto = async () => {
     localStorage.setItem('productosCache', JSON.stringify(productosCache));
     cerrarModal('modalProducto');
     cargarProductos();
-    // Si estamos en preparar pedido, recargar
-    if (document.getElementById('preparar-pedido').classList.contains('active')) {
-      cargarProductosPedido();
-    }
+    if (document.getElementById('preparar-pedido').classList.contains('active')) cargarProductosPedido();
   } catch(e) { alert('❌ Error: ' + e.message); }
 };
 
@@ -768,7 +777,6 @@ window.eliminarProducto = async (id) => {
 
 window.regenerarCatalogo = async () => {
   if (!confirm('⚠️ Se añadirán productos nuevos desde los albaranes. Los existentes NO se modificarán. ¿Continuar?')) return;
-  console.log('🔄 Regenerando catálogo...');
   const productosMap = new Map();
   productosCache.forEach(p => {
     const key = (p.ref || 'SIN_REF') + '|' + (p.nombre || 'Sin nombre');
@@ -802,11 +810,59 @@ window.regenerarCatalogo = async () => {
   cargarProductos();
 };
 
+// BÚSQUEDA POR REFERENCIA EN PRODUCTOS
+window.buscarPorReferenciaProductos = () => {
+  const refBuscada = document.getElementById('buscarRefProductos').value.trim().toUpperCase();
+  const resultadoDiv = document.getElementById('resultadoBusquedaProductos');
+  if (!refBuscada) {
+    resultadoDiv.className = 'resultado-busqueda';
+    resultadoDiv.style.display = 'none';
+    document.querySelectorAll('#tablaProductos tr').forEach(tr => tr.classList.remove('fila-resaltada'));
+    return;
+  }
+  const productoEncontrado = productosCache.find(p => (p.ref || '').toUpperCase() === refBuscada || (p.ref || '').toUpperCase().includes(refBuscada));
+  if (productoEncontrado) {
+    document.getElementById('filtroProductosProveedor').value = 'TODOS';
+    document.getElementById('filtroProductosEstado').value = 'TODOS';
+    cargarProductos();
+    setTimeout(() => {
+      const fila = document.querySelector(`tr[data-ref="${refBuscada}"]`);
+      if (fila) {
+        fila.classList.add('fila-resaltada');
+        fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        resultadoDiv.className = 'resultado-busqueda encontrado';
+        resultadoDiv.innerHTML = `✅ <strong>Producto encontrado:</strong> ${productoEncontrado.nombre} (Ref: ${productoEncontrado.ref}) - ${productoEncontrado.proveedor} - ${formatearMoneda(productoEncontrado.precio)}`;
+      }
+    }, 100);
+  } else {
+    resultadoDiv.className = 'resultado-busqueda no-encontrado';
+    resultadoDiv.innerHTML = `❌ <strong>No existe ningún producto con la referencia "${refBuscada}".</strong> <button class="btn btn-success btn-sm" onclick="darDeAltaReferencia('${refBuscada}')" style="margin-left: 10px;">➕ Dar de alta "${refBuscada}"</button>`;
+  }
+};
+
+window.darDeAltaReferencia = (ref) => {
+  document.getElementById('productoRef').value = ref;
+  document.getElementById('productoNombre').value = '';
+  document.getElementById('productoPrecio').value = '';
+  document.getElementById('productoTipo').value = 'unidades';
+  document.getElementById('productoMinimo').value = '1';
+  document.getElementById('productoEmpaque').value = '';
+  document.getElementById('productoActivo').value = 'true';
+  document.getElementById('tituloModalProducto').textContent = '➕ Dar de alta referencia: ' + ref;
+  document.getElementById('modalProducto').classList.add('active');
+  document.getElementById('productoNombre').focus();
+};
+
+window.limpiarBusquedaProductos = () => {
+  document.getElementById('buscarRefProductos').value = '';
+  document.getElementById('resultadoBusquedaProductos').style.display = 'none';
+  document.querySelectorAll('#tablaProductos tr').forEach(tr => tr.classList.remove('fila-resaltada'));
+};
+
 // PREPARAR PEDIDO
 window.cargarProductosPedido = () => {
   const proveedor = document.getElementById('pedidoProveedor').value;
   const container = document.getElementById('productosPedidoContainer');
-  console.log('Cargando productos para:', proveedor);
   const productosFiltrados = productosCache.filter(p => p.proveedor === proveedor && p.activo !== false);
   if (productosFiltrados.length === 0) {
     container.innerHTML = '<div class="alert alert-warning">⚠️ No hay productos activos para ' + proveedor + '. Ve a "Productos" para activar alguno o añadir nuevos.</div>';
@@ -833,71 +889,49 @@ window.cargarProductosPedido = () => {
   html += '</tbody></table>';
   container.innerHTML = html;
   pedidoActual = productosFiltrados.map(p => ({ ...p, cantidad: 0 }));
-  console.log('✅ Productos activos cargados:', pedidoActual.length);
 };
 
-// BÚSQUEDA POR REFERENCIA EN PEDIDO
 window.buscarPorReferenciaPedido = () => {
   const refBuscada = document.getElementById('buscarRefPedido').value.trim().toUpperCase();
   const resultadoDiv = document.getElementById('resultadoBusquedaPedido');
-  
   if (!refBuscada) {
     resultadoDiv.className = 'resultado-busqueda';
     resultadoDiv.style.display = 'none';
     document.querySelectorAll('#productosPedidoContainer tr').forEach(tr => tr.classList.remove('fila-resaltada'));
     return;
   }
-  
-  // Buscar en productos activos del proveedor seleccionado
   const proveedor = document.getElementById('pedidoProveedor').value;
-  const productoEncontrado = productosCache.find(p => 
-    p.proveedor === proveedor && 
-    p.activo !== false &&
-    ((p.ref || '').toUpperCase() === refBuscada || (p.ref || '').toUpperCase().includes(refBuscada))
-  );
-  
+  const productoEncontrado = productosCache.find(p => p.proveedor === proveedor && p.activo !== false && ((p.ref || '').toUpperCase() === refBuscada || (p.ref || '').toUpperCase().includes(refBuscada)));
   if (productoEncontrado) {
-    // Encontrar el índice en pedidoActual
     const idx = pedidoActual.findIndex(p => p.id === productoEncontrado.id);
     if (idx !== -1) {
       const fila = document.querySelector(`tr[data-ref-pedido="${refBuscada}"]`);
       if (fila) {
         fila.classList.add('fila-resaltada');
         fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Poner foco en el input de cantidad
         setTimeout(() => {
           const cantInput = document.getElementById('cant-' + idx);
-          if (cantInput) {
-            cantInput.focus();
-            cantInput.select();
-          }
+          if (cantInput) { cantInput.focus(); cantInput.select(); }
         }, 300);
         resultadoDiv.className = 'resultado-busqueda encontrado';
         resultadoDiv.innerHTML = `✅ <strong>Producto encontrado:</strong> ${productoEncontrado.nombre} (Ref: ${productoEncontrado.ref}) - Mínimo: ${productoEncontrado.minimo} - Precio: ${formatearMoneda(productoEncontrado.precio)}`;
       }
     }
   } else {
-    // Verificar si existe pero está inactivo o en otro proveedor
-    const productoInactivo = productosCache.find(p => 
-      (p.ref || '').toUpperCase() === refBuscada || (p.ref || '').toUpperCase().includes(refBuscada)
-    );
-    
+    const productoInactivo = productosCache.find(p => (p.ref || '').toUpperCase() === refBuscada || (p.ref || '').toUpperCase().includes(refBuscada));
     if (productoInactivo) {
       let mensaje = `⚠️ <strong>La referencia "${refBuscada}" existe pero no está disponible:</strong><br>`;
       if (productoInactivo.activo === false) {
-        mensaje += `• Está <strong>dado de baja</strong>. `;
-        mensaje += `<button class="btn btn-success btn-sm" onclick="reactivarProducto('${productoInactivo.id}')" style="margin-left: 5px;">✅ Reactivar</button><br>`;
+        mensaje += `• Está <strong>dado de baja</strong>. <button class="btn btn-success btn-sm" onclick="reactivarProducto('${productoInactivo.id}')" style="margin-left: 5px;">✅ Reactivar</button><br>`;
       }
       if (productoInactivo.proveedor !== proveedor) {
-        mensaje += `• Pertenece a <strong>${productoInactivo.proveedor}</strong> (estás pidiendo a ${proveedor}). `;
-        mensaje += `<button class="btn btn-info btn-sm" onclick="cambiarProveedorPedido('${productoInactivo.proveedor}')" style="margin-left: 5px;">🔄 Cambiar proveedor</button>`;
+        mensaje += `• Pertenece a <strong>${productoInactivo.proveedor}</strong> (estás pidiendo a ${proveedor}). <button class="btn btn-info btn-sm" onclick="cambiarProveedorPedido('${productoInactivo.proveedor}')" style="margin-left: 5px;">🔄 Cambiar proveedor</button>`;
       }
       resultadoDiv.className = 'resultado-busqueda no-encontrado';
       resultadoDiv.innerHTML = mensaje;
     } else {
       resultadoDiv.className = 'resultado-busqueda no-encontrado';
-      resultadoDiv.innerHTML = `❌ <strong>No existe ningún producto con la referencia "${refBuscada}".</strong> 
-        <button class="btn btn-success btn-sm" onclick="darDeAltaReferenciaPedido('${refBuscada}')" style="margin-left: 10px;">➕ Dar de alta "${refBuscada}"</button>`;
+      resultadoDiv.innerHTML = `❌ <strong>No existe ningún producto con la referencia "${refBuscada}".</strong> <button class="btn btn-success btn-sm" onclick="darDeAltaReferenciaPedido('${refBuscada}')" style="margin-left: 10px;">➕ Dar de alta "${refBuscada}"</button>`;
     }
   }
 };
