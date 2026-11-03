@@ -25,7 +25,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #4a5568; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1e3a5f; }
-.btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s; margin-right: 10px; margin-bottom: 10px; }
+.btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.3s; margin-right: 5px; margin-bottom: 5px; }
 .btn-primary { background: #1e3a5f; color: white; }
 .btn-primary:hover { background: #2c5282; }
 .btn-success { background: #10b981; color: white; }
@@ -36,11 +36,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 .btn-warning:hover { background: #d97706; }
 .btn-info { background: #3b82f6; color: white; }
 .btn-info:hover { background: #2563eb; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
 table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-table th, table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
 table th { background: #f8fafc; font-weight: 600; color: #4a5568; }
 table tr:hover { background: #f8fafc; }
-.badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
 .badge-luna { background: #dbeafe; color: #1e40af; }
 .badge-lidera { background: #fef3c7; color: #92400e; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
@@ -51,7 +52,7 @@ table tr:hover { background: #f8fafc; }
 .progress-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: width 0.3s; }
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
 .modal.active { display: flex; }
-.modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
+.modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
 .modal-header h2 { color: #1e3a5f; }
 .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
@@ -59,7 +60,6 @@ table tr:hover { background: #f8fafc; }
 .producto-linea { display: grid; grid-template-columns: 1fr 2fr 100px 120px 120px auto; gap: 10px; margin-bottom: 10px; align-items: end; }
 .producto-linea input, .producto-linea select { padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px; }
 .empty-state { text-align: center; padding: 40px; color: #64748b; }
-.empty-state svg { width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5; }
 .alert { padding: 15px; border-radius: 6px; margin-bottom: 20px; }
 .alert-info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
 .alert-warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
@@ -71,21 +71,20 @@ table tr:hover { background: #f8fafc; }
 .bar:hover { opacity: 0.8; transform: scaleY(1.05); }
 .bar-label { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #64748b; white-space: nowrap; }
 .bar-value { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; color: #1e3a5f; }
-.filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
 .filter-bar select, .filter-bar input { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
 .pedido-item { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #10b981; cursor: pointer; transition: all 0.3s; }
 .pedido-item:hover { background: #e2e8f0; transform: translateX(5px); }
 .pedido-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .pedido-item-header h4 { color: #1e3a5f; }
 .pedido-item-details { font-size: 13px; color: #64748b; }
-.tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
-.tab { padding: 10px 20px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
-.tab.active { border-bottom-color: #1e3a5f; color: #1e3a5f; font-weight: 600; }
-.tab:hover { background: #f8fafc; }
 .tipo-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
 .tipo-cajas { background: #fef3c7; color: #92400e; }
 .tipo-litros { background: #dbeafe; color: #1e40af; }
 .tipo-unidades { background: #d1fae5; color: #065f46; }
+.editable-cell { cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
+.editable-cell:hover { background: #fef3c7; }
+.minimo-input { width: 60px; padding: 4px 8px; border: 2px solid #10b981; border-radius: 4px; font-weight: bold; text-align: center; }
 </style>
 </head>
 <body>
@@ -110,31 +109,16 @@ table tr:hover { background: #f8fafc; }
   <!-- DASHBOARD -->
   <div id="dashboard" class="section active">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📊 Dashboard</h2>
-    <div class="stats" id="statsContainer">
-      <div class="stat-card">
-        <h4>Total Albaranes</h4>
-        <div class="value" id="statTotalAlbaranes">0</div>
-      </div>
-      <div class="stat-card">
-        <h4>Gasto Total</h4>
-        <div class="value" id="statGastoTotal">0 €</div>
-      </div>
-      <div class="stat-card">
-        <h4>LIDERA</h4>
-        <div class="value" id="statLidera">0 €</div>
-      </div>
-      <div class="stat-card">
-        <h4>LUNA</h4>
-        <div class="value" id="statLuna">0 €</div>
-      </div>
+    <div class="stats">
+      <div class="stat-card"><h4>Total Albaranes</h4><div class="value" id="statTotalAlbaranes">0</div></div>
+      <div class="stat-card"><h4>Gasto Total</h4><div class="value" id="statGastoTotal">0 €</div></div>
+      <div class="stat-card"><h4>LIDERA</h4><div class="value" id="statLidera">0 €</div></div>
+      <div class="stat-card"><h4>LUNA</h4><div class="value" id="statLuna">0 €</div></div>
     </div>
-    
     <div class="card">
       <h3>📅 Gasto por mes (últimos 12 meses)</h3>
       <div class="alert alert-info">💡 Haz clic en cualquier barra para ver el detalle de compras de ese mes</div>
-      <div class="chart-container">
-        <div class="bar-chart" id="chartGastoMes"></div>
-      </div>
+      <div class="chart-container"><div class="bar-chart" id="chartGastoMes"></div></div>
     </div>
   </div>
 
@@ -142,61 +126,27 @@ table tr:hover { background: #f8fafc; }
   <div id="nuevo-albaran" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📥 Registrar Nuevo Albarán</h2>
     <div class="card">
-      <div class="alert alert-info">ℹ️ Completa los datos del albarán. Puedes subir una imagen de referencia.</div>
-      
+      <div class="alert alert-info">ℹ️ Completa los datos del albarán.</div>
       <div class="form-group">
         <label>Proveedor:</label>
-        <select id="albaranProveedor">
-          <option value="">Selecciona...</option>
-          <option value="LIDERA">LIDERA</option>
-          <option value="LUNA">LUNA</option>
-        </select>
+        <select id="albaranProveedor"><option value="">Selecciona...</option><option value="LIDERA">LIDERA</option><option value="LUNA">LUNA</option></select>
       </div>
-      
-      <div class="form-group">
-        <label>Número de Albarán:</label>
-        <input type="text" id="albaranNumero" placeholder="Ej: 2005220">
-      </div>
-      
-      <div class="form-group">
-        <label>Fecha de Entrega:</label>
-        <input type="date" id="albaranFecha">
-      </div>
-      
-      <div class="form-group">
-        <label>Imagen del Albarán (opcional):</label>
-        <input type="file" id="albaranImagen" accept="image/*">
-      </div>
-      
-      <div class="form-group">
-        <label>Base Imponible (€):</label>
-        <input type="number" id="albaranBase" step="0.01" placeholder="0.00">
-      </div>
-      
-      <div class="form-group">
-        <label>IVA (%):</label>
-        <input type="number" id="albaranIva" value="21" step="0.01">
-      </div>
-      
-      <div class="form-group">
-        <label>Total (€):</label>
-        <input type="number" id="albaranTotal" step="0.01" placeholder="0.00">
-      </div>
-      
-      <h3 style="margin-top: 30px; margin-bottom: 15px;">Líneas de Productos (una por línea):</h3>
-      <div class="alert alert-info">Formato: Referencia | Nombre del producto | Cantidad | Precio unitario</div>
-      
+      <div class="form-group"><label>Número de Albarán:</label><input type="text" id="albaranNumero" placeholder="Ej: 2005220"></div>
+      <div class="form-group"><label>Fecha de Entrega:</label><input type="date" id="albaranFecha"></div>
+      <div class="form-group"><label>Base Imponible (€):</label><input type="number" id="albaranBase" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label>IVA (%):</label><input type="number" id="albaranIva" value="21" step="0.01"></div>
+      <div class="form-group"><label>Total (€):</label><input type="number" id="albaranTotal" step="0.01" placeholder="0.00"></div>
+      <h3 style="margin-top: 30px; margin-bottom: 15px;">Líneas de Productos:</h3>
       <div id="lineasContainer">
         <div class="producto-linea">
           <input type="text" placeholder="Referencia" class="linea-ref">
           <input type="text" placeholder="Nombre del producto" class="linea-producto">
-          <input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01">
-          <input type="number" placeholder="Precio unit." class="linea-precio" step="0.01">
+          <input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01" onchange="calcularImporte(this)">
+          <input type="number" placeholder="Precio unit." class="linea-precio" step="0.01" onchange="calcularImporte(this)">
           <input type="number" placeholder="Importe" class="linea-importe" step="0.01" readonly>
           <button class="btn btn-danger" onclick="eliminarLinea(this)">🗑️</button>
         </div>
       </div>
-      
       <button class="btn btn-info" onclick="agregarLinea()">➕ Añadir línea</button>
       <button class="btn btn-success" onclick="guardarAlbaran()" style="margin-top: 20px;">💾 Guardar Albarán</button>
     </div>
@@ -205,63 +155,29 @@ table tr:hover { background: #f8fafc; }
   <!-- LISTADO ALBARANES -->
   <div id="listado-albaranes" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📋 Listado de Albaranes</h2>
-    
     <div class="filter-bar">
-      <select id="filtroProveedor">
-        <option value="TODOS">Todos los proveedores</option>
-        <option value="LIDERA">Solo LIDERA</option>
-        <option value="LUNA">Solo LUNA</option>
-      </select>
-      
-      <select id="filtroAnio">
-        <option value="TODOS">Todos los años</option>
-        <option value="2022">2022</option>
-        <option value="2023">2023</option>
-        <option value="2024">2024</option>
-        <option value="2025">2025</option>
-        <option value="2026">2026</option>
-      </select>
-      
-      <input type="text" id="buscadorAlbaranes" placeholder="🔍 Buscar por número o producto...">
+      <select id="filtroProveedor"><option value="TODOS">Todos los proveedores</option><option value="LIDERA">Solo LIDERA</option><option value="LUNA">Solo LUNA</option></select>
+      <select id="filtroAnio"><option value="TODOS">Todos los años</option><option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select>
+      <input type="text" id="buscadorAlbaranes" placeholder="🔍 Buscar por número o producto..." style="flex:1;">
     </div>
-    
-    <div id="tablaAlbaranes">
-      <div class="empty-state">
-        <p>Cargando albaranes...</p>
-      </div>
-    </div>
+    <div id="tablaAlbaranes"><div class="empty-state"><p>Cargando albaranes...</p></div></div>
   </div>
 
   <!-- PRODUCTOS -->
   <div id="productos" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📦 Catálogo de Productos</h2>
-    
     <div class="filter-bar">
-      <select id="filtroProductosProveedor">
-        <option value="TODOS">Todos los proveedores</option>
-        <option value="LUNA">Solo LUNA</option>
-        <option value="LIDERA">Solo LIDERA</option>
-      </select>
-      
+      <select id="filtroProductosProveedor"><option value="TODOS">Todos los proveedores</option><option value="LUNA">Solo LUNA</option><option value="LIDERA">Solo LIDERA</option></select>
       <button class="btn btn-success" onclick="mostrarModalProducto()">➕ Añadir producto nuevo</button>
+      <button class="btn btn-info" onclick="regenerarCatalogo()">🔄 Regenerar desde albaranes</button>
     </div>
-    
-    <div class="alert alert-info">ℹ️ Referencia opcional: Si no la conoces, déjala vacía y se generará automáticamente. Las referencias que empiezan por "100" se asignan a LIDERA.</div>
-    
-    <div id="tablaProductos">
-      <div class="empty-state">
-        <p>Cargando productos...</p>
-      </div>
-    </div>
+    <div class="alert alert-info">ℹ️ Haz clic en el <strong>mínimo</strong> o <strong>tipo</strong> de cualquier producto para editarlo directamente. Los cambios se guardan automáticamente en Firebase.</div>
+    <div id="tablaProductos"><div class="empty-state"><p>Cargando productos...</p></div></div>
   </div>
 
   <!-- EVOLUCIÓN PRECIOS -->
   <div id="evolucion-precios" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📈 Evolución de Precios por Año</h2>
-    <p style="color: #64748b; margin-bottom: 20px;">Historial de precios anuales por producto</p>
-    
-    <div class="alert alert-info">ℹ️ Selecciona un proveedor para ver la evolución de precios año a año. Cada fila muestra el último precio registrado de ese año.</div>
-    
     <div class="form-group">
       <select id="filtroEvolucionProveedor" onchange="cargarEvolucionPrecios()">
         <option value="">-- Selecciona proveedor --</option>
@@ -269,68 +185,26 @@ table tr:hover { background: #f8fafc; }
         <option value="LUNA">🔵 LUNA</option>
       </select>
     </div>
-    
     <button class="btn btn-primary" onclick="descargarEvolucionPDF()">📄 Descargar PDF</button>
-    
-    <div id="tablaEvolucion" style="margin-top: 20px;">
-      <div class="empty-state">
-        <p>Selecciona un proveedor para ver la evolución de precios</p>
-      </div>
-    </div>
+    <div id="tablaEvolucion" style="margin-top: 20px;"><div class="empty-state"><p>Selecciona un proveedor para ver la evolución de precios</p></div></div>
   </div>
 
   <!-- PREPARAR PEDIDO -->
   <div id="preparar-pedido" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">🛒 Preparar Pedido</h2>
-    
-    <div class="alert alert-info">
-      ℹ️ <strong>Cajas</strong>: se piden por cajas (1, 2, 3...). <strong>Líquidos</strong>: se piden por litros (mínimo = contenido de 1 caja). <strong>Unidades</strong>: múltiplos del mínimo.
-    </div>
-    
+    <div class="alert alert-info">ℹ️ <strong>Cajas</strong>: se piden por cajas (1, 2, 3...). <strong>Líquidos</strong>: se piden por litros. <strong>Unidades</strong>: múltiplos del mínimo.</div>
     <div class="card">
-      <div class="form-group">
-        <label>Proveedor:</label>
-        <select id="pedidoProveedor" onchange="cargarProductosPedido()">
-          <option value="LUNA">LUNA</option>
-          <option value="LIDERA">LIDERA</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label>Mes:</label>
-        <input type="month" id="pedidoMes" onchange="verificarLimiteMensual()">
-      </div>
-      
-      <div class="progress-bar">
-        <div class="progress-fill" id="pedidoProgreso" style="width: 0%">0% de 500 €</div>
-      </div>
-      
-      <div class="alert alert-warning">
-        Límite mensual: <strong>500,00 €</strong> (con IVA incluido) por proveedor
-      </div>
-      
+      <div class="form-group"><label>Proveedor:</label><select id="pedidoProveedor" onchange="cargarProductosPedido()"><option value="LUNA">LUNA</option><option value="LIDERA">LIDERA</option></select></div>
+      <div class="form-group"><label>Mes:</label><input type="month" id="pedidoMes" onchange="verificarLimiteMensual()"></div>
+      <div class="progress-bar"><div class="progress-fill" id="pedidoProgreso" style="width: 0%">0% de 500 €</div></div>
+      <div class="alert alert-warning">Límite mensual: <strong>500,00 €</strong> (con IVA incluido) por proveedor</div>
       <h3 style="margin-top: 20px; margin-bottom: 15px;">Productos del pedido:</h3>
-      <div id="productosPedidoContainer">
-        <div class="empty-state">
-          <p>Selecciona un proveedor para ver los productos disponibles</p>
-        </div>
-      </div>
-      
+      <div id="productosPedidoContainer"><div class="empty-state"><p>Selecciona un proveedor para ver los productos disponibles</p></div></div>
       <div class="stats" style="margin-top: 20px;">
-        <div class="stat-card">
-          <h4>Subtotal (sin IVA):</h4>
-          <div class="value" id="pedidoSubtotal">0,00 €</div>
-        </div>
-        <div class="stat-card">
-          <h4>IVA (21%):</h4>
-          <div class="value" id="pedidoIva">0,00 €</div>
-        </div>
-        <div class="stat-card">
-          <h4>TOTAL (con IVA):</h4>
-          <div class="value" id="pedidoTotal">0,00 €</div>
-        </div>
+        <div class="stat-card"><h4>Subtotal (sin IVA):</h4><div class="value" id="pedidoSubtotal">0,00 €</div></div>
+        <div class="stat-card"><h4>IVA (21%):</h4><div class="value" id="pedidoIva">0,00 €</div></div>
+        <div class="stat-card"><h4>TOTAL (con IVA):</h4><div class="value" id="pedidoTotal">0,00 €</div></div>
       </div>
-      
       <div style="margin-top: 20px;">
         <button class="btn btn-success" onclick="guardarPedido()">💾 Guardar pedido</button>
         <button class="btn btn-info" onclick="cargarPedidosGuardados()">📂 Cargar pedido guardado</button>
@@ -344,32 +218,13 @@ table tr:hover { background: #f8fafc; }
   <!-- INFORMES -->
   <div id="informes" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📑 Informes</h2>
-    
     <div class="filter-bar">
-      <select id="filtroInformeProveedor">
-        <option value="TODOS">Todos los proveedores</option>
-        <option value="LUNA">Solo LUNA</option>
-        <option value="LIDERA">Solo LIDERA</option>
-      </select>
-      
-      <select id="filtroInformeAnio">
-        <option value="TODOS">Todos los años</option>
-        <option value="2022">2022</option>
-        <option value="2023">2023</option>
-        <option value="2024">2024</option>
-        <option value="2025">2025</option>
-        <option value="2026">2026</option>
-      </select>
-      
+      <select id="filtroInformeProveedor"><option value="TODOS">Todos los proveedores</option><option value="LUNA">Solo LUNA</option><option value="LIDERA">Solo LIDERA</option></select>
+      <select id="filtroInformeAnio"><option value="TODOS">Todos los años</option><option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select>
       <button class="btn btn-primary" onclick="generarInforme()">📊 Generar informe</button>
       <button class="btn btn-success" onclick="descargarInformePDF()">📄 Descargar PDF</button>
     </div>
-    
-    <div id="contenidoInforme">
-      <div class="empty-state">
-        <p>Selecciona los filtros y pulsa "Generar informe"</p>
-      </div>
-    </div>
+    <div id="contenidoInforme"><div class="empty-state"><p>Selecciona los filtros y pulsa "Generar informe"</p></div></div>
   </div>
 
 </div>
@@ -377,10 +232,7 @@ table tr:hover { background: #f8fafc; }
 <!-- MODAL DETALLE ALBARÁN -->
 <div id="modalDetalleAlbaran" class="modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <h2>Detalle</h2>
-      <button class="close-btn" onclick="cerrarModal('modalDetalleAlbaran')">✕ Cerrar</button>
-    </div>
+    <div class="modal-header"><h2>Detalle</h2><button class="close-btn" onclick="cerrarModal('modalDetalleAlbaran')">✕</button></div>
     <div id="contenidoDetalleAlbaran"></div>
   </div>
 </div>
@@ -388,77 +240,26 @@ table tr:hover { background: #f8fafc; }
 <!-- MODAL PEDIDOS GUARDADOS -->
 <div id="modalPedidosGuardados" class="modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <h2>📂 Pedidos guardados</h2>
-      <button class="close-btn" onclick="cerrarModal('modalPedidosGuardados')">✕ Cerrar</button>
-    </div>
+    <div class="modal-header"><h2>📂 Pedidos guardados</h2><button class="close-btn" onclick="cerrarModal('modalPedidosGuardados')">✕</button></div>
     <div class="alert alert-info">ℹ️ Haz clic en un pedido para cargarlo. Usa el botón 🗑️ para borrarlo.</div>
-    
-    <div class="form-group">
-      <label>Filtrar por mes:</label>
-      <input type="month" id="filtroPedidosMes" onchange="filtrarPedidosGuardados()">
-    </div>
-    
-    <div id="listaPedidosGuardados">
-      <div class="empty-state">
-        <p>Cargando...</p>
-      </div>
-    </div>
+    <div class="form-group"><label>Filtrar por mes:</label><input type="month" id="filtroPedidosMes" onchange="filtrarPedidosGuardados()"></div>
+    <div id="listaPedidosGuardados"><div class="empty-state"><p>Cargando...</p></div></div>
   </div>
 </div>
 
-<!-- MODAL AÑADIR PRODUCTO -->
+<!-- MODAL AÑADIR/EDITAR PRODUCTO -->
 <div id="modalProducto" class="modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <h2>➕ Añadir Nuevo Producto</h2>
-      <button class="close-btn" onclick="cerrarModal('modalProducto')">✕ Cerrar</button>
-    </div>
-    
+    <div class="modal-header"><h2 id="tituloModalProducto">➕ Añadir Nuevo Producto</h2><button class="close-btn" onclick="cerrarModal('modalProducto')">✕</button></div>
     <div class="alert alert-info">💡 La referencia es <strong>opcional</strong>. Si empieza por "100", se asignará automáticamente a <strong>LIDERA</strong>.</div>
-    
-    <div class="form-group">
-      <label>Referencia (opcional)</label>
-      <input type="text" id="productoRef" placeholder="Ej: 10001019">
-    </div>
-    
-    <div class="form-group">
-      <label>Nombre del producto *</label>
-      <input type="text" id="productoNombre" placeholder="Ej: GEL DE MANOS NACARADO PV">
-    </div>
-    
-    <div class="form-group">
-      <label>Proveedor *</label>
-      <select id="productoProveedor">
-        <option value="LUNA">LUNA</option>
-        <option value="LIDERA">LIDERA</option>
-      </select>
-    </div>
-    
-    <div class="form-group">
-      <label>Precio unitario (€) *</label>
-      <input type="number" id="productoPrecio" step="0.01" placeholder="0.00">
-    </div>
-    
-    <div class="form-group">
-      <label>Tipo de pedido *</label>
-      <select id="productoTipo">
-        <option value="unidades">Unidades (uds)</option>
-        <option value="cajas">Cajas (1, 2, 3...)</option>
-        <option value="litros">Litros (mínimo = 1 caja)</option>
-      </select>
-    </div>
-    
-    <div class="form-group">
-      <label>Cantidad mínima</label>
-      <input type="number" id="productoMinimo" step="0.01" placeholder="1">
-    </div>
-    
-    <div class="form-group">
-      <label>Unidad de empaquetado</label>
-      <input type="text" id="productoEmpaque" placeholder="Ej: caja de 20, fardo de 108">
-    </div>
-    
+    <input type="hidden" id="productoIdEditar">
+    <div class="form-group"><label>Referencia (opcional)</label><input type="text" id="productoRef" placeholder="Ej: 10001019"></div>
+    <div class="form-group"><label>Nombre del producto *</label><input type="text" id="productoNombre" placeholder="Ej: GEL DE MANOS NACARADO PV"></div>
+    <div class="form-group"><label>Proveedor *</label><select id="productoProveedor"><option value="LUNA">LUNA</option><option value="LIDERA">LIDERA</option></select></div>
+    <div class="form-group"><label>Precio unitario (€) *</label><input type="number" id="productoPrecio" step="0.01" placeholder="0.00"></div>
+    <div class="form-group"><label>Tipo de pedido *</label><select id="productoTipo"><option value="unidades">Unidades (uds)</option><option value="cajas">Cajas (1, 2, 3...)</option><option value="litros">Litros (mínimo = 1 caja)</option></select></div>
+    <div class="form-group"><label>Cantidad mínima *</label><input type="number" id="productoMinimo" step="0.01" placeholder="1" value="1"></div>
+    <div class="form-group"><label>Unidad de empaquetado</label><input type="text" id="productoEmpaque" placeholder="Ej: caja de 20, fardo de 108"></div>
     <button class="btn btn-success" onclick="guardarProducto()">💾 Guardar</button>
     <button class="btn btn-danger" onclick="cerrarModal('modalProducto')">Cancelar</button>
   </div>
@@ -466,7 +267,7 @@ table tr:hover { background: #f8fafc; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA80eaP6z8X8YrzQjr5CrgQr-9E9vqpwkY",
@@ -480,7 +281,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Variables globales
 let albaranesCache = [];
 let productosCache = [];
 let pedidoActual = [];
@@ -551,7 +351,6 @@ async function extraerProductosDeAlbaranes() {
         let minimo = 1;
         let empaque = '1 unidad';
         
-        // Detectar tipo por nombre
         if (nombre.includes('litro') || nombre.includes(' lt') || nombre.includes('gel de manos') || nombre.includes('lejia') || nombre.includes('limpiador') || nombre.includes('desengrasante') || nombre.includes('desincrustante') || nombre.includes('ambientador') || nombre.includes('fairy')) {
           tipo = 'litros';
           minimo = 1;
@@ -582,8 +381,15 @@ async function extraerProductosDeAlbaranes() {
   
   productosCache = Array.from(productosMap.values());
   console.log('✅ Productos extraídos:', productosCache.length);
-  console.log('   - LIDERA:', productosCache.filter(p => p.proveedor === 'LIDERA').length);
-  console.log('   - LUNA:', productosCache.filter(p => p.proveedor === 'LUNA').length);
+  
+  // Guardar en Firebase
+  for (const prod of productosCache) {
+    try {
+      await addDoc(collection(db, 'productos'), prod);
+    } catch(e) {
+      console.error('Error guardando producto:', e);
+    }
+  }
   
   localStorage.setItem('productosCache', JSON.stringify(productosCache));
 }
@@ -604,16 +410,13 @@ window.agregarLinea = () => {
   container.appendChild(linea);
 };
 
-window.eliminarLinea = (btn) => {
-  btn.parentElement.remove();
-};
+window.eliminarLinea = (btn) => btn.parentElement.remove();
 
 window.calcularImporte = (input) => {
   const linea = input.parentElement;
   const cantidad = parseFloat(linea.querySelector('.linea-cantidad').value) || 0;
   const precio = parseFloat(linea.querySelector('.linea-precio').value) || 0;
-  const importe = cantidad * precio;
-  linea.querySelector('.linea-importe').value = importe.toFixed(2);
+  linea.querySelector('.linea-importe').value = (cantidad * precio).toFixed(2);
 };
 
 window.guardarAlbaran = async () => {
@@ -624,10 +427,7 @@ window.guardarAlbaran = async () => {
   const iva = parseFloat(document.getElementById('albaranIva').value) || 21;
   const total = parseFloat(document.getElementById('albaranTotal').value) || 0;
   
-  if (!proveedor || !numero || !fecha) {
-    alert('Por favor, completa los campos obligatorios: Proveedor, Número y Fecha');
-    return;
-  }
+  if (!proveedor || !numero || !fecha) { alert('Completa Proveedor, Número y Fecha'); return; }
   
   const lineas = [];
   document.querySelectorAll('.producto-linea').forEach(linea => {
@@ -636,52 +436,18 @@ window.guardarAlbaran = async () => {
     const cantidad = parseFloat(linea.querySelector('.linea-cantidad').value) || 0;
     const precio = parseFloat(linea.querySelector('.linea-precio').value) || 0;
     const importe = parseFloat(linea.querySelector('.linea-importe').value) || 0;
-    
-    if (producto && cantidad > 0) {
-      lineas.push({ ref, producto, cantidad, precio, importe });
-    }
+    if (producto && cantidad > 0) lineas.push({ ref, producto, cantidad, precio, importe });
   });
   
-  if (lineas.length === 0) {
-    alert('Añade al menos una línea de producto');
-    return;
-  }
+  if (lineas.length === 0) { alert('Añade al menos una línea'); return; }
   
   try {
-    await addDoc(collection(db, 'albaranes'), {
-      numero,
-      fecha,
-      proveedor,
-      base,
-      iva,
-      total,
-      lineas,
-      mesPedido: fecha.slice(0, 7),
-      createdAt: new Date().toISOString()
-    });
-    
+    await addDoc(collection(db, 'albaranes'), { numero, fecha, proveedor, base, iva, total, lineas, mesPedido: fecha.slice(0, 7), createdAt: new Date().toISOString() });
     alert('✅ Albarán guardado correctamente');
-    document.getElementById('albaranProveedor').value = '';
-    document.getElementById('albaranNumero').value = '';
-    document.getElementById('albaranFecha').value = '';
-    document.getElementById('albaranBase').value = '';
-    document.getElementById('albaranTotal').value = '';
-    document.getElementById('lineasContainer').innerHTML = `
-      <div class="producto-linea">
-        <input type="text" placeholder="Referencia" class="linea-ref">
-        <input type="text" placeholder="Nombre del producto" class="linea-producto">
-        <input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01">
-        <input type="number" placeholder="Precio unit." class="linea-precio" step="0.01">
-        <input type="number" placeholder="Importe" class="linea-importe" step="0.01" readonly>
-        <button class="btn btn-danger" onclick="eliminarLinea(this)">🗑️</button>
-      </div>
-    `;
-  } catch(e) {
-    alert('❌ Error al guardar: ' + e.message);
-  }
+    location.reload();
+  } catch(e) { alert('❌ Error: ' + e.message); }
 };
 
-// Cargar albaranes desde Firebase
 window.cargarListadoAlbaranes = async () => {
   const contenedor = document.getElementById('tablaAlbaranes');
   contenedor.innerHTML = '<div class="empty-state"><p>Cargando albaranes...</p></div>';
@@ -694,19 +460,11 @@ window.cargarListadoAlbaranes = async () => {
     let filtrados = albaranesCache;
     if (proveedor !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === proveedor);
     if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
-    if (busqueda) {
-      filtrados = filtrados.filter(a => 
-        (a.numero || '').toLowerCase().includes(busqueda) ||
-        (a.lineas || []).some(l => (l.producto || '').toLowerCase().includes(busqueda))
-      );
-    }
+    if (busqueda) filtrados = filtrados.filter(a => (a.numero || '').toLowerCase().includes(busqueda) || (a.lineas || []).some(l => (l.producto || '').toLowerCase().includes(busqueda)));
     
     filtrados.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
     
-    if (filtrados.length === 0) {
-      contenedor.innerHTML = '<div class="empty-state"><p>No se encontraron albaranes</p></div>';
-      return;
-    }
+    if (filtrados.length === 0) { contenedor.innerHTML = '<div class="empty-state"><p>No se encontraron albaranes</p></div>'; return; }
     
     let html = '<table><thead><tr><th>Nº Albarán</th><th>Fecha</th><th>Proveedor</th><th>Total</th><th>Acciones</th></tr></thead><tbody>';
     filtrados.forEach(a => {
@@ -717,17 +475,14 @@ window.cargarListadoAlbaranes = async () => {
         <td><span class="badge ${badge}">${a.proveedor || '?'}</span></td>
         <td><strong>${formatearMoneda(a.total || 0)}</strong></td>
         <td>
-          <button class="btn btn-info" onclick="verDetalleAlbaran('${a.id}')">👁️ Ver</button>
-          <button class="btn btn-danger" onclick="eliminarAlbaran('${a.id}')">🗑️</button>
+          <button class="btn btn-info btn-sm" onclick="verDetalleAlbaran('${a.id}')">👁️ Ver</button>
+          <button class="btn btn-danger btn-sm" onclick="eliminarAlbaran('${a.id}')">🗑️</button>
         </td>
       </tr>`;
     });
     html += '</tbody></table>';
     contenedor.innerHTML = html;
-    
-  } catch(e) {
-    contenedor.innerHTML = `<div class="alert alert-danger">❌ Error al cargar: ${e.message}</div>`;
-  }
+  } catch(e) { contenedor.innerHTML = `<div class="alert alert-danger">❌ Error: ${e.message}</div>`; }
 };
 
 window.verDetalleAlbaran = (id) => {
@@ -737,60 +492,27 @@ window.verDetalleAlbaran = (id) => {
   const modal = document.getElementById('modalDetalleAlbaran');
   const contenido = document.getElementById('contenidoDetalleAlbaran');
   
-  let html = `
-    <div class="alert alert-info">
-      <strong>Albarán ${albaran.numero}</strong> - ${albaran.proveedor} - ${formatearFecha(albaran.fecha)}
-    </div>
-    <table>
-      <thead>
-        <tr><th>Referencia</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Importe</th></tr>
-      </thead>
-      <tbody>
-  `;
+  let html = `<div class="alert alert-info"><strong>Albarán ${albaran.numero}</strong> - ${albaran.proveedor} - ${formatearFecha(albaran.fecha)}</div>
+    <table><thead><tr><th>Referencia</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Importe</th></tr></thead><tbody>`;
   
   (albaran.lineas || []).forEach(l => {
-    html += `<tr>
-      <td><code>${l.ref || '-'}</code></td>
-      <td>${l.producto || '-'}</td>
-      <td>${l.cantidad || 0}</td>
-      <td>${formatearMoneda(l.precio || 0)}</td>
-      <td><strong>${formatearMoneda(l.importe || 0)}</strong></td>
-    </tr>`;
+    html += `<tr><td><code>${l.ref || '-'}</code></td><td>${l.producto || '-'}</td><td>${l.cantidad || 0}</td><td>${formatearMoneda(l.precio || 0)}</td><td><strong>${formatearMoneda(l.importe || 0)}</strong></td></tr>`;
   });
   
-  html += `
-      </tbody>
-    </table>
+  html += `</tbody></table>
     <div class="stats" style="margin-top: 20px;">
-      <div class="stat-card">
-        <h4>Base Imponible:</h4>
-        <div class="value">${formatearMoneda(albaran.base || 0)}</div>
-      </div>
-      <div class="stat-card">
-        <h4>IVA (${albaran.iva || 21}%):</h4>
-        <div class="value">${formatearMoneda(albaran.iva ? (albaran.base * albaran.iva / 100) : 0)}</div>
-      </div>
-      <div class="stat-card">
-        <h4>TOTAL:</h4>
-        <div class="value">${formatearMoneda(albaran.total || 0)}</div>
-      </div>
-    </div>
-  `;
+      <div class="stat-card"><h4>Base Imponible:</h4><div class="value">${formatearMoneda(albaran.base || 0)}</div></div>
+      <div class="stat-card"><h4>IVA (${albaran.iva || 21}%):</h4><div class="value">${formatearMoneda(albaran.iva ? (albaran.base * albaran.iva / 100) : 0)}</div></div>
+      <div class="stat-card"><h4>TOTAL:</h4><div class="value">${formatearMoneda(albaran.total || 0)}</div></div>
+    </div>`;
   
   contenido.innerHTML = html;
   modal.classList.add('active');
 };
 
 window.eliminarAlbaran = async (id) => {
-  if (!confirm('¿Seguro que quieres eliminar este albarán?')) return;
-  
-  try {
-    await deleteDoc(doc(db, 'albaranes', id));
-    alert('✅ Albarán eliminado');
-    cargarListadoAlbaranes();
-  } catch(e) {
-    alert('❌ Error: ' + e.message);
-  }
+  if (!confirm('¿Eliminar este albarán?')) return;
+  try { await deleteDoc(doc(db, 'albaranes', id)); alert('✅ Eliminado'); cargarListadoAlbaranes(); } catch(e) { alert('❌ Error: ' + e.message); }
 };
 
 // Dashboard
@@ -806,144 +528,67 @@ window.cargarDashboard = async () => {
     document.getElementById('statLidera').textContent = formatearMoneda(gastoLidera);
     document.getElementById('statLuna').textContent = formatearMoneda(gastoLuna);
     
-    // Gráfico de gastos por mes
     const gastosPorMes = {};
-    albaranesCache.forEach(a => {
-      if (a.fecha) {
-        const mes = a.fecha.slice(0, 7);
-        gastosPorMes[mes] = (gastosPorMes[mes] || 0) + (a.total || 0);
-      }
-    });
-    
+    albaranesCache.forEach(a => { if (a.fecha) { const mes = a.fecha.slice(0, 7); gastosPorMes[mes] = (gastosPorMes[mes] || 0) + (a.total || 0); } });
     const meses = Object.keys(gastosPorMes).sort().slice(-12);
     const maxGasto = Math.max(...Object.values(gastosPorMes));
     
     const chartContainer = document.getElementById('chartGastoMes');
     chartContainer.innerHTML = '';
-    
     meses.forEach(mes => {
       const gasto = gastosPorMes[mes];
       const altura = (gasto / maxGasto) * 100;
       const bar = document.createElement('div');
       bar.className = 'bar';
       bar.style.height = altura + '%';
-      bar.innerHTML = `
-        <div class="bar-value">${formatearMoneda(gasto)}</div>
-        <div class="bar-label">${mes}</div>
-      `;
+      bar.innerHTML = `<div class="bar-value">${formatearMoneda(gasto)}</div><div class="bar-label">${mes}</div>`;
       bar.onclick = () => verDetalleMes(mes);
       chartContainer.appendChild(bar);
     });
-    
-  } catch(e) {
-    console.error('Error cargando dashboard:', e);
-  }
+  } catch(e) { console.error('Error dashboard:', e); }
 };
 
 window.verDetalleMes = (mes) => {
   const albaranesMes = albaranesCache.filter(a => a.fecha && a.fecha.startsWith(mes));
-  
   const totalGeneral = albaranesMes.reduce((s, a) => s + (a.total || 0), 0);
-  
   const albaranesLidera = albaranesMes.filter(a => a.proveedor === 'LIDERA');
   const albaranesLuna = albaranesMes.filter(a => a.proveedor === 'LUNA');
-  
   const totalLidera = albaranesLidera.reduce((s, a) => s + (a.total || 0), 0);
   const totalLuna = albaranesLuna.reduce((s, a) => s + (a.total || 0), 0);
   
-  let html = `
-    <div style="padding: 20px;">
-      <h3 style="color: #1e3a5f; margin-bottom: 20px;">📅 Detalle de compras - ${mes}</h3>
-      
-      <div class="stats" style="margin-bottom: 20px;">
-        <div class="stat-card">
-          <h4>Total Albaranes</h4>
-          <div class="value">${albaranesMes.length}</div>
-        </div>
-        <div class="stat-card">
-          <h4>Gasto Total</h4>
-          <div class="value">${formatearMoneda(totalGeneral)}</div>
-        </div>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-        <div class="card" style="border-left: 4px solid #f59e0b;">
-          <h4 style="color: #92400e; margin-bottom: 10px;">🟡 LIDERA</h4>
-          <div style="font-size: 24px; font-weight: bold; color: #1e3a5f;">${formatearMoneda(totalLidera)}</div>
-          <div style="color: #64748b; margin-top: 5px;">${albaranesLidera.length} albaranes</div>
-        </div>
-        
-        <div class="card" style="border-left: 4px solid #3b82f6;">
-          <h4 style="color: #1e40af; margin-bottom: 10px;">🔵 LUNA</h4>
-          <div style="font-size: 24px; font-weight: bold; color: #1e3a5f;">${formatearMoneda(totalLuna)}</div>
-          <div style="color: #64748b; margin-top: 5px;">${albaranesLuna.length} albaranes</div>
-        </div>
-      </div>
-  `;
+  let html = `<div style="padding: 20px;">
+    <h3 style="color: #1e3a5f; margin-bottom: 20px;">📅 Detalle de compras - ${mes}</h3>
+    <div class="stats" style="margin-bottom: 20px;">
+      <div class="stat-card"><h4>Total Albaranes</h4><div class="value">${albaranesMes.length}</div></div>
+      <div class="stat-card"><h4>Gasto Total</h4><div class="value">${formatearMoneda(totalGeneral)}</div></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+      <div class="card" style="border-left: 4px solid #f59e0b;"><h4 style="color: #92400e; margin-bottom: 10px;">🟡 LIDERA</h4><div style="font-size: 24px; font-weight: bold;">${formatearMoneda(totalLidera)}</div><div style="color: #64748b;">${albaranesLidera.length} albaranes</div></div>
+      <div class="card" style="border-left: 4px solid #3b82f6;"><h4 style="color: #1e40af; margin-bottom: 10px;">🔵 LUNA</h4><div style="font-size: 24px; font-weight: bold;">${formatearMoneda(totalLuna)}</div><div style="color: #64748b;">${albaranesLuna.length} albaranes</div></div>
+    </div>`;
   
   if (albaranesLidera.length > 0) {
-    html += `
-      <h4 style="color: #92400e; margin-top: 20px; margin-bottom: 10px;">🟡 Albaranes LIDERA</h4>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="background: #fef3c7;">
-            <th style="padding: 8px; text-align: left;">Nº Albarán</th>
-            <th style="padding: 8px; text-align: left;">Fecha</th>
-            <th style="padding: 8px; text-align: right;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-    
+    html += `<h4 style="color: #92400e; margin-top: 20px;">🟡 Albaranes LIDERA</h4><table><thead><tr style="background: #fef3c7;"><th style="padding: 8px;">Nº</th><th style="padding: 8px;">Fecha</th><th style="padding: 8px; text-align: right;">Total</th></tr></thead><tbody>`;
     albaranesLidera.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || '')).forEach(a => {
-      html += `
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px;"><code>${a.numero || ''}</code></td>
-          <td style="padding: 8px;">${formatearFecha(a.fecha)}</td>
-          <td style="padding: 8px; text-align: right;"><strong>${formatearMoneda(a.total || 0)}</strong></td>
-        </tr>
-      `;
+      html += `<tr><td style="padding: 8px;"><code>${a.numero || ''}</code></td><td style="padding: 8px;">${formatearFecha(a.fecha)}</td><td style="padding: 8px; text-align: right;"><strong>${formatearMoneda(a.total || 0)}</strong></td></tr>`;
     });
-    
     html += '</tbody></table>';
   }
   
   if (albaranesLuna.length > 0) {
-    html += `
-      <h4 style="color: #1e40af; margin-top: 20px; margin-bottom: 10px;">🔵 Albaranes LUNA</h4>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="background: #dbeafe;">
-            <th style="padding: 8px; text-align: left;">Nº Albarán</th>
-            <th style="padding: 8px; text-align: left;">Fecha</th>
-            <th style="padding: 8px; text-align: right;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-    
+    html += `<h4 style="color: #1e40af; margin-top: 20px;">🔵 Albaranes LUNA</h4><table><thead><tr style="background: #dbeafe;"><th style="padding: 8px;">Nº</th><th style="padding: 8px;">Fecha</th><th style="padding: 8px; text-align: right;">Total</th></tr></thead><tbody>`;
     albaranesLuna.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || '')).forEach(a => {
-      html += `
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px;"><code>${a.numero || ''}</code></td>
-          <td style="padding: 8px;">${formatearFecha(a.fecha)}</td>
-          <td style="padding: 8px; text-align: right;"><strong>${formatearMoneda(a.total || 0)}</strong></td>
-        </tr>
-      `;
+      html += `<tr><td style="padding: 8px;"><code>${a.numero || ''}</code></td><td style="padding: 8px;">${formatearFecha(a.fecha)}</td><td style="padding: 8px; text-align: right;"><strong>${formatearMoneda(a.total || 0)}</strong></td></tr>`;
     });
-    
     html += '</tbody></table>';
   }
   
   html += '</div>';
-  
-  const modal = document.getElementById('modalDetalleAlbaran');
-  const contenido = document.getElementById('contenidoDetalleAlbaran');
-  contenido.innerHTML = html;
-  modal.classList.add('active');
+  document.getElementById('contenidoDetalleAlbaran').innerHTML = html;
+  document.getElementById('modalDetalleAlbaran').classList.add('active');
 };
 
-// Productos
+// PRODUCTOS - CON EDICIÓN INLINE DEL MÍNIMO
 window.cargarProductos = async () => {
   const contenedor = document.getElementById('tablaProductos');
   contenedor.innerHTML = '<div class="empty-state"><p>Cargando productos...</p></div>';
@@ -953,40 +598,140 @@ window.cargarProductos = async () => {
     let filtrados = productosCache;
     if (proveedor !== 'TODOS') filtrados = filtrados.filter(p => p.proveedor === proveedor);
     
-    if (filtrados.length === 0) {
-      contenedor.innerHTML = '<div class="empty-state"><p>No hay productos registrados</p></div>';
-      return;
-    }
+    if (filtrados.length === 0) { contenedor.innerHTML = '<div class="empty-state"><p>No hay productos registrados</p></div>'; return; }
     
-    let html = '<table><thead><tr><th>Referencia</th><th>Producto</th><th>Proveedor</th><th>Precio</th><th>Tipo</th><th>Mínimo</th><th>Acciones</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Referencia</th><th>Producto</th><th>Proveedor</th><th>Precio</th><th>Tipo</th><th>Mínimo</th><th>Empaque</th><th>Acciones</th></tr></thead><tbody>';
     filtrados.forEach(p => {
       const badge = p.proveedor === 'LUNA' ? 'badge-luna' : 'badge-lidera';
       const tipoIcon = p.tipo === 'cajas' ? '📦' : p.tipo === 'litros' ? '💧' : '🔢';
-      html += `<tr>
+      const tipoClass = 'tipo-' + (p.tipo || 'unidades');
+      const tipoTexto = p.tipo === 'cajas' ? 'Cajas' : p.tipo === 'litros' ? 'Litros' : 'Unidades';
+      
+      html += `<tr data-id="${p.id}">
         <td><code>${p.ref || '-'}</code></td>
         <td>${p.nombre || '-'}</td>
         <td><span class="badge ${badge}">${p.proveedor || '?'}</span></td>
         <td>${formatearMoneda(p.precio || 0)}</td>
-        <td>${tipoIcon} ${p.tipo || 'unidades'}</td>
-        <td>${p.minimo || 1}</td>
         <td>
-          <button class="btn btn-danger" onclick="eliminarProducto('${p.id}')">🗑️</button>
+          <span class="editable-cell tipo-badge ${tipoClass}" onclick="editarTipoProducto('${p.id}')" title="Clic para cambiar">
+            ${tipoIcon} ${tipoTexto}
+          </span>
+        </td>
+        <td>
+          <input type="number" class="minimo-input" value="${p.minimo || 1}" step="0.01" min="0.01" 
+            onchange="guardarMinimoProducto('${p.id}', this.value)" 
+            title="Cambia el mínimo y se guarda automáticamente">
+        </td>
+        <td>
+          <input type="text" value="${p.empaque || ''}" style="width: 120px; padding: 4px 8px; border: 1px solid #cbd5e0; border-radius: 4px;"
+            onchange="guardarEmpaqueProducto('${p.id}', this.value)"
+            title="Ej: caja de 20, fardo de 108">
+        </td>
+        <td>
+          <button class="btn btn-info btn-sm" onclick="editarProducto('${p.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="eliminarProducto('${p.id}')">🗑️</button>
         </td>
       </tr>`;
     });
     html += '</tbody></table>';
     contenedor.innerHTML = html;
-    
+  } catch(e) { contenedor.innerHTML = `<div class="alert alert-danger">❌ Error: ${e.message}</div>`; }
+};
+
+// Guardar mínimo directamente desde la tabla
+window.guardarMinimoProducto = async (id, nuevoMinimo) => {
+  const minimo = parseFloat(nuevoMinimo);
+  if (isNaN(minimo) || minimo <= 0) {
+    alert('El mínimo debe ser un número mayor que 0');
+    cargarProductos();
+    return;
+  }
+  
+  const producto = productosCache.find(p => p.id === id);
+  if (!producto) return;
+  
+  producto.minimo = minimo;
+  
+  try {
+    await updateDoc(doc(db, 'productos', id), { minimo: minimo });
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
+    console.log('✅ Mínimo actualizado:', producto.nombre, '->', minimo);
   } catch(e) {
-    contenedor.innerHTML = `<div class="alert alert-danger">❌ Error: ${e.message}</div>`;
+    alert('❌ Error al guardar: ' + e.message);
+    cargarProductos();
   }
 };
 
+// Guardar empaque directamente desde la tabla
+window.guardarEmpaqueProducto = async (id, nuevoEmpaque) => {
+  const producto = productosCache.find(p => p.id === id);
+  if (!producto) return;
+  
+  producto.empaque = nuevoEmpaque;
+  
+  try {
+    await updateDoc(doc(db, 'productos', id), { empaque: nuevoEmpaque });
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
+    console.log('✅ Empaque actualizado:', producto.nombre, '->', nuevoEmpaque);
+  } catch(e) {
+    alert('❌ Error al guardar: ' + e.message);
+  }
+};
+
+// Editar tipo desde la tabla (ciclo: unidades -> cajas -> litros -> unidades)
+window.editarTipoProducto = async (id) => {
+  const producto = productosCache.find(p => p.id === id);
+  if (!producto) return;
+  
+  const tipos = ['unidades', 'cajas', 'litros'];
+  const idx = tipos.indexOf(producto.tipo || 'unidades');
+  const nuevoTipo = tipos[(idx + 1) % tipos.length];
+  
+  producto.tipo = nuevoTipo;
+  
+  try {
+    await updateDoc(doc(db, 'productos', id), { tipo: nuevoTipo });
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
+    cargarProductos();
+    console.log('✅ Tipo actualizado:', producto.nombre, '->', nuevoTipo);
+  } catch(e) {
+    alert('❌ Error: ' + e.message);
+  }
+};
+
+// Editar producto completo (modal)
+window.editarProducto = (id) => {
+  const producto = productosCache.find(p => p.id === id);
+  if (!producto) return;
+  
+  document.getElementById('tituloModalProducto').textContent = '✏️ Editar Producto';
+  document.getElementById('productoIdEditar').value = id;
+  document.getElementById('productoRef').value = producto.ref || '';
+  document.getElementById('productoNombre').value = producto.nombre || '';
+  document.getElementById('productoProveedor').value = producto.proveedor || 'LUNA';
+  document.getElementById('productoPrecio').value = producto.precio || 0;
+  document.getElementById('productoTipo').value = producto.tipo || 'unidades';
+  document.getElementById('productoMinimo').value = producto.minimo || 1;
+  document.getElementById('productoEmpaque').value = producto.empaque || '';
+  
+  document.getElementById('modalProducto').classList.add('active');
+};
+
 window.mostrarModalProducto = () => {
+  document.getElementById('tituloModalProducto').textContent = '➕ Añadir Nuevo Producto';
+  document.getElementById('productoIdEditar').value = '';
+  document.getElementById('productoRef').value = '';
+  document.getElementById('productoNombre').value = '';
+  document.getElementById('productoProveedor').value = 'LUNA';
+  document.getElementById('productoPrecio').value = '';
+  document.getElementById('productoTipo').value = 'unidades';
+  document.getElementById('productoMinimo').value = '1';
+  document.getElementById('productoEmpaque').value = '';
   document.getElementById('modalProducto').classList.add('active');
 };
 
 window.guardarProducto = async () => {
+  const idEditar = document.getElementById('productoIdEditar').value;
   const ref = document.getElementById('productoRef').value;
   const nombre = document.getElementById('productoNombre').value;
   const proveedor = document.getElementById('productoProveedor').value;
@@ -995,67 +740,113 @@ window.guardarProducto = async () => {
   const minimo = parseFloat(document.getElementById('productoMinimo').value) || 1;
   const empaque = document.getElementById('productoEmpaque').value;
   
-  if (!nombre || !precio) {
-    alert('Por favor, completa los campos obligatorios: Nombre y Precio');
-    return;
-  }
+  if (!nombre || !precio) { alert('Completa Nombre y Precio'); return; }
   
   let refFinal = ref;
-  if (!refFinal && proveedor === 'LIDERA') {
-    refFinal = '100' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-  }
+  if (!refFinal && proveedor === 'LIDERA') refFinal = '100' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
   
   try {
-    await addDoc(collection(db, 'productos'), {
-      ref: refFinal,
-      nombre,
-      proveedor,
-      precio,
-      tipo,
-      minimo,
-      empaque,
-      createdAt: new Date().toISOString()
-    });
+    if (idEditar) {
+      // Actualizar existente
+      await updateDoc(doc(db, 'productos', idEditar), { ref: refFinal, nombre, proveedor, precio, tipo, minimo, empaque });
+      const idx = productosCache.findIndex(p => p.id === idEditar);
+      if (idx !== -1) {
+        productosCache[idx] = { ...productosCache[idx], ref: refFinal, nombre, proveedor, precio, tipo, minimo, empaque };
+      }
+      alert('✅ Producto actualizado');
+    } else {
+      // Crear nuevo
+      const docRef = await addDoc(collection(db, 'productos'), { ref: refFinal, nombre, proveedor, precio, tipo, minimo, empaque, createdAt: new Date().toISOString() });
+      productosCache.push({ id: docRef.id, ref: refFinal, nombre, proveedor, precio, tipo, minimo, empaque });
+      alert('✅ Producto guardado');
+    }
     
-    alert('✅ Producto guardado correctamente');
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
     cerrarModal('modalProducto');
     cargarProductos();
-    
-    document.getElementById('productoRef').value = '';
-    document.getElementById('productoNombre').value = '';
-    document.getElementById('productoPrecio').value = '';
-    document.getElementById('productoMinimo').value = '';
-    document.getElementById('productoEmpaque').value = '';
-    
-  } catch(e) {
-    alert('❌ Error: ' + e.message);
-  }
+  } catch(e) { alert('❌ Error: ' + e.message); }
 };
 
 window.eliminarProducto = async (id) => {
-  if (!confirm('¿Seguro que quieres eliminar este producto?')) return;
-  
+  if (!confirm('¿Eliminar este producto?')) return;
   try {
     await deleteDoc(doc(db, 'productos', id));
+    productosCache = productosCache.filter(p => p.id !== id);
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
     alert('✅ Producto eliminado');
     cargarProductos();
-  } catch(e) {
-    alert('❌ Error: ' + e.message);
-  }
+  } catch(e) { alert('❌ Error: ' + e.message); }
 };
 
-// Preparar Pedido - FUNCIÓN CORREGIDA
+window.regenerarCatalogo = async () => {
+  if (!confirm('⚠️ Esto regenerará el catálogo desde los albaranes. Los productos existentes se mantendrán pero se añadirán los que falten. ¿Continuar?')) return;
+  
+  console.log('🔄 Regenerando catálogo...');
+  const productosMap = new Map();
+  
+  // Primero cargar los existentes
+  productosCache.forEach(p => {
+    const key = (p.ref || 'SIN_REF') + '|' + (p.nombre || 'Sin nombre');
+    productosMap.set(key, { ...p, esExistente: true });
+  });
+  
+  // Luego añadir los de los albaranes que falten
+  albaranesCache.forEach(a => {
+    const proveedor = a.proveedor || 'DESCONOCIDO';
+    (a.lineas || []).forEach(l => {
+      const ref = l.ref || 'SIN_REF';
+      const key = ref + '|' + (l.producto || 'Sin nombre');
+      
+      if (!productosMap.has(key)) {
+        const nombre = (l.producto || '').toLowerCase();
+        let tipo = 'unidades';
+        let minimo = 1;
+        let empaque = '1 unidad';
+        
+        if (nombre.includes('litro') || nombre.includes(' lt') || nombre.includes('gel de manos') || nombre.includes('lejia') || nombre.includes('limpiador') || nombre.includes('desengrasante') || nombre.includes('desincrustante') || nombre.includes('ambientador') || nombre.includes('fairy')) {
+          tipo = 'litros'; minimo = 1; empaque = '1 litro';
+        } else if (nombre.includes('caja') || nombre.includes('fardo') || nombre.includes('pack') || nombre.includes('rollo')) {
+          tipo = 'cajas'; minimo = 1; empaque = '1 caja';
+        }
+        
+        productosMap.set(key, {
+          ref, nombre: l.producto || 'Sin nombre', proveedor,
+          precio: l.precio || 0, tipo, minimo, empaque,
+          historialPrecios: [l.precio || 0]
+        });
+      }
+    });
+  });
+  
+  productosCache = Array.from(productosMap.values()).filter(p => !p.esExistente);
+  
+  // Guardar los nuevos en Firebase
+  let nuevos = 0;
+  for (const prod of productosCache.filter(p => !p.esExistente)) {
+    try {
+      const docRef = await addDoc(collection(db, 'productos'), prod);
+      prod.id = docRef.id;
+      nuevos++;
+    } catch(e) { console.error('Error:', e); }
+  }
+  
+  localStorage.setItem('productosCache', JSON.stringify(productosCache));
+  alert(`✅ Catálogo actualizado. ${nuevos} productos nuevos añadidos.`);
+  cargarProductos();
+};
+
+// PREPARAR PEDIDO - USA LOS MÍNIMOS GUARDADOS
 window.cargarProductosPedido = () => {
   const proveedor = document.getElementById('pedidoProveedor').value;
   const container = document.getElementById('productosPedidoContainer');
   
   console.log('Cargando productos para:', proveedor);
-  console.log('Productos disponibles:', productosCache.length);
+  console.log('Productos en caché:', productosCache.length);
   
   const productosFiltrados = productosCache.filter(p => p.proveedor === proveedor);
   
   if (productosFiltrados.length === 0) {
-    container.innerHTML = '<div class="alert alert-warning">⚠️ No hay productos registrados para ' + proveedor + '. Ve a "Productos" para añadirlos.</div>';
+    container.innerHTML = '<div class="alert alert-warning">⚠️ No hay productos para ' + proveedor + '. Ve a "Productos" para añadirlos o pulsa "Regenerar desde albaranes".</div>';
     return;
   }
   
@@ -1072,17 +863,17 @@ window.cargarProductosPedido = () => {
     const tipoIcon = p.tipo === 'cajas' ? '📦' : p.tipo === 'litros' ? '💧' : '🔢';
     const tipoTexto = p.tipo === 'cajas' ? 'Cajas' : p.tipo === 'litros' ? 'Litros' : 'Unidades';
     const tipoClass = 'tipo-' + (p.tipo || 'unidades');
+    const minimo = p.minimo || 1;
+    const empaqueTexto = p.empaque || (p.tipo === 'cajas' ? 'caja(s)' : p.tipo === 'litros' ? 'litro(s)' : 'ud(s)');
     
     html += '<tr>';
     html += '<td><strong>' + (p.nombre || 'Sin nombre') + '</strong>';
-    if (p.ref && p.ref !== 'SIN_REF') {
-      html += '<br><small style="color:#64748b;">Ref: ' + p.ref + '</small>';
-    }
+    if (p.ref && p.ref !== 'SIN_REF') html += '<br><small style="color:#64748b;">Ref: ' + p.ref + '</small>';
     html += '</td>';
     html += '<td><span class="tipo-badge ' + tipoClass + '">' + tipoIcon + ' ' + tipoTexto + '</span></td>';
-    html += '<td><strong>' + p.minimo + '</strong> ' + (p.tipo === 'cajas' ? 'caja(s)' : p.tipo === 'litros' ? 'litro(s)' : 'ud(s)') + '</td>';
+    html += '<td><strong>' + minimo + '</strong> ' + empaqueTexto + '</td>';
     html += '<td>' + formatearMoneda(p.precio || 0) + '</td>';
-    html += '<td><input type="number" id="cant-' + idx + '" value="0" min="' + p.minimo + '" step="' + p.minimo + '" onchange="validarYActualizarPedido(' + idx + ', ' + p.minimo + ')" style="width: 80px; padding: 5px;"></td>';
+    html += '<td><input type="number" id="cant-' + idx + '" value="0" min="' + minimo + '" step="' + minimo + '" onchange="validarYActualizarPedido(' + idx + ', ' + minimo + ')" style="width: 80px; padding: 5px;"></td>';
     html += '<td id="imp-' + idx + '">0,00 €</td>';
     html += '</tr>';
   });
@@ -1094,7 +885,6 @@ window.cargarProductosPedido = () => {
   console.log('✅ Productos cargados en tabla:', pedidoActual.length);
 };
 
-// Validar cantidad y actualizar
 window.validarYActualizarPedido = (idx, minimo) => {
   const cantInput = document.getElementById('cant-' + idx);
   let cantidad = parseFloat(cantInput.value) || 0;
@@ -1105,7 +895,7 @@ window.validarYActualizarPedido = (idx, minimo) => {
     cantInput.value = cantidad;
   }
   
-  if (cantidad > 0 && cantidad % minimo !== 0) {
+  if (cantidad > 0 && minimo > 0 && cantidad % minimo !== 0) {
     const multiplo = Math.ceil(cantidad / minimo) * minimo;
     if (confirm('La cantidad debe ser múltiplo de ' + minimo + '. ¿Redondear a ' + multiplo + '?')) {
       cantidad = multiplo;
@@ -1121,11 +911,9 @@ window.validarYActualizarPedido = (idx, minimo) => {
 
 window.actualizarPedido = () => {
   let subtotal = 0;
-  
   pedidoActual.forEach((p, idx) => {
     const cantInput = document.getElementById('cant-' + idx);
     const impCell = document.getElementById('imp-' + idx);
-    
     if (cantInput && impCell) {
       const cantidad = parseFloat(cantInput.value) || 0;
       const importe = cantidad * (p.precio || 0);
@@ -1147,68 +935,35 @@ window.actualizarPedido = () => {
   if (progreso) {
     progreso.style.width = porcentaje + '%';
     progreso.textContent = porcentaje.toFixed(0) + '% de 500 €';
-    
-    if (total > 500) {
-      progreso.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
-    } else if (total > 400) {
-      progreso.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
-    } else {
-      progreso.style.background = 'linear-gradient(90deg, #10b981, #059669)';
-    }
+    if (total > 500) progreso.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+    else if (total > 400) progreso.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+    else progreso.style.background = 'linear-gradient(90deg, #10b981, #059669)';
   }
 };
 
 window.verificarLimiteMensual = () => {
   const mes = document.getElementById('pedidoMes').value;
   const proveedor = document.getElementById('pedidoProveedor').value;
-  
   if (!mes) return;
-  
-  const albaranesMes = albaranesCache.filter(a => 
-    a.proveedor === proveedor && a.fecha && a.fecha.startsWith(mes)
-  );
+  const albaranesMes = albaranesCache.filter(a => a.proveedor === proveedor && a.fecha && a.fecha.startsWith(mes));
   const gastoMes = albaranesMes.reduce((s, a) => s + (a.total || 0), 0);
-  
-  if (gastoMes >= 500) {
-    alert('⚠️ Ya has gastado ' + formatearMoneda(gastoMes) + ' este mes con ' + proveedor + '. El límite es 500€.');
-  }
+  if (gastoMes >= 500) alert('⚠️ Ya has gastado ' + formatearMoneda(gastoMes) + ' este mes con ' + proveedor + '. Límite: 500€.');
 };
 
 window.guardarPedido = () => {
   const mes = document.getElementById('pedidoMes').value;
   const proveedor = document.getElementById('pedidoProveedor').value;
-  
-  if (!mes) {
-    alert('Por favor, selecciona un mes');
-    return;
-  }
-  
+  if (!mes) { alert('Selecciona un mes'); return; }
   const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
-  if (productosPedidos.length === 0) {
-    alert('Añade al menos un producto al pedido');
-    return;
-  }
-  
+  if (productosPedidos.length === 0) { alert('Añade al menos un producto'); return; }
   const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * (p.precio || 0)), 0);
   const iva = subtotal * 0.21;
   const total = subtotal + iva;
-  
-  const pedido = {
-    id: Date.now(),
-    mes,
-    proveedor,
-    productos: productosPedidos,
-    subtotal,
-    iva,
-    total,
-    createdAt: new Date().toISOString()
-  };
-  
+  const pedido = { id: Date.now(), mes, proveedor, productos: productosPedidos, subtotal, iva, total, createdAt: new Date().toISOString() };
   const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
   pedidos.push(pedido);
   localStorage.setItem('pedidosLimpieza', JSON.stringify(pedidos));
-  
-  alert('✅ Pedido guardado correctamente\n\nMes: ' + mes + '\nProveedor: ' + proveedor + '\nTotal: ' + formatearMoneda(total));
+  alert('✅ Pedido guardado\n\nMes: ' + mes + '\nProveedor: ' + proveedor + '\nTotal: ' + formatearMoneda(total));
 };
 
 window.cargarPedidosGuardados = () => {
@@ -1219,29 +974,13 @@ window.cargarPedidosGuardados = () => {
 window.filtrarPedidosGuardados = () => {
   const mesFiltro = document.getElementById('filtroPedidosMes').value;
   const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
-  
   let filtrados = pedidos;
-  if (mesFiltro) {
-    filtrados = pedidos.filter(p => p.mes === mesFiltro);
-  }
-  
+  if (mesFiltro) filtrados = pedidos.filter(p => p.mes === mesFiltro);
   const container = document.getElementById('listaPedidosGuardados');
-  
-  if (filtrados.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No hay pedidos guardados</p></div>';
-    return;
-  }
-  
+  if (filtrados.length === 0) { container.innerHTML = '<div class="empty-state"><p>No hay pedidos guardados</p></div>'; return; }
   let html = '';
   filtrados.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).forEach(p => {
-    html += '<div class="pedido-item" onclick="cargarPedido(' + p.id + ')">';
-    html += '<div class="pedido-item-header">';
-    html += '<h4>' + p.proveedor + ' - ' + p.mes + '</h4>';
-    html += '<button class="btn btn-danger" onclick="event.stopPropagation(); eliminarPedido(' + p.id + ')">🗑️</button>';
-    html += '</div>';
-    html += '<div class="pedido-item-details">';
-    html += p.productos.length + ' productos | Total: ' + formatearMoneda(p.total);
-    html += '</div></div>';
+    html += '<div class="pedido-item" onclick="cargarPedido(' + p.id + ')"><div class="pedido-item-header"><h4>' + p.proveedor + ' - ' + p.mes + '</h4><button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); eliminarPedido(' + p.id + ')">🗑️</button></div><div class="pedido-item-details">' + p.productos.length + ' productos | Total: ' + formatearMoneda(p.total) + '</div></div>';
   });
   container.innerHTML = html;
 };
@@ -1249,82 +988,47 @@ window.filtrarPedidosGuardados = () => {
 window.cargarPedido = (id) => {
   const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
   const pedido = pedidos.find(p => p.id === id);
-  
   if (!pedido) return;
-  
   document.getElementById('pedidoMes').value = pedido.mes;
   document.getElementById('pedidoProveedor').value = pedido.proveedor;
-  
   cargarProductosPedido();
-  
   setTimeout(() => {
     pedido.productos.forEach(pProd => {
       const idx = pedidoActual.findIndex(p => p.nombre === pProd.nombre);
       if (idx !== -1) {
         const cantInput = document.getElementById('cant-' + idx);
-        if (cantInput) {
-          cantInput.value = pProd.cantidad;
-          pedidoActual[idx].cantidad = pProd.cantidad;
-        }
+        if (cantInput) { cantInput.value = pProd.cantidad; pedidoActual[idx].cantidad = pProd.cantidad; }
       }
     });
     actualizarPedido();
   }, 500);
-  
   cerrarModal('modalPedidosGuardados');
 };
 
 window.eliminarPedido = (id) => {
-  if (!confirm('¿Seguro que quieres eliminar este pedido?')) return;
-  
+  if (!confirm('¿Eliminar este pedido?')) return;
   const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
-  const filtrados = pedidos.filter(p => p.id !== id);
-  localStorage.setItem('pedidosLimpieza', JSON.stringify(filtrados));
-  
+  localStorage.setItem('pedidosLimpieza', JSON.stringify(pedidos.filter(p => p.id !== id)));
   filtrarPedidosGuardados();
 };
 
 window.generarPDFPedido = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  
   const mes = document.getElementById('pedidoMes').value;
   const proveedor = document.getElementById('pedidoProveedor').value;
   const subtotal = parseFloat(document.getElementById('pedidoSubtotal').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
   const iva = parseFloat(document.getElementById('pedidoIva').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
   const total = parseFloat(document.getElementById('pedidoTotal').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-  
-  doc.setFontSize(20);
-  doc.text('Pedido de Limpieza', 20, 20);
-  
-  doc.setFontSize(12);
-  doc.text('Proveedor: ' + proveedor, 20, 35);
-  doc.text('Mes: ' + mes, 20, 45);
-  doc.text('Fecha: ' + new Date().toLocaleDateString('es-ES'), 20, 55);
-  
+  doc.setFontSize(20); doc.text('Pedido de Limpieza', 20, 20);
+  doc.setFontSize(12); doc.text('Proveedor: ' + proveedor, 20, 35); doc.text('Mes: ' + mes, 20, 45); doc.text('Fecha: ' + new Date().toLocaleDateString('es-ES'), 20, 55);
   const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
-  
-  const tableData = productosPedidos.map(p => [
-    p.nombre,
-    p.cantidad.toString(),
-    formatearMoneda(p.precio),
-    formatearMoneda(p.cantidad * p.precio)
-  ]);
-  
-  doc.autoTable({
-    startY: 65,
-    head: [['Producto', 'Cantidad', 'Precio', 'Importe']],
-    body: tableData,
-    theme: 'grid',
-    headStyles: { fillColor: [30, 58, 95] }
-  });
-  
+  const tableData = productosPedidos.map(p => [p.nombre, p.cantidad.toString(), formatearMoneda(p.precio), formatearMoneda(p.cantidad * p.precio)]);
+  doc.autoTable({ startY: 65, head: [['Producto', 'Cantidad', 'Precio', 'Importe']], body: tableData, theme: 'grid', headStyles: { fillColor: [30, 58, 95] } });
   const finalY = doc.lastAutoTable.finalY + 10;
   doc.text('Subtotal: ' + formatearMoneda(subtotal), 140, finalY);
   doc.text('IVA (21%): ' + formatearMoneda(iva), 140, finalY + 10);
-  doc.setFontSize(14);
-  doc.text('TOTAL: ' + formatearMoneda(total), 140, finalY + 25);
-  
+  doc.setFontSize(14); doc.text('TOTAL: ' + formatearMoneda(total), 140, finalY + 25);
   doc.save('pedido_' + proveedor + '_' + mes + '.pdf');
 };
 
@@ -1332,30 +1036,15 @@ window.copiarPedido = () => {
   const mes = document.getElementById('pedidoMes').value;
   const proveedor = document.getElementById('pedidoProveedor').value;
   const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
-  
   let texto = 'PEDIDO ' + proveedor + ' - ' + mes + '\n\n';
-  productosPedidos.forEach(p => {
-    texto += p.nombre + ': ' + p.cantidad + ' x ' + formatearMoneda(p.precio) + ' = ' + formatearMoneda(p.cantidad * p.precio) + '\n';
-  });
-  
+  productosPedidos.forEach(p => { texto += p.nombre + ': ' + p.cantidad + ' x ' + formatearMoneda(p.precio) + ' = ' + formatearMoneda(p.cantidad * p.precio) + '\n'; });
   const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * p.precio), 0);
-  const iva = subtotal * 0.21;
-  const total = subtotal + iva;
-  
-  texto += '\nSubtotal: ' + formatearMoneda(subtotal) + '\n';
-  texto += 'IVA (21%): ' + formatearMoneda(iva) + '\n';
-  texto += 'TOTAL: ' + formatearMoneda(total) + '\n';
-  
-  navigator.clipboard.writeText(texto).then(() => {
-    alert('✅ Pedido copiado al portapapeles');
-  }).catch(() => {
-    alert('❌ Error al copiar');
-  });
+  texto += '\nSubtotal: ' + formatearMoneda(subtotal) + '\nIVA (21%): ' + formatearMoneda(subtotal * 0.21) + '\nTOTAL: ' + formatearMoneda(subtotal * 1.21) + '\n';
+  navigator.clipboard.writeText(texto).then(() => alert('✅ Pedido copiado')).catch(() => alert('❌ Error al copiar'));
 };
 
 window.limpiarPedido = () => {
-  if (!confirm('¿Seguro que quieres limpiar el pedido actual?')) return;
-  
+  if (!confirm('¿Limpiar el pedido actual?')) return;
   document.getElementById('pedidoMes').value = '';
   pedidoActual = [];
   document.getElementById('productosPedidoContainer').innerHTML = '<div class="empty-state"><p>Selecciona un proveedor para ver los productos disponibles</p></div>';
@@ -1370,64 +1059,17 @@ window.limpiarPedido = () => {
 window.generarInforme = async () => {
   const proveedor = document.getElementById('filtroInformeProveedor').value;
   const anio = document.getElementById('filtroInformeAnio').value;
-  
   let filtrados = albaranesCache;
   if (proveedor !== 'TODOS') filtrados = filtrados.filter(a => a.proveedor === proveedor);
   if (anio !== 'TODOS') filtrados = filtrados.filter(a => a.fecha && a.fecha.startsWith(anio));
-  
   const contenedor = document.getElementById('contenidoInforme');
-  
-  if (filtrados.length === 0) {
-    contenedor.innerHTML = '<div class="empty-state"><p>No se encontraron albaranes con los filtros seleccionados</p></div>';
-    return;
-  }
-  
+  if (filtrados.length === 0) { contenedor.innerHTML = '<div class="empty-state"><p>No se encontraron albaranes</p></div>'; return; }
   const totalGasto = filtrados.reduce((s, a) => s + (a.total || 0), 0);
-  const totalAlbaranes = filtrados.length;
-  
   const gastosPorMes = {};
-  filtrados.forEach(a => {
-    if (a.fecha) {
-      const mes = a.fecha.slice(0, 7);
-      if (!gastosPorMes[mes]) gastosPorMes[mes] = { albaranes: 0, total: 0 };
-      gastosPorMes[mes].albaranes++;
-      gastosPorMes[mes].total += a.total || 0;
-    }
-  });
-  
-  let html = `
-    <div class="stats">
-      <div class="stat-card">
-        <h4>Total Albaranes:</h4>
-        <div class="value">${totalAlbaranes}</div>
-      </div>
-      <div class="stat-card">
-        <h4>Gasto Total:</h4>
-        <div class="value">${formatearMoneda(totalGasto)}</div>
-      </div>
-      <div class="stat-card">
-        <h4>Media por Albarán:</h4>
-        <div class="value">${formatearMoneda(totalGasto / totalAlbaranes)}</div>
-      </div>
-    </div>
-    
-    <h3 style="margin-top: 30px; margin-bottom: 15px;">📅 Desglose por mes:</h3>
-    <table>
-      <thead>
-        <tr><th>Mes</th><th>Nº Albaranes</th><th>Total</th></tr>
-      </thead>
-      <tbody>
-  `;
-  
-  Object.keys(gastosPorMes).sort().forEach(mes => {
-    const data = gastosPorMes[mes];
-    html += `<tr>
-      <td>${mes}</td>
-      <td>${data.albaranes}</td>
-      <td><strong>${formatearMoneda(data.total)}</strong></td>
-    </tr>`;
-  });
-  
+  filtrados.forEach(a => { if (a.fecha) { const mes = a.fecha.slice(0, 7); if (!gastosPorMes[mes]) gastosPorMes[mes] = { albaranes: 0, total: 0 }; gastosPorMes[mes].albaranes++; gastosPorMes[mes].total += a.total || 0; } });
+  let html = '<div class="stats"><div class="stat-card"><h4>Total Albaranes:</h4><div class="value">' + filtrados.length + '</div></div><div class="stat-card"><h4>Gasto Total:</h4><div class="value">' + formatearMoneda(totalGasto) + '</div></div><div class="stat-card"><h4>Media por Albarán:</h4><div class="value">' + formatearMoneda(totalGasto / filtrados.length) + '</div></div></div>';
+  html += '<h3 style="margin-top: 30px; margin-bottom: 15px;">📅 Desglose por mes:</h3><table><thead><tr><th>Mes</th><th>Nº Albaranes</th><th>Total</th></tr></thead><tbody>';
+  Object.keys(gastosPorMes).sort().forEach(mes => { const data = gastosPorMes[mes]; html += '<tr><td>' + mes + '</td><td>' + data.albaranes + '</td><td><strong>' + formatearMoneda(data.total) + '</strong></td></tr>'; });
   html += '</tbody></table>';
   contenedor.innerHTML = html;
 };
@@ -1435,91 +1077,45 @@ window.generarInforme = async () => {
 window.descargarInformePDF = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  
-  const proveedor = document.getElementById('filtroInformeProveedor').value;
-  const anio = document.getElementById('filtroInformeAnio').value;
-  
-  doc.setFontSize(20);
-  doc.text('Informe de Gastos', 20, 20);
-  
-  doc.setFontSize(12);
-  doc.text('Proveedor: ' + proveedor, 20, 35);
-  doc.text('Año: ' + anio, 20, 45);
-  doc.text('Fecha: ' + new Date().toLocaleDateString('es-ES'), 20, 55);
-  
-  doc.save('informe_' + proveedor + '_' + anio + '.pdf');
+  doc.setFontSize(20); doc.text('Informe de Gastos', 20, 20);
+  doc.setFontSize(12); doc.text('Proveedor: ' + document.getElementById('filtroInformeProveedor').value, 20, 35);
+  doc.text('Año: ' + document.getElementById('filtroInformeAnio').value, 20, 45);
+  doc.save('informe.pdf');
 };
 
 // Evolución de precios
 window.cargarEvolucionPrecios = async () => {
   const proveedor = document.getElementById('filtroEvolucionProveedor').value;
   const contenedor = document.getElementById('tablaEvolucion');
-  
-  if (!proveedor) {
-    contenedor.innerHTML = '<div class="empty-state"><p>Selecciona un proveedor para ver la evolución de precios</p></div>';
-    return;
-  }
-  
+  if (!proveedor) { contenedor.innerHTML = '<div class="empty-state"><p>Selecciona un proveedor</p></div>'; return; }
   const productosPorAnio = {};
-  
   albaranesCache.filter(a => a.proveedor === proveedor).forEach(a => {
     if (!a.fecha) return;
     const anio = a.fecha.slice(0, 4);
-    
     (a.lineas || []).forEach(l => {
       if (!l.ref) return;
       const key = l.ref + '-' + anio;
-      if (!productosPorAnio[key]) {
-        productosPorAnio[key] = {
-          ref: l.ref,
-          producto: l.producto,
-          anio,
-          precios: []
-        };
-      }
+      if (!productosPorAnio[key]) productosPorAnio[key] = { ref: l.ref, producto: l.producto, anio, precios: [] };
       productosPorAnio[key].precios.push(l.precio);
     });
   });
-  
   const evolucion = {};
   Object.values(productosPorAnio).forEach(p => {
     if (!evolucion[p.ref]) evolucion[p.ref] = {};
-    const precioMedio = p.precios.reduce((s, v) => s + v, 0) / p.precios.length;
-    evolucion[p.ref][p.anio] = {
-      producto: p.producto,
-      precio: precioMedio
-    };
+    evolucion[p.ref][p.anio] = { producto: p.producto, precio: p.precios.reduce((s, v) => s + v, 0) / p.precios.length };
   });
-  
   const refs = Object.keys(evolucion).sort();
-  
-  if (refs.length === 0) {
-    contenedor.innerHTML = '<div class="empty-state"><p>No hay datos de evolución para este proveedor</p></div>';
-    return;
-  }
-  
+  if (refs.length === 0) { contenedor.innerHTML = '<div class="empty-state"><p>No hay datos</p></div>'; return; }
   const anios = [...new Set(Object.values(evolucion).flatMap(r => Object.keys(r)))].sort();
-  
   let html = '<table><thead><tr><th>Referencia</th><th>Producto</th>';
-  anios.forEach(anio => {
-    html += '<th>' + anio + '</th>';
-  });
+  anios.forEach(anio => { html += '<th>' + anio + '</th>'; });
   html += '</tr></thead><tbody>';
-  
   refs.forEach(ref => {
     const producto = Object.values(evolucion[ref])[0]?.producto || ref;
     html += '<tr><td><code>' + ref + '</code></td><td>' + producto + '</td>';
-    anios.forEach(anio => {
-      const data = evolucion[ref][anio];
-      if (data) {
-        html += '<td>' + formatearMoneda(data.precio) + '</td>';
-      } else {
-        html += '<td>-</td>';
-      }
-    });
+    anios.forEach(anio => { const data = evolucion[ref][anio]; html += '<td>' + (data ? formatearMoneda(data.precio) : '-') + '</td>'; });
     html += '</tr>';
   });
-  
   html += '</tbody></table>';
   contenedor.innerHTML = html;
 };
@@ -1527,50 +1123,25 @@ window.cargarEvolucionPrecios = async () => {
 window.descargarEvolucionPDF = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  
-  const proveedor = document.getElementById('filtroEvolucionProveedor').value;
-  
-  doc.setFontSize(20);
-  doc.text('Evolución de Precios', 20, 20);
-  
-  doc.setFontSize(12);
-  doc.text('Proveedor: ' + proveedor, 20, 35);
-  doc.text('Fecha: ' + new Date().toLocaleDateString('es-ES'), 20, 45);
-  
-  doc.save('evolucion_precios_' + proveedor + '.pdf');
+  doc.setFontSize(20); doc.text('Evolución de Precios', 20, 20);
+  doc.setFontSize(12); doc.text('Proveedor: ' + document.getElementById('filtroEvolucionProveedor').value, 20, 35);
+  doc.save('evolucion_precios.pdf');
 };
 
 // Utilidades
-function formatearMoneda(valor) {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(valor);
-}
+function formatearMoneda(valor) { return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(valor); }
+function formatearFecha(fecha) { if (!fecha) return '-'; const [anio, mes, dia] = fecha.split('-'); return dia + '/' + mes + '/' + anio; }
+window.cerrarModal = (id) => { document.getElementById(id).classList.remove('active'); };
 
-function formatearFecha(fecha) {
-  if (!fecha) return '-';
-  const [anio, mes, dia] = fecha.split('-');
-  return dia + '/' + mes + '/' + anio;
-}
-
-window.cerrarModal = (id) => {
-  document.getElementById(id).classList.remove('active');
-};
-
-// Event listeners para filtros
 document.getElementById('filtroProveedor').addEventListener('change', cargarListadoAlbaranes);
 document.getElementById('filtroAnio').addEventListener('change', cargarListadoAlbaranes);
 document.getElementById('buscadorAlbaranes').addEventListener('input', cargarListadoAlbaranes);
 document.getElementById('filtroProductosProveedor').addEventListener('change', cargarProductos);
 
-// Cerrar modales al hacer clic fuera
 document.querySelectorAll('.modal').forEach(modal => {
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.remove('active');
-    }
-  });
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
 });
 
-// Hacer funciones accesibles globalmente
 window.cargarAlbaranesDesdeFirebase = cargarAlbaranesDesdeFirebase;
 window.cargarProductosDesdeFirebase = cargarProductosDesdeFirebase;
 window.extraerProductosDeAlbaranes = extraerProductosDeAlbaranes;
