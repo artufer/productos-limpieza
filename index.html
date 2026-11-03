@@ -1355,6 +1355,222 @@ document.querySelectorAll('.modal').forEach(modal => {
 // Inicializar
 cargarDashboard();
 </script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyA80eaP6z8X8YrzQjr5CrgQr-9E9vqpwkY",
+  authDomain: "control-limpieza-4bbeb.firebaseapp.com",
+  projectId: "control-limpieza-4bbeb",
+  storageBucket: "control-limpieza-4bbeb.firebasestorage.app",
+  messagingSenderId: "348215953887",
+  appId: "1:348215953887:web:1ec5cd9801b8c2d6401c6a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Variables globales
+let albaranesCache = [];
+let productosCache = [];
+let pedidoActual = [];
+
+// Cargar datos al iniciar
+window.addEventListener('DOMContentLoaded', () => {
+  cargarAlbaranesDesdeFirebase();
+  cargarProductosDesdeFirebase();
+});
+
+// Cargar albaranes
+async function cargarAlbaranesDesdeFirebase() {
+  try {
+    const snap = await getDocs(collection(db, 'albaranes'));
+    albaranesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    localStorage.setItem('albaranesCache', JSON.stringify(albaranesCache));
+    console.log('✅ Albaranes cargados:', albaranesCache.length);
+  } catch(e) {
+    console.error('Error cargando albaranes:', e);
+  }
+}
+
+// Cargar productos
+async function cargarProductosDesdeFirebase() {
+  try {
+    const snap = await getDocs(collection(db, 'productos'));
+    productosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
+    console.log('✅ Productos cargados:', productosCache.length);
+    
+    // Si no hay productos en Firebase, extraerlos de los albaranes
+    if (productosCache.length === 0 && albaranesCache.length > 0) {
+      await extraerProductosDeAlbaranes();
+    }
+  } catch(e) {
+    console.error('Error cargando productos:', e);
+  }
+}
+
+// Extraer productos desde albaranes
+async function extraerProductosDeAlbaranes() {
+  console.log('📦 Extrayendo productos de albaranes...');
+  const productosMap = new Map();
+  
+  albaranesCache.forEach(a => {
+    const proveedor = a.proveedor || 'DESCONOCIDO';
+    (a.lineas || []).forEach(l => {
+      const ref = l.ref || 'SIN_REF_' + Math.random().toString(36).substr(2, 9);
+      const key = `${ref}|${l.producto || 'Sin nombre'}`;
+      
+      if (!productosMap.has(key)) {
+        productosMap.set(key, {
+          ref: ref,
+          nombre: l.producto || 'Sin nombre',
+          proveedor: proveedor,
+          precio: l.precio || 0,
+          tipo: 'unidades',
+          minimo: 1
+        });
+      }
+    });
+  });
+  
+  const productos = Array.from(productosMap.values());
+  productosCache = productos;
+  localStorage.setItem('productosCache', JSON.stringify(productos));
+  console.log('✅ Productos extraídos:', productos.length);
+  
+  // Guardar en Firebase
+  for (const prod of productos) {
+    try {
+      await addDoc(collection(db, 'productos'), prod);
+    } catch(e) {
+      console.error('Error guardando producto:', e);
+    }
+  }
+}
+
+// Navegación
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.section).classList.add('active');
+  });
+});
+
+// Cargar productos para pedido
+window.cargarProductosPedido = () => {
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  const container = document.getElementById('productosPedidoContainer');
+  
+  console.log('Cargando productos para:', proveedor);
+  console.log('Productos disponibles:', productosCache.length);
+  
+  const productosFiltrados = productosCache.filter(p => p.proveedor === proveedor);
+  
+  if (productosFiltrados.length === 0) {
+    container.innerHTML = '<div class="alert alert-warning">⚠️ No hay productos registrados para ' + proveedor + '. Ve a "Productos" para añadirlos.</div>';
+    return;
+  }
+  
+  let html = '<table><thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
+  
+  productosFiltrados.forEach((p, idx) => {
+    html += '<tr>';
+    html += '<td>' + (p.nombre || 'Sin nombre') + '</td>';
+    html += '<td>' + formatearMoneda(p.precio || 0) + '</td>';
+    html += '<td><input type="number" id="cant-' + idx + '" value="0" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>';
+    html += '<td id="imp-' + idx + '">0,00 €</td>';
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  
+  pedidoActual = productosFiltrados.map(p => ({ ...p, cantidad: 0 }));
+  console.log('Productos cargados:', pedidoActual.length);
+};
+
+// Actualizar pedido
+window.actualizarPedido = () => {
+  let subtotal = 0;
+  
+  pedidoActual.forEach((p, idx) => {
+    const cantInput = document.getElementById('cant-' + idx);
+    const impCell = document.getElementById('imp-' + idx);
+    
+    if (cantInput && impCell) {
+      const cantidad = parseFloat(cantInput.value) || 0;
+      const importe = cantidad * (p.precio || 0);
+      impCell.textContent = formatearMoneda(importe);
+      p.cantidad = cantidad;
+      subtotal += importe;
+    }
+  });
+  
+  const iva = subtotal * 0.21;
+  const total = subtotal + iva;
+  
+  document.getElementById('pedidoSubtotal').textContent = formatearMoneda(subtotal);
+  document.getElementById('pedidoIva').textContent = formatearMoneda(iva);
+  document.getElementById('pedidoTotal').textContent = formatearMoneda(total);
+  
+  const porcentaje = Math.min((total / 500) * 100, 100);
+  const progreso = document.getElementById('pedidoProgreso');
+  if (progreso) {
+    progreso.style.width = porcentaje + '%';
+    progreso.textContent = porcentaje.toFixed(0) + '% de 500 €';
+  }
+};
+
+// Guardar pedido
+window.guardarPedido = () => {
+  const mes = document.getElementById('pedidoMes').value;
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  
+  if (!mes) {
+    alert('Por favor, selecciona un mes');
+    return;
+  }
+  
+  const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
+  if (productosPedidos.length === 0) {
+    alert('Añade al menos un producto al pedido');
+    return;
+  }
+  
+  const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * (p.precio || 0)), 0);
+  const iva = subtotal * 0.21;
+  const total = subtotal + iva;
+  
+  const pedido = {
+    id: Date.now(),
+    mes,
+    proveedor,
+    productos: productosPedidos,
+    subtotal,
+    iva,
+    total,
+    createdAt: new Date().toISOString()
+  };
+  
+  const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
+  pedidos.push(pedido);
+  localStorage.setItem('pedidosLimpieza', JSON.stringify(pedidos));
+  
+  alert('✅ Pedido guardado correctamente\n\nMes: ' + mes + '\nProveedor: ' + proveedor + '\nTotal: ' + formatearMoneda(total));
+};
+
+// Utilidades
+function formatearMoneda(valor) {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(valor);
+}
+
+// Hacer funciones accesibles globalmente
+window.cargarAlbaranesDesdeFirebase = cargarAlbaranesDesdeFirebase;
+window.cargarProductosDesdeFirebase = cargarProductosDesdeFirebase;
+</script>
 </body>
 </html>
