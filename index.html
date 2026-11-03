@@ -62,7 +62,7 @@ table tr:hover { background: #f8fafc; }
 .empty-state svg { width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5; }
 .alert { padding: 15px; border-radius: 6px; margin-bottom: 20px; }
 .alert-info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
-.alert-warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 10px 0; color: #92400e; }
+.alert-warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
 .alert-danger { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
 .alert-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
 .chart-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -95,9 +95,9 @@ table tr:hover { background: #f8fafc; }
   <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
   <button class="nav-btn" data-section="nuevo-albaran">📥 Nuevo Albarán</button>
   <button class="nav-btn" data-section="listado-albaranes">📋 Listado Albaranes</button>
-  <button class="nav-btn" data-section="productos"> Productos</button>
+  <button class="nav-btn" data-section="productos">📦 Productos</button>
   <button class="nav-btn" data-section="evolucion-precios">📈 Evolución Precios</button>
-  <button class="nav-btn" data-section="preparar-pedido">🛒 Preparar Pedido</button>
+  <button class="nav-btn" data-section="preparar-pedido"> Preparar Pedido</button>
   <button class="nav-btn" data-section="informes"> Informes</button>
 </div>
 
@@ -242,7 +242,7 @@ table tr:hover { background: #f8fafc; }
       <button class="btn btn-success" onclick="mostrarModalProducto()">➕ Añadir producto nuevo</button>
     </div>
     
-    <div class="alert alert-info">️ Referencia opcional: Si no la conoces, déjala vacía y se generará automáticamente. Las referencias que empiezan por "100" se asignan a LIDERA.</div>
+    <div class="alert alert-info">ℹ️ Referencia opcional: Si no la conoces, déjala vacía y se generará automáticamente. Las referencias que empiezan por "100" se asignan a LIDERA.</div>
     
     <div id="tablaProductos">
       <div class="empty-state">
@@ -262,7 +262,7 @@ table tr:hover { background: #f8fafc; }
       <select id="filtroEvolucionProveedor" onchange="cargarEvolucionPrecios()">
         <option value="">-- Selecciona proveedor --</option>
         <option value="LIDERA">🟡 LIDERA</option>
-        <option value="LUNA">🔵 LUNA</option>
+        <option value="LUNA"> LUNA</option>
       </select>
     </div>
     
@@ -328,11 +328,11 @@ table tr:hover { background: #f8fafc; }
       </div>
       
       <div style="margin-top: 20px;">
-        <button class="btn btn-success" onclick="guardarPedido()">💾 Guardar pedido</button>
-        <button class="btn btn-info" onclick="cargarPedidosGuardados()"> Cargar pedido guardado</button>
+        <button class="btn btn-success" onclick="guardarPedido()"> Guardar pedido</button>
+        <button class="btn btn-info" onclick="cargarPedidosGuardados()">📂 Cargar pedido guardado</button>
         <button class="btn btn-primary" onclick="generarPDFPedido()">📄 Generar PDF</button>
-        <button class="btn btn-warning" onclick="copiarPedido()">📋 Copiar pedido</button>
-        <button class="btn btn-danger" onclick="limpiarPedido()">🗑️ Limpiar</button>
+        <button class="btn btn-warning" onclick="copiarPedido()"> Copiar pedido</button>
+        <button class="btn btn-danger" onclick="limpiarPedido()">️ Limpiar</button>
       </div>
     </div>
   </div>
@@ -386,9 +386,9 @@ table tr:hover { background: #f8fafc; }
   <div class="modal-content">
     <div class="modal-header">
       <h2>📂 Pedidos guardados</h2>
-      <button class="close-btn" onclick="cerrarModal('modalPedidosGuardados')"> Cerrar</button>
+      <button class="close-btn" onclick="cerrarModal('modalPedidosGuardados')">✕ Cerrar</button>
     </div>
-    <div class="alert alert-info">ℹ️ Haz clic en un pedido para cargarlo. Usa el botón 🗑️ para borrarlo.</div>
+    <div class="alert alert-info">️ Haz clic en un pedido para cargarlo. Usa el botón 🗑️ para borrarlo.</div>
     
     <div class="form-group">
       <label>Filtrar por mes:</label>
@@ -627,7 +627,7 @@ window.cargarListadoAlbaranes = async () => {
         <td><span class="badge ${badge}">${a.proveedor || '?'}</span></td>
         <td><strong>${formatearMoneda(a.total || 0)}</strong></td>
         <td>
-          <button class="btn btn-info" onclick="verDetalleAlbaran('${a.id}')">👁️ Ver</button>
+          <button class="btn btn-info" onclick="verDetalleAlbaran('${a.id}')">️ Ver</button>
           <button class="btn btn-danger" onclick="eliminarAlbaran('${a.id}')">🗑️</button>
         </td>
       </tr>`;
@@ -636,7 +636,7 @@ window.cargarListadoAlbaranes = async () => {
     contenedor.innerHTML = html;
     
   } catch(e) {
-    contenedor.innerHTML = `<div class="alert alert-danger">❌ Error al cargar: ${e.message}</div>`;
+    contenedor.innerHTML = `<div class="alert alert-danger"> Error al cargar: ${e.message}</div>`;
   }
 };
 
@@ -755,111 +755,9 @@ window.cargarDashboard = async () => {
 
 window.verDetalleMes = (mes) => {
   const albaranesMes = albaranesCache.filter(a => a.fecha && a.fecha.startsWith(mes));
+  const total = albaranesMes.reduce((s, a) => s + (a.total || 0), 0);
   
-  // Calcular totales generales
-  const totalGeneral = albaranesMes.reduce((s, a) => s + (a.total || 0), 0);
-  
-  // Calcular totales por proveedor
-  const albaranesLidera = albaranesMes.filter(a => a.proveedor === 'LIDERA');
-  const albaranesLuna = albaranesMes.filter(a => a.proveedor === 'LUNA');
-  
-  const totalLidera = albaranesLidera.reduce((s, a) => s + (a.total || 0), 0);
-  const totalLuna = albaranesLuna.reduce((s, a) => s + (a.total || 0), 0);
-  
-  // Crear contenido HTML del modal
-  let html = `
-    <div style="padding: 20px;">
-      <h3 style="color: #1e3a5f; margin-bottom: 20px;">📅 Detalle de compras - ${mes}</h3>
-      
-      <div class="stats" style="margin-bottom: 20px;">
-        <div class="stat-card">
-          <h4>Total Albaranes</h4>
-          <div class="value">${albaranesMes.length}</div>
-        </div>
-        <div class="stat-card">
-          <h4>Gasto Total</h4>
-          <div class="value">${formatearMoneda(totalGeneral)}</div>
-        </div>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-        <div class="card" style="border-left: 4px solid #f59e0b;">
-          <h4 style="color: #92400e; margin-bottom: 10px;">🟡 LIDERA</h4>
-          <div style="font-size: 24px; font-weight: bold; color: #1e3a5f;">${formatearMoneda(totalLidera)}</div>
-          <div style="color: #64748b; margin-top: 5px;">${albaranesLidera.length} albaranes</div>
-        </div>
-        
-        <div class="card" style="border-left: 4px solid #3b82f6;">
-          <h4 style="color: #1e40af; margin-bottom: 10px;"> LUNA</h4>
-          <div style="font-size: 24px; font-weight: bold; color: #1e3a5f;">${formatearMoneda(totalLuna)}</div>
-          <div style="color: #64748b; margin-top: 5px;">${albaranesLuna.length} albaranes</div>
-        </div>
-      </div>
-  `;
-  
-  // Mostrar albaranes de LIDERA
-  if (albaranesLidera.length > 0) {
-    html += `
-      <h4 style="color: #92400e; margin-top: 20px; margin-bottom: 10px;">🟡 Albaranes LIDERA</h4>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="background: #fef3c7;">
-            <th style="padding: 8px; text-align: left;">Nº Albarán</th>
-            <th style="padding: 8px; text-align: left;">Fecha</th>
-            <th style="padding: 8px; text-align: right;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-    
-    albaranesLidera.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || '')).forEach(a => {
-      html += `
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px;"><code>${a.numero || ''}</code></td>
-          <td style="padding: 8px;">${formatearFecha(a.fecha)}</td>
-          <td style="padding: 8px; text-align: right;"><strong>${formatearMoneda(a.total || 0)}</strong></td>
-        </tr>
-      `;
-    });
-    
-    html += '</tbody></table>';
-  }
-  
-  // Mostrar albaranes de LUNA
-  if (albaranesLuna.length > 0) {
-    html += `
-      <h4 style="color: #1e40af; margin-top: 20px; margin-bottom: 10px;">🔵 Albaranes LUNA</h4>
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="background: #dbeafe;">
-            <th style="padding: 8px; text-align: left;">Nº Albarán</th>
-            <th style="padding: 8px; text-align: left;">Fecha</th>
-            <th style="padding: 8px; text-align: right;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-    
-    albaranesLuna.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || '')).forEach(a => {
-      html += `
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px;"><code>${a.numero || ''}</code></td>
-          <td style="padding: 8px;">${formatearFecha(a.fecha)}</td>
-          <td style="padding: 8px; text-align: right;"><strong>${formatearMoneda(a.total || 0)}</strong></td>
-        </tr>
-      `;
-    });
-    
-    html += '</tbody></table>';
-  }
-  
-  html += '</div>';
-  
-  // Mostrar en modal
-  const modal = document.getElementById('modalDetalleAlbaran');
-  const contenido = document.getElementById('contenidoDetalleAlbaran');
-  contenido.innerHTML = html;
-  modal.classList.add('active');
+  alert(` ${mes}\n\n${albaranesMes.length} albaranes\nTotal: ${formatearMoneda(total)}`);
 };
 
 // Productos
@@ -867,34 +765,39 @@ window.cargarProductos = async () => {
   const contenedor = document.getElementById('tablaProductos');
   contenedor.innerHTML = '<div class="empty-state"><p>Cargando productos...</p></div>';
   
-  // Leer productos desde localStorage
-  const productos = JSON.parse(localStorage.getItem('catalogoProductos') || '[]');
-  
-  const proveedor = document.getElementById('filtroProductosProveedor').value;
-  let filtrados = productos;
-  if (proveedor !== 'TODOS') filtrados = filtrados.filter(p => p.proveedor === proveedor);
-  
-  if (filtrados.length === 0) {
-    contenedor.innerHTML = '<div class="empty-state"><p>No hay productos registrados</p></div>';
-    return;
+  try {
+    const snap = await getDocs(collection(db, 'productos'));
+    productosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    const proveedor = document.getElementById('filtroProductosProveedor').value;
+    let filtrados = productosCache;
+    if (proveedor !== 'TODOS') filtrados = filtrados.filter(p => p.proveedor === proveedor);
+    
+    if (filtrados.length === 0) {
+      contenedor.innerHTML = '<div class="empty-state"><p>No hay productos registrados</p></div>';
+      return;
+    }
+    
+    let html = '<table><thead><tr><th>Referencia</th><th>Producto</th><th>Proveedor</th><th>Precio</th><th>Tipo</th><th>Acciones</th></tr></thead><tbody>';
+    filtrados.forEach(p => {
+      const badge = p.proveedor === 'LUNA' ? 'badge-luna' : 'badge-lidera';
+      html += `<tr>
+        <td><code>${p.ref || '-'}</code></td>
+        <td>${p.nombre || '-'}</td>
+        <td><span class="badge ${badge}">${p.proveedor || '?'}</span></td>
+        <td>${formatearMoneda(p.precio || 0)}</td>
+        <td>${p.tipo || 'unidades'}</td>
+        <td>
+          <button class="btn btn-danger" onclick="eliminarProducto('${p.id}')">🗑️</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    contenedor.innerHTML = html;
+    
+  } catch(e) {
+    contenedor.innerHTML = `<div class="alert alert-danger">❌ Error: ${e.message}</div>`;
   }
-  
-  let html = '<table><thead><tr><th>Referencia</th><th>Producto</th><th>Proveedor</th><th>Precio</th><th>Tipo</th><th>Acciones</th></tr></thead><tbody>';
-  filtrados.forEach(p => {
-    const badge = p.proveedor === 'LUNA' ? 'badge-luna' : 'badge-lidera';
-    html += `<tr>
-      <td><code>${p.ref || '-'}</code></td>
-      <td>${p.nombre || '-'}</td>
-      <td><span class="badge ${badge}">${p.proveedor || '?'}</span></td>
-      <td>${formatearMoneda(p.precio || 0)}</td>
-      <td>${p.tipo || 'unidades'}</td>
-      <td>
-        <button class="btn btn-danger" onclick="eliminarProducto('${p.id}')">🗑️</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  contenedor.innerHTML = html;
 };
 
 window.mostrarModalProducto = () => {
@@ -945,7 +848,7 @@ window.guardarProducto = async () => {
     document.getElementById('productoEmpaque').value = '';
     
   } catch(e) {
-    alert(' Error: ' + e.message);
+    alert('❌ Error: ' + e.message);
   }
 };
 
@@ -957,7 +860,7 @@ window.eliminarProducto = async (id) => {
     alert('✅ Producto eliminado');
     cargarProductos();
   } catch(e) {
-    alert('❌ Error: ' + e.message);
+    alert(' Error: ' + e.message);
   }
 };
 
@@ -966,24 +869,22 @@ window.cargarProductosPedido = () => {
   const proveedor = document.getElementById('pedidoProveedor').value;
   const container = document.getElementById('productosPedidoContainer');
   
-  // Leer productos desde localStorage
-  const productos = JSON.parse(localStorage.getItem('catalogoProductos') || '[]');
-  const productosFiltrados = productos.filter(p => p.proveedor === proveedor);
+  const productosFiltrados = productosCache.filter(p => p.proveedor === proveedor);
   
   if (productosFiltrados.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No hay productos registrados para ' + proveedor + '</p></div>';
+    container.innerHTML = '<div class="empty-state"><p>No hay productos registrados para este proveedor</p></div>';
     return;
   }
   
-  let html = '<table><thead><tr><th>Ref</th><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Importe</th><th></th></tr></thead><tbody>';
   productosFiltrados.forEach((p, idx) => {
-    html += '<tr>' +
-      '<td><code>' + (p.ref || '-') + '</code></td>' +
-      '<td>' + p.nombre + '</td>' +
-      '<td>' + formatearMoneda(p.ultimoPrecio || p.precio || 0) + '</td>' +
-      '<td><input type="number" id="cant-' + idx + '" value="0" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>' +
-      '<td id="imp-' + idx + '">0,00 €</td>' +
-      '</tr>';
+    html += `<tr>
+      <td>${p.nombre}</td>
+      <td>${formatearMoneda(p.precio)}</td>
+      <td><input type="number" id="cant-${idx}" value="0" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>
+      <td id="imp-${idx}">0,00 €</td>
+      <td><button class="btn btn-danger" onclick="quitarProductoPedido(${idx})">🗑️</button></td>
+    </tr>`;
   });
   html += '</tbody></table>';
   container.innerHTML = html;
@@ -992,14 +893,16 @@ window.cargarProductosPedido = () => {
 };
 
 window.actualizarPedido = () => {
+  const mes = document.getElementById('pedidoMes').value;
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  
   let subtotal = 0;
   pedidoActual.forEach((p, idx) => {
-    const cantInput = document.getElementById('cant-' + idx);
-    const impCell = document.getElementById('imp-' + idx);
+    const cantInput = document.getElementById(`cant-${idx}`);
+    const impCell = document.getElementById(`imp-${idx}`);
     if (cantInput && impCell) {
       const cantidad = parseFloat(cantInput.value) || 0;
-      const precio = p.ultimoPrecio || p.precio || 0;
-      const importe = cantidad * precio;
+      const importe = cantidad * p.precio;
       impCell.textContent = formatearMoneda(importe);
       p.cantidad = cantidad;
       subtotal += importe;
@@ -1013,10 +916,11 @@ window.actualizarPedido = () => {
   document.getElementById('pedidoIva').textContent = formatearMoneda(iva);
   document.getElementById('pedidoTotal').textContent = formatearMoneda(total);
   
+  // Actualizar barra de progreso
   const porcentaje = Math.min((total / 500) * 100, 100);
   const progreso = document.getElementById('pedidoProgreso');
   progreso.style.width = porcentaje + '%';
-  progreso.textContent = porcentaje.toFixed(0) + '% de 500 €';
+  progreso.textContent = `${porcentaje.toFixed(0)}% de 500 €`;
   
   if (total > 500) {
     progreso.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
@@ -1040,7 +944,7 @@ window.verificarLimiteMensual = async () => {
   const gastoMes = albaranesMes.reduce((s, a) => s + (a.total || 0), 0);
   
   if (gastoMes >= 500) {
-    alert(`⚠️ Ya has gastado ${formatearMoneda(gastoMes)} este mes con ${proveedor}. El límite es 500€.`);
+    alert(`️ Ya has gastado ${formatearMoneda(gastoMes)} este mes con ${proveedor}. El límite es 500€.`);
   }
 };
 
@@ -1059,32 +963,27 @@ window.guardarPedido = () => {
     return;
   }
   
-  const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * (p.ultimoPrecio || p.precio || 0)), 0);
+  const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * p.precio), 0);
   const iva = subtotal * 0.21;
   const total = subtotal + iva;
   
   const pedido = {
     id: Date.now(),
-    mes: mes,
-    proveedor: proveedor,
-    productos: productosPedidos.map(p => ({
-      ref: p.ref,
-      nombre: p.nombre,
-      cantidad: p.cantidad,
-      precio: p.ultimoPrecio || p.precio || 0,
-      importe: p.cantidad * (p.ultimoPrecio || p.precio || 0)
-    })),
-    subtotal: subtotal,
-    iva: iva,
-    total: total,
+    mes,
+    proveedor,
+    productos: productosPedidos,
+    subtotal,
+    iva,
+    total,
     createdAt: new Date().toISOString()
   };
   
+  // Guardar en localStorage
   const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
   pedidos.push(pedido);
   localStorage.setItem('pedidosLimpieza', JSON.stringify(pedidos));
   
-  alert('✅ Pedido guardado correctamente\n\nMes: ' + mes + '\nProveedor: ' + proveedor + '\nTotal: ' + formatearMoneda(total));
+  alert(`✅ Pedido guardado correctamente\n\nMes: ${mes}\nProveedor: ${proveedor}\nTotal: ${formatearMoneda(total)}`);
 };
 
 window.cargarPedidosGuardados = () => {
@@ -1110,15 +1009,17 @@ window.filtrarPedidosGuardados = () => {
   
   let html = '';
   filtrados.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).forEach(p => {
-    html += '<div class="pedido-item" onclick="cargarPedido(' + p.id + ')">' +
-      '<div class="pedido-item-header">' +
-        '<h4>' + p.proveedor + ' - ' + p.mes + '</h4>' +
-        '<button class="btn btn-danger" onclick="event.stopPropagation(); eliminarPedido(' + p.id + ')">🗑️</button>' +
-      '</div>' +
-      '<div class="pedido-item-details">' +
-        p.productos.length + ' productos | Total: ' + formatearMoneda(p.total) +
-      '</div>' +
-    '</div>';
+    html += `
+      <div class="pedido-item" onclick="cargarPedido(${p.id})">
+        <div class="pedido-item-header">
+          <h4>${p.proveedor} - ${p.mes}</h4>
+          <button class="btn btn-danger" onclick="event.stopPropagation(); eliminarPedido(${p.id})">🗑️</button>
+        </div>
+        <div class="pedido-item-details">
+          ${p.productos.length} productos | Total: ${formatearMoneda(p.total)}
+        </div>
+      </div>
+    `;
   });
   container.innerHTML = html;
 };
@@ -1132,13 +1033,14 @@ window.cargarPedido = (id) => {
   document.getElementById('pedidoMes').value = pedido.mes;
   document.getElementById('pedidoProveedor').value = pedido.proveedor;
   
+  // Cargar productos y cantidades
   cargarProductosPedido();
   
   setTimeout(() => {
     pedido.productos.forEach(pProd => {
-      const idx = pedidoActual.findIndex(p => p.ref === pProd.ref && p.nombre === pProd.nombre);
+      const idx = pedidoActual.findIndex(p => p.nombre === pProd.nombre);
       if (idx !== -1) {
-        const cantInput = document.getElementById('cant-' + idx);
+        const cantInput = document.getElementById(`cant-${idx}`);
         if (cantInput) {
           cantInput.value = pProd.cantidad;
           pedidoActual[idx].cantidad = pProd.cantidad;
@@ -1146,7 +1048,7 @@ window.cargarPedido = (id) => {
       }
     });
     actualizarPedido();
-  }, 300);
+  }, 500);
   
   cerrarModal('modalPedidosGuardados');
 };
@@ -1171,96 +1073,37 @@ window.generarPDFPedido = () => {
   const iva = parseFloat(document.getElementById('pedidoIva').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
   const total = parseFloat(document.getElementById('pedidoTotal').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
   
-  // Formatear mes para mostrar (ej: 2026-11 → noviembre de 2026)
-  const mesesTexto = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
-                      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-  const [anio, mesNum] = mes.split('-');
-  const mesTexto = mesesTexto[parseInt(mesNum) - 1] + ' de ' + anio;
-  
-  // Nombre del proveedor completo
-  const proveedorNombre = proveedor === 'LUNA' ? 'Comercial Leonesa LUNA' : 'LIDERA Higiene';
-  
-  // ===== ENCABEZADO =====
-  doc.setFontSize(12);
-  doc.text('Diputación de León', 20, 20);
-  
-  doc.setFontSize(18);
-  doc.setFont(undefined, 'bold');
-  doc.text('Pabellón Niño Jesús', 20, 32);
-  doc.setFont(undefined, 'normal');
+  doc.setFontSize(20);
+  doc.text('Pedido de Limpieza', 20, 20);
   
   doc.setFontSize(12);
-  doc.text('Pedido correspondiente al mes de ' + mesTexto, 20, 45);
+  doc.text(`Proveedor: ${proveedor}`, 20, 35);
+  doc.text(`Mes: ${mes}`, 20, 45);
+  doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')}`, 20, 55);
   
-  doc.text('Proveedor: ' + proveedorNombre, 20, 55);
-  
-  // ===== TABLA DE PRODUCTOS =====
   const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
   
   const tableData = productosPedidos.map(p => [
-    p.ref || '-',
     p.nombre,
     p.cantidad.toString(),
-    formatearMoneda(p.ultimoPrecio || p.precio || 0),
-    formatearMoneda(p.cantidad * (p.ultimoPrecio || p.precio || 0))
+    formatearMoneda(p.precio),
+    formatearMoneda(p.cantidad * p.precio)
   ]);
   
   doc.autoTable({
     startY: 65,
-    head: [['Referencia', 'Producto', 'Cantidad', 'Precio', 'Importe']],
+    head: [['Producto', 'Cantidad', 'Precio', 'Importe']],
     body: tableData,
     theme: 'grid',
-    headStyles: { 
-      fillColor: [30, 58, 95],
-      textColor: 255,
-      fontStyle: 'bold',
-      halign: 'center'
-    },
-    columnStyles: {
-      0: { halign: 'center', cellWidth: 22 },   // Referencia
-      1: { halign: 'left', cellWidth: 75 },     // Producto
-      2: { halign: 'right', cellWidth: 25 },    // Cantidad
-      3: { halign: 'right', cellWidth: 24 },    // Precio
-      4: { halign: 'right', cellWidth: 24 }     // Importe
-    },
-    styles: {
-      fontSize: 10,
-      cellPadding: 3
-    }
+    headStyles: { fillColor: [30, 58, 95] }
   });
   
-  // ===== TOTALES =====
   const finalY = doc.lastAutoTable.finalY + 10;
+  doc.text(`Subtotal: ${formatearMoneda(subtotal)}`, 140, finalY);
+  doc.text(`IVA (21%): ${formatearMoneda(iva)}`, 140, finalY + 10);
+  doc.setFontSize(14);
+  doc.text(`TOTAL: ${formatearMoneda(total)}`, 140, finalY + 25);
   
-  doc.setFontSize(10);
-  doc.text('Subtotal:', 130, finalY);
-  doc.text(formatearMoneda(subtotal), 190, finalY, { align: 'right' });
-  
-  doc.text('IVA (21%):', 130, finalY + 8);
-  doc.text(formatearMoneda(iva), 190, finalY + 8, { align: 'right' });
-  
-  doc.setFontSize(12);
-  doc.setFont(undefined, 'bold');
-  doc.text('TOTAL:', 130, finalY + 20);
-  doc.text(formatearMoneda(total), 190, finalY + 20, { align: 'right' });
-  doc.setFont(undefined, 'normal');
-  
-  // ===== PIE CON FIRMA =====
-  const pieY = finalY + 50;
-  
-  doc.setFontSize(11);
-  doc.text('Pedido efectuado por Arturo Fernández', 20, pieY);
-  doc.text('Encargado del edificio', 20, pieY + 8);
-  
-  // Fecha actual
-  const fechaHoy = new Date().toLocaleDateString('es-ES', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
-  });
-  doc.text(fechaHoy, 20, pieY + 16);
-  
-  // Guardar PDF
   doc.save(`pedido_${proveedor}_${mes}.pdf`);
 };
 
@@ -1271,10 +1114,10 @@ window.copiarPedido = () => {
   
   let texto = `PEDIDO ${proveedor} - ${mes}\n\n`;
   productosPedidos.forEach(p => {
-    texto += `${p.nombre}: ${p.cantidad} x ${formatearMoneda(p.ultimoPrecio || p.precio || 0)} = ${formatearMoneda(p.cantidad * (p.ultimoPrecio || p.precio || 0))}\n`;
+    texto += `${p.nombre}: ${p.cantidad} x ${formatearMoneda(p.precio)} = ${formatearMoneda(p.cantidad * p.precio)}\n`;
   });
   
-  const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * (p.ultimoPrecio || p.precio || 0)), 0);
+  const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * p.precio), 0);
   const iva = subtotal * 0.21;
   const total = subtotal + iva;
   
@@ -1511,6 +1354,384 @@ document.querySelectorAll('.modal').forEach(modal => {
 
 // Inicializar
 cargarDashboard();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA80eaP6z8X8YrzQjr5CrgQr-9E9vqpwkY",
+  authDomain: "control-limpieza-4bbeb.firebaseapp.com",
+  projectId: "control-limpieza-4bbeb",
+  storageBucket: "control-limpieza-4bbeb.firebasestorage.app",
+  messagingSenderId: "348215953887",
+  appId: "1:348215953887:web:1ec5cd9801b8c2d6401c6a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Variables globales
+let albaranesCache = [];
+let productosCache = [];
+let pedidoActual = [];
+
+// Cargar datos al iniciar
+window.addEventListener('DOMContentLoaded', () => {
+  cargarAlbaranesDesdeFirebase();
+  cargarProductosDesdeFirebase();
+});
+
+// Cargar albaranes
+async function cargarAlbaranesDesdeFirebase() {
+  try {
+    const snap = await getDocs(collection(db, 'albaranes'));
+    albaranesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    localStorage.setItem('albaranesCache', JSON.stringify(albaranesCache));
+    console.log('✅ Albaranes cargados:', albaranesCache.length);
+  } catch(e) {
+    console.error('Error cargando albaranes:', e);
+  }
+}
+
+// Cargar productos
+async function cargarProductosDesdeFirebase() {
+  try {
+    const snap = await getDocs(collection(db, 'productos'));
+    productosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
+    console.log('✅ Productos cargados:', productosCache.length);
+    
+    // Si no hay productos en Firebase, extraerlos de los albaranes
+    if (productosCache.length === 0 && albaranesCache.length > 0) {
+      await extraerProductosDeAlbaranes();
+    }
+  } catch(e) {
+    console.error('Error cargando productos:', e);
+  }
+}
+
+// Extraer productos desde albaranes
+async function extraerProductosDeAlbaranes() {
+  console.log('📦 Extrayendo productos de albaranes...');
+  const productosMap = new Map();
+  
+  albaranesCache.forEach(a => {
+    const proveedor = a.proveedor || 'DESCONOCIDO';
+    (a.lineas || []).forEach(l => {
+      const ref = l.ref || 'SIN_REF_' + Math.random().toString(36).substr(2, 9);
+      const key = `${ref}|${l.producto || 'Sin nombre'}`;
+      
+      if (!productosMap.has(key)) {
+        productosMap.set(key, {
+          ref: ref,
+          nombre: l.producto || 'Sin nombre',
+          proveedor: proveedor,
+          precio: l.precio || 0,
+          tipo: 'unidades',
+          minimo: 1
+        });
+      }
+    });
+  });
+  
+  const productos = Array.from(productosMap.values());
+  productosCache = productos;
+  localStorage.setItem('productosCache', JSON.stringify(productos));
+  console.log('✅ Productos extraídos:', productos.length);
+  
+  // Guardar en Firebase
+  for (const prod of productos) {
+    try {
+      await addDoc(collection(db, 'productos'), prod);
+    } catch(e) {
+      console.error('Error guardando producto:', e);
+    }
+  }
+}
+
+// Navegación
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.section).classList.add('active');
+  });
+});
+
+// Cargar productos para pedido
+window.cargarProductosPedido = () => {
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  const container = document.getElementById('productosPedidoContainer');
+  
+  console.log('Cargando productos para:', proveedor);
+  console.log('Productos disponibles:', productosCache.length);
+  
+  const productosFiltrados = productosCache.filter(p => p.proveedor === proveedor);
+  
+  if (productosFiltrados.length === 0) {
+    container.innerHTML = '<div class="alert alert-warning">⚠️ No hay productos registrados para ' + proveedor + '. Ve a "Productos" para añadirlos.</div>';
+    return;
+  }
+  
+  let html = '<table><thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
+  
+  productosFiltrados.forEach((p, idx) => {
+    html += '<tr>';
+    html += '<td>' + (p.nombre || 'Sin nombre') + '</td>';
+    html += '<td>' + formatearMoneda(p.precio || 0) + '</td>';
+    html += '<td><input type="number" id="cant-' + idx + '" value="0" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>';
+    html += '<td id="imp-' + idx + '">0,00 €</td>';
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  
+  pedidoActual = productosFiltrados.map(p => ({ ...p, cantidad: 0 }));
+  console.log('Productos cargados:', pedidoActual.length);
+};
+
+// Actualizar pedido
+window.actualizarPedido = () => {
+  let subtotal = 0;
+  
+  pedidoActual.forEach((p, idx) => {
+    const cantInput = document.getElementById('cant-' + idx);
+    const impCell = document.getElementById('imp-' + idx);
+    
+    if (cantInput && impCell) {
+      const cantidad = parseFloat(cantInput.value) || 0;
+      const importe = cantidad * (p.precio || 0);
+      impCell.textContent = formatearMoneda(importe);
+      p.cantidad = cantidad;
+      subtotal += importe;
+    }
+  });
+  
+  const iva = subtotal * 0.21;
+  const total = subtotal + iva;
+  
+  document.getElementById('pedidoSubtotal').textContent = formatearMoneda(subtotal);
+  document.getElementById('pedidoIva').textContent = formatearMoneda(iva);
+  document.getElementById('pedidoTotal').textContent = formatearMoneda(total);
+  
+  const porcentaje = Math.min((total / 500) * 100, 100);
+  const progreso = document.getElementById('pedidoProgreso');
+  if (progreso) {
+    progreso.style.width = porcentaje + '%';
+    progreso.textContent = porcentaje.toFixed(0) + '% de 500 €';
+  }
+};
+
+// Guardar pedido
+window.guardarPedido = () => {
+  const mes = document.getElementById('pedidoMes').value;
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  
+  if (!mes) {
+    alert('Por favor, selecciona un mes');
+    return;
+  }
+  
+  const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
+  if (productosPedidos.length === 0) {
+    alert('Añade al menos un producto al pedido');
+    return;
+  }
+  
+  const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * (p.precio || 0)), 0);
+  const iva = subtotal * 0.21;
+  const total = subtotal + iva;
+  
+  const pedido = {
+    id: Date.now(),
+    mes,
+    proveedor,
+    productos: productosPedidos,
+    subtotal,
+    iva,
+    total,
+    createdAt: new Date().toISOString()
+  };
+  
+  const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
+  pedidos.push(pedido);
+  localStorage.setItem('pedidosLimpieza', JSON.stringify(pedidos));
+  
+  alert('✅ Pedido guardado correctamente\n\nMes: ' + mes + '\nProveedor: ' + proveedor + '\nTotal: ' + formatearMoneda(total));
+};
+
+// Utilidades
+function formatearMoneda(valor) {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(valor);
+}
+
+// Hacer funciones accesibles globalmente
+window.cargarAlbaranesDesdeFirebase = cargarAlbaranesDesdeFirebase;
+window.cargarProductosDesdeFirebase = cargarProductosDesdeFirebase;
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA80eaP6z8X8YrzQjr5CrgQr-9E9vqpwkY",
+  authDomain: "control-limpieza-4bbeb.firebaseapp.com",
+  projectId: "control-limpieza-4bbeb",
+  storageBucket: "control-limpieza-4bbeb.firebasestorage.app",
+  messagingSenderId: "348215953887",
+  appId: "1:348215953887:web:1ec5cd9801b8c2d6401c6a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let albaranesCache = [];
+let productosCache = [];
+let pedidoActual = [];
+
+window.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 Iniciando...');
+  await cargarAlbaranes();
+  await cargarProductos();
+  configurarEventos();
+});
+
+async function cargarAlbaranes() {
+  const snap = await getDocs(collection(db, 'albaranes'));
+  albaranesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  localStorage.setItem('albaranesCache', JSON.stringify(albaranesCache));
+  console.log('✅ Albaranes:', albaranesCache.length);
+}
+
+async function cargarProductos() {
+  const snap = await getDocs(collection(db, 'productos'));
+  productosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  
+  if (productosCache.length === 0) {
+    console.log('📦 Extrayendo de albaranes...');
+    const productosMap = new Map();
+    albaranesCache.forEach(a => {
+      const proveedor = a.proveedor || 'DESCONOCIDO';
+      (a.lineas || []).forEach(l => {
+        const ref = l.ref || 'SIN_REF';
+        const key = ref + '|' + (l.producto || 'Sin nombre');
+        if (!productosMap.has(key)) {
+          productosMap.set(key, {
+            ref: ref,
+            nombre: l.producto || 'Sin nombre',
+            proveedor: proveedor,
+            precio: l.precio || 0,
+            tipo: 'unidades',
+            minimo: 1
+          });
+        }
+      });
+    });
+    productosCache = Array.from(productosMap.values());
+    console.log('✅ Productos extraídos:', productosCache.length);
+  }
+  
+  localStorage.setItem('productosCache', JSON.stringify(productosCache));
+}
+
+function configurarEventos() {
+  const selectorProveedor = document.getElementById('pedidoProveedor');
+  if (selectorProveedor) {
+    selectorProveedor.addEventListener('change', () => {
+      console.log('Proveedor:', selectorProveedor.value);
+      cargarProductosPedido();
+    });
+  }
+}
+
+window.cargarProductosPedido = () => {
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  const container = document.getElementById('productosPedidoContainer');
+  
+  const productosFiltrados = productosCache.filter(p => p.proveedor === proveedor);
+  
+  if (productosFiltrados.length === 0) {
+    container.innerHTML = '<p>No hay productos para ' + proveedor + '</p>';
+    return;
+  }
+  
+  let html = '<table><thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
+  
+  productosFiltrados.forEach((p, idx) => {
+    html += '<tr>';
+    html += '<td>' + p.nombre + '</td>';
+    html += '<td>' + formatearMoneda(p.precio) + '</td>';
+    html += '<td><input type="number" id="cant-' + idx + '" value="0" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px;"></td>';
+    html += '<td id="imp-' + idx + '">0,00 €</td>';
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  
+  pedidoActual = productosFiltrados.map(p => ({ ...p, cantidad: 0 }));
+  console.log('✅ Productos en tabla:', pedidoActual.length);
+};
+
+window.actualizarPedido = () => {
+  let subtotal = 0;
+  pedidoActual.forEach((p, idx) => {
+    const cantInput = document.getElementById('cant-' + idx);
+    const impCell = document.getElementById('imp-' + idx);
+    if (cantInput && impCell) {
+      const cantidad = parseFloat(cantInput.value) || 0;
+      const importe = cantidad * p.precio;
+      impCell.textContent = formatearMoneda(importe);
+      p.cantidad = cantidad;
+      subtotal += importe;
+    }
+  });
+  
+  const iva = subtotal * 0.21;
+  const total = subtotal + iva;
+  
+  document.getElementById('pedidoSubtotal').textContent = formatearMoneda(subtotal);
+  document.getElementById('pedidoIva').textContent = formatearMoneda(iva);
+  document.getElementById('pedidoTotal').textContent = formatearMoneda(total);
+};
+
+window.guardarPedido = () => {
+  const mes = document.getElementById('pedidoMes').value;
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  
+  if (!mes) { alert('Selecciona un mes'); return; }
+  
+  const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
+  if (productosPedidos.length === 0) { alert('Añade productos'); return; }
+  
+  const subtotal = productosPedidos.reduce((s, p) => s + (p.cantidad * p.precio), 0);
+  const iva = subtotal * 0.21;
+  const total = subtotal + iva;
+  
+  const pedido = {
+    id: Date.now(),
+    mes,
+    proveedor,
+    productos: productosPedidos,
+    subtotal,
+    iva,
+    total,
+    createdAt: new Date().toISOString()
+  };
+  
+  const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
+  pedidos.push(pedido);
+  localStorage.setItem('pedidosLimpieza', JSON.stringify(pedidos));
+  
+  alert('✅ Pedido guardado\nTotal: ' + formatearMoneda(total));
+};
+
+function formatearMoneda(valor) {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(valor);
+}
 </script>
 
 </body>
