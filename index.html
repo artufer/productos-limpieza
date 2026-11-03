@@ -92,6 +92,16 @@ table tr:hover { background: #f8fafc; }
 .fila-inactiva .minimo-input, .fila-inactiva .ref-input { text-decoration: none; color: #333; opacity: 1; }
 .toggle-activo { cursor: pointer; font-size: 20px; padding: 4px 8px; border-radius: 4px; transition: all 0.2s; display: inline-block; }
 .toggle-activo:hover { background: #e5e7eb; transform: scale(1.1); }
+.fila-resaltada { background: #fef3c7 !important; animation: highlightPulse 1.5s ease-in-out; }
+@keyframes highlightPulse { 0% { background: #fef3c7; } 50% { background: #fde68a; } 100% { background: #fef3c7; } }
+.buscar-ref-container { display: flex; gap: 10px; align-items: center; background: #f0f9ff; padding: 12px 16px; border-radius: 8px; border: 2px solid #bae6fd; margin-bottom: 15px; }
+.buscar-ref-container label { font-weight: 600; color: #0c4a6e; white-space: nowrap; }
+.buscar-ref-container input { flex: 1; padding: 8px 12px; border: 2px solid #7dd3fc; border-radius: 6px; font-size: 14px; font-family: monospace; }
+.buscar-ref-container input:focus { outline: none; border-color: #0284c7; }
+.buscar-ref-container .btn { margin: 0; }
+.resultado-busqueda { padding: 10px 15px; border-radius: 6px; margin-top: 10px; display: none; }
+.resultado-busqueda.encontrado { display: block; background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+.resultado-busqueda.no-encontrado { display: block; background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
 </style>
 </head>
 <body>
@@ -177,12 +187,23 @@ table tr:hover { background: #f8fafc; }
       <button class="btn btn-success" onclick="mostrarModalProducto()">➕ Añadir producto nuevo</button>
       <button class="btn btn-info" onclick="regenerarCatalogo()">🔄 Regenerar desde albaranes</button>
     </div>
+    
+    <!-- BÚSQUEDA POR REFERENCIA EN PRODUCTOS -->
+    <div class="buscar-ref-container">
+      <label>🔍 Buscar por referencia:</label>
+      <input type="text" id="buscarRefProductos" placeholder="Escribe la referencia (Ej: DT294, CEL0013...)" oninput="buscarPorReferenciaProductos()">
+      <button class="btn btn-primary btn-sm" onclick="buscarPorReferenciaProductos()">Buscar</button>
+      <button class="btn btn-secondary btn-sm" onclick="limpiarBusquedaProductos()">✕ Limpiar</button>
+    </div>
+    <div id="resultadoBusquedaProductos" class="resultado-busqueda"></div>
+    
     <div class="alert alert-info">
       <strong>ℹ️ Cómo gestionar productos:</strong><br>
       • <strong>Estado</strong>: Haz clic en ✅/❌ para activar/dar de baja. Los dados de baja NO aparecen al hacer pedidos pero se conservan en el histórico.<br>
       • <strong>Referencia</strong>: Edítala directamente en la tabla. El histórico de albaranes NO se modifica.<br>
       • <strong>Mínimo</strong>: Cambia el valor directamente y se guarda automáticamente.<br>
-      • <strong>Tipo</strong>: Haz clic en el badge para rotar entre Unidades/Cajas/Litros.
+      • <strong>Tipo</strong>: Haz clic en el badge para rotar entre Unidades/Cajas/Litros.<br>
+      • <strong>Buscar</strong>: Escribe una referencia arriba para ir directamente al producto. Si no existe, podrás darlo de alta.
     </div>
     <div id="tablaProductos"><div class="empty-state"><p>Cargando productos...</p></div></div>
   </div>
@@ -206,6 +227,16 @@ table tr:hover { background: #f8fafc; }
       <div class="form-group"><label>Mes:</label><input type="month" id="pedidoMes" onchange="verificarLimiteMensual()"></div>
       <div class="progress-bar"><div class="progress-fill" id="pedidoProgreso" style="width: 0%">0% de 500 €</div></div>
       <div class="alert alert-warning">Límite mensual: <strong>500,00 €</strong> (con IVA incluido) por proveedor</div>
+      
+      <!-- BÚSQUEDA POR REFERENCIA EN PEDIDO -->
+      <div class="buscar-ref-container" style="margin-top: 20px;">
+        <label>🔍 Ir a referencia:</label>
+        <input type="text" id="buscarRefPedido" placeholder="Escribe la referencia para ir directamente..." oninput="buscarPorReferenciaPedido()">
+        <button class="btn btn-primary btn-sm" onclick="buscarPorReferenciaPedido()">Buscar</button>
+        <button class="btn btn-secondary btn-sm" onclick="limpiarBusquedaPedido()">✕ Limpiar</button>
+      </div>
+      <div id="resultadoBusquedaPedido" class="resultado-busqueda"></div>
+      
       <h3 style="margin-top: 20px; margin-bottom: 15px;">Productos del pedido:</h3>
       <div id="productosPedidoContainer"><div class="empty-state"><p>Selecciona un proveedor para ver los productos disponibles</p></div></div>
       <div class="stats" style="margin-top: 20px;">
@@ -525,7 +556,7 @@ window.cargarProductos = () => {
     const toggleIcon = esActivo ? '✅' : '❌';
     const toggleTitle = esActivo ? 'Activo - Clic para dar de baja' : 'Dado de baja - Clic para reactivar';
     const estadoBadge = esActivo ? '<span class="badge badge-activo">Activo</span>' : '<span class="badge badge-inactivo">Baja</span>';
-    html += `<tr class="${filaClass}" data-id="${p.id}">
+    html += `<tr class="${filaClass}" data-id="${p.id}" data-ref="${(p.ref || '').toUpperCase()}">
       <td><span class="toggle-activo" onclick="toggleActivoProducto('${p.id}')" title="${toggleTitle}">${toggleIcon}</span> ${estadoBadge}</td>
       <td><input type="text" class="ref-input" value="${p.ref || ''}" onchange="guardarRefProducto('${p.id}', this.value)" title="Cambia la referencia (el histórico NO se modifica)"></td>
       <td>${p.nombre || '-'}</td>
@@ -539,6 +570,65 @@ window.cargarProductos = () => {
   });
   html += '</tbody></table>';
   contenedor.innerHTML = html;
+};
+
+// BÚSQUEDA POR REFERENCIA EN PRODUCTOS
+window.buscarPorReferenciaProductos = () => {
+  const refBuscada = document.getElementById('buscarRefProductos').value.trim().toUpperCase();
+  const resultadoDiv = document.getElementById('resultadoBusquedaProductos');
+  
+  if (!refBuscada) {
+    resultadoDiv.className = 'resultado-busqueda';
+    resultadoDiv.style.display = 'none';
+    document.querySelectorAll('#tablaProductos tr').forEach(tr => tr.classList.remove('fila-resaltada'));
+    return;
+  }
+  
+  // Buscar producto por referencia (coincidencia exacta o parcial)
+  const productoEncontrado = productosCache.find(p => 
+    (p.ref || '').toUpperCase() === refBuscada || 
+    (p.ref || '').toUpperCase().includes(refBuscada)
+  );
+  
+  if (productoEncontrado) {
+    // Asegurar que los filtros no oculten el producto
+    document.getElementById('filtroProductosProveedor').value = 'TODOS';
+    document.getElementById('filtroProductosEstado').value = 'TODOS';
+    cargarProductos();
+    
+    setTimeout(() => {
+      const fila = document.querySelector(`tr[data-ref="${refBuscada}"]`);
+      if (fila) {
+        fila.classList.add('fila-resaltada');
+        fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        resultadoDiv.className = 'resultado-busqueda encontrado';
+        resultadoDiv.innerHTML = `✅ <strong>Producto encontrado:</strong> ${productoEncontrado.nombre} (Ref: ${productoEncontrado.ref}) - ${productoEncontrado.proveedor} - ${formatearMoneda(productoEncontrado.precio)}`;
+      }
+    }, 100);
+  } else {
+    resultadoDiv.className = 'resultado-busqueda no-encontrado';
+    resultadoDiv.innerHTML = `❌ <strong>No existe ningún producto con la referencia "${refBuscada}".</strong> 
+      <button class="btn btn-success btn-sm" onclick="darDeAltaReferencia('${refBuscada}')" style="margin-left: 10px;">➕ Dar de alta "${refBuscada}"</button>`;
+  }
+};
+
+window.darDeAltaReferencia = (ref) => {
+  document.getElementById('productoRef').value = ref;
+  document.getElementById('productoNombre').value = '';
+  document.getElementById('productoPrecio').value = '';
+  document.getElementById('productoTipo').value = 'unidades';
+  document.getElementById('productoMinimo').value = '1';
+  document.getElementById('productoEmpaque').value = '';
+  document.getElementById('productoActivo').value = 'true';
+  document.getElementById('tituloModalProducto').textContent = '➕ Dar de alta referencia: ' + ref;
+  document.getElementById('modalProducto').classList.add('active');
+  document.getElementById('productoNombre').focus();
+};
+
+window.limpiarBusquedaProductos = () => {
+  document.getElementById('buscarRefProductos').value = '';
+  document.getElementById('resultadoBusquedaProductos').style.display = 'none';
+  document.querySelectorAll('#tablaProductos tr').forEach(tr => tr.classList.remove('fila-resaltada'));
 };
 
 window.toggleActivoProducto = async (id) => {
@@ -557,13 +647,11 @@ window.toggleActivoProducto = async (id) => {
 window.guardarRefProducto = async (id, nuevaRef) => {
   const producto = productosCache.find(p => p.id === id);
   if (!producto) return;
-  const refAnterior = producto.ref;
   producto.ref = nuevaRef;
   try {
     await updateDoc(doc(db, 'productos', id), { ref: nuevaRef });
     localStorage.setItem('productosCache', JSON.stringify(productosCache));
-    console.log('✅ Referencia actualizada:', producto.nombre, refAnterior, '->', nuevaRef);
-    console.log('ℹ️ El histórico de albaranes NO se ha modificado');
+    console.log('✅ Referencia actualizada:', producto.nombre, '->', nuevaRef);
   } catch(e) { alert('❌ Error: ' + e.message); cargarProductos(); }
 };
 
@@ -576,7 +664,6 @@ window.guardarMinimoProducto = async (id, nuevoMinimo) => {
   try {
     await updateDoc(doc(db, 'productos', id), { minimo: minimo });
     localStorage.setItem('productosCache', JSON.stringify(productosCache));
-    console.log('✅ Mínimo actualizado:', producto.nombre, '->', minimo);
   } catch(e) { alert('❌ Error: ' + e.message); cargarProductos(); }
 };
 
@@ -661,6 +748,10 @@ window.guardarProducto = async () => {
     localStorage.setItem('productosCache', JSON.stringify(productosCache));
     cerrarModal('modalProducto');
     cargarProductos();
+    // Si estamos en preparar pedido, recargar
+    if (document.getElementById('preparar-pedido').classList.contains('active')) {
+      cargarProductosPedido();
+    }
   } catch(e) { alert('❌ Error: ' + e.message); }
 };
 
@@ -676,7 +767,7 @@ window.eliminarProducto = async (id) => {
 };
 
 window.regenerarCatalogo = async () => {
-  if (!confirm('⚠️ Se añadirán productos nuevos desde los albaranes. Los existentes NO se modificarán (se conservan mínimos, referencias y estado). ¿Continuar?')) return;
+  if (!confirm('⚠️ Se añadirán productos nuevos desde los albaranes. Los existentes NO se modificarán. ¿Continuar?')) return;
   console.log('🔄 Regenerando catálogo...');
   const productosMap = new Map();
   productosCache.forEach(p => {
@@ -707,11 +798,11 @@ window.regenerarCatalogo = async () => {
   }
   productosCache = Array.from(productosMap.values());
   localStorage.setItem('productosCache', JSON.stringify(productosCache));
-  alert(`✅ Catálogo actualizado. ${count} productos nuevos añadidos. Los existentes se mantienen intactos.`);
+  alert(`✅ Catálogo actualizado. ${count} productos nuevos añadidos.`);
   cargarProductos();
 };
 
-// PREPARAR PEDIDO - SOLO PRODUCTOS ACTIVOS
+// PREPARAR PEDIDO
 window.cargarProductosPedido = () => {
   const proveedor = document.getElementById('pedidoProveedor').value;
   const container = document.getElementById('productosPedidoContainer');
@@ -728,7 +819,7 @@ window.cargarProductosPedido = () => {
     const tipoClass = 'tipo-' + (p.tipo || 'unidades');
     const minimo = p.minimo || 1;
     const empaqueTexto = p.empaque || (p.tipo === 'cajas' ? 'caja(s)' : p.tipo === 'litros' ? 'litro(s)' : 'ud(s)');
-    html += '<tr>';
+    html += '<tr data-ref-pedido="' + (p.ref || '').toUpperCase() + '" data-idx="' + idx + '">';
     html += '<td><strong>' + (p.nombre || 'Sin nombre') + '</strong>';
     if (p.ref && p.ref !== 'SIN_REF') html += '<br><small style="color:#64748b;">Ref: ' + p.ref + '</small>';
     html += '</td>';
@@ -743,6 +834,113 @@ window.cargarProductosPedido = () => {
   container.innerHTML = html;
   pedidoActual = productosFiltrados.map(p => ({ ...p, cantidad: 0 }));
   console.log('✅ Productos activos cargados:', pedidoActual.length);
+};
+
+// BÚSQUEDA POR REFERENCIA EN PEDIDO
+window.buscarPorReferenciaPedido = () => {
+  const refBuscada = document.getElementById('buscarRefPedido').value.trim().toUpperCase();
+  const resultadoDiv = document.getElementById('resultadoBusquedaPedido');
+  
+  if (!refBuscada) {
+    resultadoDiv.className = 'resultado-busqueda';
+    resultadoDiv.style.display = 'none';
+    document.querySelectorAll('#productosPedidoContainer tr').forEach(tr => tr.classList.remove('fila-resaltada'));
+    return;
+  }
+  
+  // Buscar en productos activos del proveedor seleccionado
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  const productoEncontrado = productosCache.find(p => 
+    p.proveedor === proveedor && 
+    p.activo !== false &&
+    ((p.ref || '').toUpperCase() === refBuscada || (p.ref || '').toUpperCase().includes(refBuscada))
+  );
+  
+  if (productoEncontrado) {
+    // Encontrar el índice en pedidoActual
+    const idx = pedidoActual.findIndex(p => p.id === productoEncontrado.id);
+    if (idx !== -1) {
+      const fila = document.querySelector(`tr[data-ref-pedido="${refBuscada}"]`);
+      if (fila) {
+        fila.classList.add('fila-resaltada');
+        fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Poner foco en el input de cantidad
+        setTimeout(() => {
+          const cantInput = document.getElementById('cant-' + idx);
+          if (cantInput) {
+            cantInput.focus();
+            cantInput.select();
+          }
+        }, 300);
+        resultadoDiv.className = 'resultado-busqueda encontrado';
+        resultadoDiv.innerHTML = `✅ <strong>Producto encontrado:</strong> ${productoEncontrado.nombre} (Ref: ${productoEncontrado.ref}) - Mínimo: ${productoEncontrado.minimo} - Precio: ${formatearMoneda(productoEncontrado.precio)}`;
+      }
+    }
+  } else {
+    // Verificar si existe pero está inactivo o en otro proveedor
+    const productoInactivo = productosCache.find(p => 
+      (p.ref || '').toUpperCase() === refBuscada || (p.ref || '').toUpperCase().includes(refBuscada)
+    );
+    
+    if (productoInactivo) {
+      let mensaje = `⚠️ <strong>La referencia "${refBuscada}" existe pero no está disponible:</strong><br>`;
+      if (productoInactivo.activo === false) {
+        mensaje += `• Está <strong>dado de baja</strong>. `;
+        mensaje += `<button class="btn btn-success btn-sm" onclick="reactivarProducto('${productoInactivo.id}')" style="margin-left: 5px;">✅ Reactivar</button><br>`;
+      }
+      if (productoInactivo.proveedor !== proveedor) {
+        mensaje += `• Pertenece a <strong>${productoInactivo.proveedor}</strong> (estás pidiendo a ${proveedor}). `;
+        mensaje += `<button class="btn btn-info btn-sm" onclick="cambiarProveedorPedido('${productoInactivo.proveedor}')" style="margin-left: 5px;">🔄 Cambiar proveedor</button>`;
+      }
+      resultadoDiv.className = 'resultado-busqueda no-encontrado';
+      resultadoDiv.innerHTML = mensaje;
+    } else {
+      resultadoDiv.className = 'resultado-busqueda no-encontrado';
+      resultadoDiv.innerHTML = `❌ <strong>No existe ningún producto con la referencia "${refBuscada}".</strong> 
+        <button class="btn btn-success btn-sm" onclick="darDeAltaReferenciaPedido('${refBuscada}')" style="margin-left: 10px;">➕ Dar de alta "${refBuscada}"</button>`;
+    }
+  }
+};
+
+window.reactivarProducto = async (id) => {
+  const producto = productosCache.find(p => p.id === id);
+  if (!producto) return;
+  producto.activo = true;
+  try {
+    await updateDoc(doc(db, 'productos', id), { activo: true });
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
+    alert('✅ Producto reactivado: ' + producto.nombre);
+    cargarProductosPedido();
+    document.getElementById('resultadoBusquedaPedido').style.display = 'none';
+  } catch(e) { alert('❌ Error: ' + e.message); }
+};
+
+window.cambiarProveedorPedido = (nuevoProveedor) => {
+  document.getElementById('pedidoProveedor').value = nuevoProveedor;
+  cargarProductosPedido();
+  document.getElementById('resultadoBusquedaPedido').style.display = 'none';
+  document.getElementById('buscarRefPedido').value = '';
+};
+
+window.darDeAltaReferenciaPedido = (ref) => {
+  const proveedor = document.getElementById('pedidoProveedor').value;
+  document.getElementById('productoRef').value = ref;
+  document.getElementById('productoProveedor').value = proveedor;
+  document.getElementById('productoNombre').value = '';
+  document.getElementById('productoPrecio').value = '';
+  document.getElementById('productoTipo').value = 'unidades';
+  document.getElementById('productoMinimo').value = '1';
+  document.getElementById('productoEmpaque').value = '';
+  document.getElementById('productoActivo').value = 'true';
+  document.getElementById('tituloModalProducto').textContent = '➕ Dar de alta referencia: ' + ref;
+  document.getElementById('modalProducto').classList.add('active');
+  document.getElementById('productoNombre').focus();
+};
+
+window.limpiarBusquedaPedido = () => {
+  document.getElementById('buscarRefPedido').value = '';
+  document.getElementById('resultadoBusquedaPedido').style.display = 'none';
+  document.querySelectorAll('#productosPedidoContainer tr').forEach(tr => tr.classList.remove('fila-resaltada'));
 };
 
 window.validarYActualizarPedido = (idx, minimo) => {
@@ -845,7 +1043,7 @@ window.cargarPedido = (id) => {
 };
 
 window.eliminarPedido = (id) => {
-  if (!confirm('¿Seguro que quieres eliminar este pedido?')) return;
+  if (!confirm('¿Eliminar este pedido?')) return;
   const pedidos = JSON.parse(localStorage.getItem('pedidosLimpieza') || '[]');
   localStorage.setItem('pedidosLimpieza', JSON.stringify(pedidos.filter(p => p.id !== id)));
   filtrarPedidosGuardados();
