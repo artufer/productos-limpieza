@@ -85,6 +85,7 @@ table tr:hover { background: #f8fafc; }
 .tipo-cajas { background: #fef3c7; color: #92400e; }
 .tipo-litros { background: #dbeafe; color: #1e40af; }
 .tipo-unidades { background: #d1fae5; color: #065f46; }
+.tipo-botellas { background: #fce7f3; color: #9d174d; }
 .editable-cell { cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
 .editable-cell:hover { background: #fef3c7; }
 .minimo-input { width: 60px; padding: 4px 8px; border: 2px solid #10b981; border-radius: 4px; font-weight: bold; text-align: center; }
@@ -215,7 +216,7 @@ table tr:hover { background: #f8fafc; }
       • <strong>Referencia</strong>: Edita directamente (el histórico NO se modifica)<br>
       • <strong>Nombre</strong>: Haz clic para editar el nombre<br>
       • <strong>Precio</strong>: Edita directamente el precio unitario<br>
-      • <strong>Tipo</strong>: Selecciona entre Unidades/Cajas/Litros<br>
+      • <strong>Tipo</strong>: Selecciona entre Unidades/Cajas/Litros/Botellas<br>
       • <strong>Mínimo</strong>: Cambia la cantidad mínima<br>
       • <strong>Importe Mín.</strong>: Se autocalcula (precio × mínimo)<br>
       • <strong>Empaque</strong>: Edita la descripción del empaque
@@ -301,7 +302,14 @@ table tr:hover { background: #f8fafc; }
     <div class="form-group"><label>Nombre del producto *</label><input type="text" id="productoNombre" placeholder="Ej: GEL DE MANOS NACARADO PV"></div>
     <div class="form-group"><label>Proveedor *</label><select id="productoProveedor"><option value="LUNA">LUNA</option><option value="LIDERA">LIDERA</option></select></div>
     <div class="form-group"><label>Precio unitario (€) *</label><input type="number" id="productoPrecio" step="0.01" placeholder="0.00"></div>
-    <div class="form-group"><label>Tipo de pedido *</label><select id="productoTipo"><option value="unidades">Unidades (uds)</option><option value="cajas">Cajas (1, 2, 3...)</option><option value="litros">Litros (mínimo = 1 caja)</option></select></div>
+    <div class="form-group"><label>Tipo de pedido *</label>
+      <select id="productoTipo">
+        <option value="unidades">Unidades (uds)</option>
+        <option value="cajas">Cajas (1, 2, 3...)</option>
+        <option value="litros">Litros (mínimo = 1 caja)</option>
+        <option value="botellas">Botellas (1, 2, 3...)</option>
+      </select>
+    </div>
     <div class="form-group"><label>Cantidad mínima *</label><input type="number" id="productoMinimo" step="0.01" placeholder="1" value="1"></div>
     <div class="form-group"><label>Unidad de empaquetado</label><input type="text" id="productoEmpaque" placeholder="Ej: caja de 20, fardo de 108"></div>
     <div class="form-group"><label>Estado</label><select id="productoActivo"><option value="true">✅ Activo (disponible para pedidos)</option><option value="false">❌ Dado de baja (no aparece en pedidos)</option></select></div>
@@ -392,6 +400,8 @@ async function extraerProductosDeAlbaranes() {
           tipo = 'litros'; empaque = '1 litro';
         } else if (nombre.includes('caja') || nombre.includes('fardo') || nombre.includes('pack') || nombre.includes('rollo')) {
           tipo = 'cajas'; empaque = '1 caja';
+        } else if (nombre.includes('bot') || nombre.includes('botella') || nombre.includes('pulverizador')) {
+          tipo = 'botellas'; empaque = '1 botella';
         }
         productosMap.set(key, { ref, nombre: l.producto || 'Sin nombre', proveedor, precio: l.precio || 0, tipo, minimo, empaque, activo: true, historialPrecios: [l.precio || 0] });
       } else {
@@ -590,6 +600,7 @@ window.cargarProductos = () => {
         <option value="unidades" ${p.tipo === 'unidades' ? 'selected' : ''}>🔢 Uds</option>
         <option value="cajas" ${p.tipo === 'cajas' ? 'selected' : ''}>📦 Cajas</option>
         <option value="litros" ${p.tipo === 'litros' ? 'selected' : ''}>💧 Litros</option>
+        <option value="botellas" ${p.tipo === 'botellas' ? 'selected' : ''}>🍶 Botellas</option>
       </select>
     </td>`;
     html += `<td class="celda-editable"><input type="number" class="minimo-input" value="${p.minimo || 1}" step="0.01" min="0.01" onchange="guardarCampoProducto('${p.id}', 'minimo', parseFloat(this.value)); actualizarImporteMinimo('${p.id}')" title="Cantidad mínima"></td>`;
@@ -655,6 +666,20 @@ window.toggleActivoProducto = async (id) => {
   producto.activo = nuevoEstado;
   try {
     await updateDoc(doc(db, 'productos', id), { activo: nuevoEstado });
+    localStorage.setItem('productosCache', JSON.stringify(productosCache));
+    cargarProductos();
+  } catch(e) { alert('❌ Error: ' + e.message); }
+};
+
+window.editarTipoProducto = async (id) => {
+  const producto = productosCache.find(p => p.id === id);
+  if (!producto) return;
+  const tipos = ['unidades', 'cajas', 'litros', 'botellas'];
+  const idx = tipos.indexOf(producto.tipo || 'unidades');
+  const nuevoTipo = tipos[(idx + 1) % tipos.length];
+  producto.tipo = nuevoTipo;
+  try {
+    await updateDoc(doc(db, 'productos', id), { tipo: nuevoTipo });
     localStorage.setItem('productosCache', JSON.stringify(productosCache));
     cargarProductos();
   } catch(e) { alert('❌ Error: ' + e.message); }
@@ -751,6 +776,8 @@ window.regenerarCatalogo = async () => {
           tipo = 'litros'; empaque = '1 litro';
         } else if (nombre.includes('caja') || nombre.includes('fardo') || nombre.includes('pack') || nombre.includes('rollo')) {
           tipo = 'cajas'; empaque = '1 caja';
+        } else if (nombre.includes('bot') || nombre.includes('botella') || nombre.includes('pulverizador')) {
+          tipo = 'botellas'; empaque = '1 botella';
         }
         productosMap.set(key, { ref, nombre: l.producto || 'Sin nombre', proveedor, precio: l.precio || 0, tipo, minimo, empaque, activo: true, historialPrecios: [l.precio || 0] });
       }
@@ -825,11 +852,11 @@ window.cargarProductosPedido = () => {
   }
   let html = '<table><thead><tr><th>Producto</th><th>Tipo</th><th>Mínimo</th><th>Precio Unit.</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>';
   productosFiltrados.forEach((p, idx) => {
-    const tipoIcon = p.tipo === 'cajas' ? '📦' : p.tipo === 'litros' ? '💧' : '🔢';
-    const tipoTexto = p.tipo === 'cajas' ? 'Cajas' : p.tipo === 'litros' ? 'Litros' : 'Unidades';
+    const tipoIcon = p.tipo === 'cajas' ? '📦' : p.tipo === 'litros' ? '💧' : p.tipo === 'botellas' ? '🍶' : '🔢';
+    const tipoTexto = p.tipo === 'cajas' ? 'Cajas' : p.tipo === 'litros' ? 'Litros' : p.tipo === 'botellas' ? 'Botellas' : 'Unidades';
     const tipoClass = 'tipo-' + (p.tipo || 'unidades');
     const minimo = p.minimo || 1;
-    const empaqueTexto = p.empaque || (p.tipo === 'cajas' ? 'caja(s)' : p.tipo === 'litros' ? 'litro(s)' : 'ud(s)');
+    const empaqueTexto = p.empaque || (p.tipo === 'cajas' ? 'caja(s)' : p.tipo === 'litros' ? 'litro(s)' : p.tipo === 'botellas' ? 'botella(s)' : 'ud(s)');
     html += '<tr data-ref-pedido="' + (p.ref || '').toUpperCase() + '" data-idx="' + idx + '">';
     html += '<td><strong>' + (p.nombre || 'Sin nombre') + '</strong>';
     if (p.ref && p.ref !== 'SIN_REF') html += '<br><small style="color:#64748b;">Ref: ' + p.ref + '</small>';
