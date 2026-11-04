@@ -1847,68 +1847,113 @@ window.eliminarPedido = (id) => {
 // GENERAR PDF
 // ==========================================
 window.generarPDFPedido = () => {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  
-  const mes = document.getElementById('pedidoMes').value;
-  const proveedor = document.getElementById('pedidoProveedor').value;
-  const subtotal = parseFloat(document.getElementById('pedidoSubtotal').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-  const iva = parseFloat(document.getElementById('pedidoIva').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-  const total = parseFloat(document.getElementById('pedidoTotal').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-  
-  const mesesTexto = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
-                      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-  const [anio, mesNum] = mes.split('-');
-  const mesTexto = mesesTexto[parseInt(mesNum) - 1] + ' de ' + anio;
-  
-  const proveedorNombre = proveedor === 'LUNA' ? 'Comercial Leonesa LUNA' : 'LIDERA Higiene';
-  
-  doc.setFontSize(12);
-  doc.text('Diputación de León', 20, 20);
-  
-  doc.setFontSize(18);
-  doc.setFont(undefined, 'bold');
-  doc.text('Pabellón Niño Jesús', 20, 32);
-  doc.setFont(undefined, 'normal');
-  
-  doc.setFontSize(12);
-  doc.text('Pedido correspondiente al mes de ' + mesTexto, 20, 45);
-  
-  doc.text('Proveedor: ' + proveedorNombre, 20, 55);
-  
-  const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
-  
-  const tableData = productosPedidos.map(p => [
-    p.ref || '-',
-    p.nombre,
-    p.cantidad.toString(),
-    formatearMoneda(p.precio || 0),
-    formatearMoneda(p.cantidad * (p.precio || 0))
-  ]);
-  
-  doc.autoTable({
-    startY: 65,
-    head: [['Referencia', 'Producto', 'Cantidad', 'Precio', 'Importe']],
-    body: tableData,
-    theme: 'grid',
-    headStyles: { 
-      fillColor: [30, 58, 95],
-      textColor: 255,
-      fontStyle: 'bold',
-      halign: 'center'
-    },
-    columnStyles: {
-      0: { halign: 'center', cellWidth: 22 },
-      1: { halign: 'left', cellWidth: 75 },
-      2: { halign: 'right', cellWidth: 25 },
-      3: { halign: 'right', cellWidth: 24 },
-      4: { halign: 'right', cellWidth: 24 }
-    },
-    styles: {
-      fontSize: 10,
-      cellPadding: 3
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const mes = document.getElementById('pedidoMes').value;
+    const proveedor = document.getElementById('pedidoProveedor').value;
+    const subtotal = parseFloat(document.getElementById('pedidoSubtotal').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    const iva = parseFloat(document.getElementById('pedidoIva').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    const total = parseFloat(document.getElementById('pedidoTotal').textContent.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    
+    // Validar que haya productos en el pedido
+    const productosPedidos = pedidoActual.filter(p => p.cantidad > 0);
+    
+    if (productosPedidos.length === 0) {
+      mostrarToast('⚠️ No hay productos en el pedido. Añade cantidades antes de generar el PDF.', 'warning');
+      return;
     }
-  });
+    
+    if (!mes) {
+      mostrarToast('⚠️ Selecciona un mes antes de generar el PDF.', 'warning');
+      return;
+    }
+    
+    const mesesTexto = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const [anio, mesNum] = mes.split('-');
+    const mesTexto = mesesTexto[parseInt(mesNum) - 1] + ' de ' + anio;
+    const proveedorNombre = proveedor === 'LUNA' ? 'Comercial Leonesa LUNA' : 'LIDERA Higiene';
+    
+    // Encabezado
+    doc.setFontSize(12);
+    doc.text('Diputación de León', 20, 20);
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text('Pabellón Niño Jesús', 20, 32);
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(12);
+    doc.text('Pedido correspondiente al mes de ' + mesTexto, 20, 45);
+    doc.text('Proveedor: ' + proveedorNombre, 20, 55);
+    
+    // Preparar datos de la tabla
+    const tableData = productosPedidos.map(p => [
+      p.ref || '-',
+      p.nombre || 'Sin nombre',
+      p.cantidad.toString(),
+      formatearMoneda(p.precio || 0),
+      formatearMoneda((p.cantidad || 0) * (p.precio || 0))
+    ]);
+    
+    // Generar tabla
+    doc.autoTable({
+      startY: 65,
+      head: [['Referencia', 'Producto', 'Cantidad', 'Precio', 'Importe']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { 
+        fillColor: [30, 58, 95],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 22 },
+        1: { halign: 'left', cellWidth: 75 },
+        2: { halign: 'right', cellWidth: 25 },
+        3: { halign: 'right', cellWidth: 24 },
+        4: { halign: 'right', cellWidth: 24 }
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 3
+      }
+    });
+    
+    // Totales
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.text('Subtotal:', 130, finalY);
+    doc.text(formatearMoneda(subtotal), 190, finalY, { align: 'right' });
+    doc.text('IVA (21%):', 130, finalY + 8);
+    doc.text(formatearMoneda(iva), 190, finalY + 8, { align: 'right' });
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('TOTAL:', 130, finalY + 20);
+    doc.text(formatearMoneda(total), 190, finalY + 20, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+    
+    // Pie
+    const pieY = finalY + 50;
+    doc.setFontSize(11);
+    doc.text('Pedido efectuado por Arturo Fernández', 20, pieY);
+    doc.text('Encargado del edificio', 20, pieY + 8);
+    const fechaHoy = new Date().toLocaleDateString('es-ES', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+    doc.text(fechaHoy, 20, pieY + 16);
+    
+    // Guardar PDF
+    doc.save(`pedido_${proveedor}_${mes}.pdf`);
+    mostrarToast('📄 PDF generado correctamente', 'success');
+    
+  } catch(e) {
+    console.error('Error generando PDF:', e);
+    mostrarToast('❌ Error al generar PDF: ' + e.message, 'error');
+  }
+};
   
   const finalY = doc.lastAutoTable.finalY + 10;
   
