@@ -759,9 +759,10 @@ const storage = getStorage(app);
 let albaranesCache = [];
 let productosCache = [];
 let pedidoActual = [];
-let cantidadesPedido = {}; // NUEVO: objeto para guardar cantidades por índice
+let cantidadesPedido = {};
 let imagenAlbaranFile = null;
 
+// ===== UTILIDADES =====
 window.mostrarToast = function(mensaje, tipo) {
   tipo = tipo || 'success';
   var container = document.getElementById('toastContainer');
@@ -795,6 +796,7 @@ window.cerrarModal = function(id) {
   document.getElementById(id).classList.remove('active');
 };
 
+// ===== NAVEGACIÓN =====
 document.querySelectorAll('.nav-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -809,6 +811,7 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
   });
 });
 
+// Preview imagen
 var inputImagen = document.getElementById('albaranImagen');
 if (inputImagen) {
   inputImagen.addEventListener('change', function(e) {
@@ -824,6 +827,7 @@ if (inputImagen) {
   });
 }
 
+// ===== ALBARANES =====
 window.agregarLinea = function() {
   var container = document.getElementById('lineasContainer');
   var linea = document.createElement('div');
@@ -1009,6 +1013,7 @@ window.eliminarAlbaran = async function(id) {
   }
 };
 
+// ===== CALENDARIO =====
 window.cargarCalendario = async function() {
   var grid = document.getElementById('calendarioGrid');
   grid.innerHTML = '<div class="empty-state"><p>Cargando calendario...</p></div>';
@@ -1059,6 +1064,7 @@ window.verDetalleMesCalendario = function(mesKey) {
   mostrarToast('📅 ' + mesKey + ': ' + snap.length + ' albaranes | Total: ' + formatearMoneda(total) + ' (🟡 LIDERA: ' + formatearMoneda(lidera) + ' | 🔵 LUNA: ' + formatearMoneda(luna) + ')', 'info');
 };
 
+// ===== DASHBOARD =====
 window.cargarDashboard = async function() {
   try {
     var snap = await getDocs(collection(db, 'albaranes'));
@@ -1170,6 +1176,7 @@ window.verDetalleMes = function(mes) {
   mostrarToast('📅 ' + mes + ': ' + albaranesMes.length + ' albaranes | Total: ' + formatearMoneda(total) + ' (🟡 LIDERA: ' + formatearMoneda(lidera) + ' | 🔵 LUNA: ' + formatearMoneda(luna) + ')', 'info');
 };
 
+// ===== PRODUCTOS =====
 window.cargarProductos = async function() {
   var contenedor = document.getElementById('tablaProductos');
   contenedor.innerHTML = '<div class="empty-state"><p>Cargando productos...</p></div>';
@@ -1402,7 +1409,7 @@ window.eliminarProducto = async function(id) {
   }
 };
 
-// ===== PREPARAR PEDIDO CON CANTIDADES PERSISTENTES =====
+// ===== PREPARAR PEDIDO (CORREGIDO) =====
 
 window.cargarProductosPedido = async function() {
   var proveedor = document.getElementById('pedidoProveedor').value;
@@ -1410,8 +1417,9 @@ window.cargarProductosPedido = async function() {
   var buscadorContainer = document.getElementById('buscadorPedidoContainer');
   var buscadorInput = document.getElementById('buscadorPedido');
   
-  // Resetear cantidades
+  // Resetear completamente
   cantidadesPedido = {};
+  pedidoActual = [];
   
   if (productosCache.length === 0) {
     try {
@@ -1461,17 +1469,24 @@ window.cargarProductosPedido = async function() {
   buscadorInput.value = '';
   document.getElementById('contadorResultados').textContent = productosFiltrados.length + ' productos';
   
-  window._productosPedidoCompletos = productosFiltrados;
-  
-  // Inicializar cantidades a 0 y guardar índice original
+  // Inicializar pedidoActual con índices consecutivos (0,1,2,3...)
   pedidoActual = productosFiltrados.map(function(p, idx) { 
     cantidadesPedido[idx] = 0;
-    return { ...p, cantidad: 0, idxOriginal: idx }; 
+    return { 
+      ref: p.ref, 
+      nombre: p.nombre, 
+      precio: p.precio, 
+      tipo: p.tipo, 
+      minimo: p.minimo, 
+      activo: p.activo,
+      cantidad: 0
+    }; 
   });
   
+  window._productosPedidoCompletos = productosFiltrados;
+  
   renderizarTablaProductosPedido(productosFiltrados);
-  actualizarResumenPedido();
-  actualizarPanelFlotante();
+  recalcularTotales();
 };
 
 function renderizarTablaProductosPedido(productos) {
@@ -1483,12 +1498,20 @@ function renderizarTablaProductosPedido(productos) {
   }
   
   var html = '<table><thead><tr><th>Producto</th><th style="width: 60px;">Mín.</th><th>Precio</th><th style="width: 90px;">Cantidad</th><th>Importe</th><th></th></tr></thead><tbody>';
+  
   productos.forEach(function(p) {
+    // Buscar el índice en pedidoActual por nombre y referencia
+    var idx = pedidoActual.findIndex(function(x) { 
+      return x.ref === p.ref && x.nombre === p.nombre; 
+    });
+    
+    if (idx === -1) {
+      idx = window._productosPedidoCompletos.indexOf(p);
+    }
+    
     var minimo = p.minimo || 1;
     var iconoTipo = getIconoTipo(p.tipo);
-    // Usar el índice original del producto
-    var idx = p.idxOriginal !== undefined ? p.idxOriginal : pedidoActual.indexOf(p);
-    var cantidadActual = cantidadesPedido[idx] || 0;
+    var cantidadActual = (idx >= 0 && cantidadesPedido[idx]) ? cantidadesPedido[idx] : 0;
     
     html += '<tr data-idx="' + idx + '">' +
       '<td><span class="tipo-icon">' + iconoTipo + '</span> ' + p.nombre + '</td>' +
@@ -1499,37 +1522,34 @@ function renderizarTablaProductosPedido(productos) {
       '<td><button class="btn btn-danger" onclick="quitarProductoPedido(' + idx + ')">🗑️</button></td>' +
       '</tr>';
   });
+  
   html += '</tbody></table>';
   container.innerHTML = html;
 }
 
-// NUEVA: Cambiar cantidad en tiempo real
 window.cambiarCantidad = function(idx, valor) {
   var cantidad = parseFloat(valor) || 0;
-  cantidadesPedido[idx] = cantidad;
-  if (pedidoActual[idx]) {
+  
+  if (idx >= 0 && idx < pedidoActual.length) {
+    cantidadesPedido[idx] = cantidad;
     pedidoActual[idx].cantidad = cantidad;
+    
+    var impCell = document.getElementById('imp-' + idx);
+    if (impCell) {
+      impCell.textContent = formatearMoneda(cantidad * pedidoActual[idx].precio);
+    }
   }
   
-  // Actualizar solo el importe de esta fila
-  var impCell = document.getElementById('imp-' + idx);
-  if (impCell && pedidoActual[idx]) {
-    impCell.textContent = formatearMoneda(cantidad * pedidoActual[idx].precio);
-  }
-  
-  // Recalcular totales
   recalcularTotales();
 };
 
-// NUEVA: Recalcular totales desde el objeto cantidadesPedido
 function recalcularTotales() {
   var subtotal = 0;
   var productosConCantidad = 0;
   
-  Object.keys(cantidadesPedido).forEach(function(idx) {
+  pedidoActual.forEach(function(p, idx) {
     var cantidad = cantidadesPedido[idx] || 0;
-    var p = pedidoActual[idx];
-    if (p && cantidad > 0) {
+    if (cantidad > 0) {
       subtotal += cantidad * p.precio;
       productosConCantidad++;
     }
@@ -1633,16 +1653,17 @@ window.copiarPedidoAnterior = async function() {
 };
 
 window.quitarProductoPedido = function(idx) {
-  cantidadesPedido[idx] = 0;
-  if (pedidoActual[idx]) {
+  if (idx >= 0 && idx < pedidoActual.length) {
+    cantidadesPedido[idx] = 0;
     pedidoActual[idx].cantidad = 0;
+    
+    var cantInput = document.getElementById('cant-' + idx);
+    if (cantInput) cantInput.value = 0;
+    
+    var impCell = document.getElementById('imp-' + idx);
+    if (impCell) impCell.textContent = '0,00 €';
   }
-  var cantInput = document.getElementById('cant-' + idx);
-  if (cantInput) cantInput.value = 0;
-  var impCell = document.getElementById('imp-' + idx);
-  if (impCell && pedidoActual[idx]) {
-    impCell.textContent = '0,00 €';
-  }
+  
   recalcularTotales();
 };
 
@@ -1676,27 +1697,30 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
   total = total || 0;
   
   var panel = document.getElementById('panelFlotante');
-  
-  if (productos === 0 && total === 0) {
-    panel.classList.remove('visible');
+  if (!panel) {
+    console.error('Panel flotante no encontrado');
     return;
   }
   
-  panel.classList.add('visible');
-  panel.classList.remove('pf-alerta', 'pf-cuidado');
-  
-  document.getElementById('pfProductos').textContent = productos;
-  document.getElementById('pfSubtotal').textContent = formatearMoneda(subtotal);
-  document.getElementById('pfIva').textContent = formatearMoneda(iva);
-  document.getElementById('pfTotal').textContent = formatearMoneda(total);
-  
-  var restante = Math.max(500 - total, 0);
-  document.getElementById('pfRestante').textContent = formatearMoneda(restante);
-  
-  if (total > 500) {
-    panel.classList.add('pf-alerta');
-  } else if (total > 400) {
-    panel.classList.add('pf-cuidado');
+  if (productos > 0 || total > 0) {
+    panel.classList.add('visible');
+    panel.classList.remove('pf-alerta', 'pf-cuidado');
+    
+    document.getElementById('pfProductos').textContent = productos;
+    document.getElementById('pfSubtotal').textContent = formatearMoneda(subtotal);
+    document.getElementById('pfIva').textContent = formatearMoneda(iva);
+    document.getElementById('pfTotal').textContent = formatearMoneda(total);
+    
+    var restante = Math.max(500 - total, 0);
+    document.getElementById('pfRestante').textContent = formatearMoneda(restante);
+    
+    if (total > 500) {
+      panel.classList.add('pf-alerta');
+    } else if (total > 400) {
+      panel.classList.add('pf-cuidado');
+    }
+  } else {
+    panel.classList.remove('visible');
   }
 }
 
@@ -1974,6 +1998,7 @@ window.limpiarPedido = function() {
   mostrarToast('🗑️ Pedido limpiado', 'info');
 };
 
+// ===== INFORMES =====
 window.generarInforme = async function() {
   var proveedor = document.getElementById('filtroInformeProveedor').value;
   var anio = document.getElementById('filtroInformeAnio').value;
@@ -2086,6 +2111,7 @@ window.descargarEvolucionPDF = function() {
   doc.save('evolucion_precios_' + proveedor + '.pdf');
 };
 
+// ===== EVENT LISTENERS =====
 document.getElementById('filtroProveedor').addEventListener('change', cargarListadoAlbaranes);
 document.getElementById('filtroAnio').addEventListener('change', cargarListadoAlbaranes);
 document.getElementById('buscadorAlbaranes').addEventListener('input', cargarListadoAlbaranes);
