@@ -225,41 +225,55 @@ table tr:hover { background: #f8fafc; }
 }
 .contador-productos .total { font-weight: bold; color: #1e3a5f; }
 
-// NUEVA: Actualiza el panel flotante
-function actualizarPanelFlotante(productos, subtotal, iva, total) {
-  productos = productos || 0;
-  subtotal = subtotal || 0;
-  iva = iva || 0;
-  total = total || 0;
-  
-  var panel = document.getElementById('panelFlotante');
-  
-  if (productos === 0 && total === 0) {
-    panel.classList.remove('visible');
-    return;
-  }
-  
-  panel.classList.add('visible');
-  
-  // Quitar clases de alerta previas
-  panel.classList.remove('pf-alerta', 'pf-cuidado');
-  
-  document.getElementById('pfProductos').textContent = productos;
-  document.getElementById('pfSubtotal').textContent = formatearMoneda(subtotal);
-  document.getElementById('pfIva').textContent = formatearMoneda(iva);
-  document.getElementById('pfTotal').textContent = formatearMoneda(total);
-  
-  var restante = Math.max(500 - total, 0);
-  document.getElementById('pfRestante').textContent = formatearMoneda(restante);
-  
-  // Cambiar color según el gasto
-  if (total > 500) {
-    panel.classList.add('pf-alerta');
-  } else if (total > 400) {
-    panel.classList.add('pf-cuidado');
-  }
+/* ===== PANEL FLOTANTE DE PEDIDO ===== */
+.panel-flotante {
+  position: fixed;
+  bottom: 90px;
+  right: 30px;
+  background: linear-gradient(135deg, #1e3a5f, #2c5282);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 998;
+  min-width: 220px;
+  display: none;
+  font-size: 14px;
 }
+.panel-flotante.visible { display: block; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.panel-flotante .pf-titulo { font-size: 11px; opacity: 0.8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.panel-flotante .pf-fila { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.panel-flotante .pf-total { font-size: 22px; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3); }
+.panel-flotante .pf-restante { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+.panel-flotante.pf-alerta { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.panel-flotante.pf-cuidado { background: linear-gradient(135deg, #d97706, #f59e0b); }
 
+/* ===== BUSCADOR DE PRODUCTOS EN PEDIDO ===== */
+.buscador-pedido {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+.buscador-pedido input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+.buscador-pedido input:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+.buscador-pedido .contador-resultados {
+  font-size: 13px;
+  color: #64748b;
+  white-space: nowrap;
+}
 </style>
 </head>
 <body>
@@ -289,8 +303,8 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
   <button class="nav-btn" data-section="productos">📦 Productos</button>
   <button class="nav-btn" data-section="calendario">📅 Calendario</button>
   <button class="nav-btn" data-section="evolucion-precios">📈 Evolución Precios</button>
-  <button class="nav-btn" data-section="preparar-pedido">🛒 Preparar Pedido</button>
-  <button class="nav-btn" data-section="informes">📑 Informes</button>
+  <button class="nav-btn" data-section="preparar-pedido"> Preparar Pedido</button>
+  <button class="nav-btn" data-section="informes"> Informes</button>
 </div>
 
 <div class="container">
@@ -308,7 +322,7 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
         <div class="value" id="statGastoTotal">0 €</div>
       </div>
       <div class="stat-card lidera">
-        <h4>🟡 LIDERA</h4>
+        <h4> LIDERA</h4>
         <div class="value" id="statLidera">0 €</div>
       </div>
       <div class="stat-card luna">
@@ -430,7 +444,7 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
         <option value="2026">2026</option>
       </select>
       
-      <input type="text" id="buscadorAlbaranes" placeholder="🔍 Buscar por número o producto...">
+      <input type="text" id="buscadorAlbaranes" placeholder=" Buscar por número o producto...">
     </div>
     
     <div id="tablaAlbaranes">
@@ -454,7 +468,7 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
       <div class="filtro-estado">
         <label>Estado:</label>
         <select id="filtroProductosEstado" onchange="cargarProductos()">
-          <option value="TODOS">📋 Todos</option>
+          <option value="TODOS"> Todos</option>
           <option value="ACTIVOS">✅ Solo activos</option>
           <option value="INACTIVOS">⛔ Solo inactivos</option>
         </select>
@@ -475,10 +489,10 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
 
   <!-- EVOLUCIÓN PRECIOS -->
   <div id="evolucion-precios" class="section">
-    <h2 style="color: #1e3a5f; margin-bottom: 20px;">📈 Evolución de Precios por Año</h2>
+    <h2 style="color: #1e3a5f; margin-bottom: 20px;"> Evolución de Precios por Año</h2>
     <p style="color: #64748b; margin-bottom: 20px;">Historial de precios anuales por producto</p>
     
-    <div class="alert alert-info">ℹ️ Selecciona un proveedor para ver la evolución de precios año a año. Cada fila muestra el último precio registrado de ese año.</div>
+    <div class="alert alert-info">️ Selecciona un proveedor para ver la evolución de precios año a año. Cada fila muestra el último precio registrado de ese año.</div>
     
     <div class="form-group">
       <select id="filtroEvolucionProveedor" onchange="cargarEvolucionPrecios()">
@@ -532,6 +546,13 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
       </div>
       
       <h3 style="margin-top: 20px; margin-bottom: 15px;">Productos del pedido:</h3>
+      
+      <!-- NUEVO: Buscador de productos -->
+      <div class="buscador-pedido" id="buscadorPedidoContainer" style="display: none;">
+        <input type="text" id="buscadorPedido" placeholder="🔍 Buscar por código o nombre del artículo..." oninput="filtrarProductosPedido()">
+        <span class="contador-resultados" id="contadorResultados"></span>
+      </div>
+      
       <div id="productosPedidoContainer">
         <div class="empty-state">
           <p>Selecciona un proveedor y mes para comenzar</p>
@@ -552,11 +573,11 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
           <div class="value" id="resumenIva">0 €</div>
         </div>
         <div class="resumen-item">
-          <div class="label">💰 TOTAL</div>
+          <div class="label"> TOTAL</div>
           <div class="value" id="resumenTotal">0 €</div>
         </div>
         <div class="resumen-item">
-          <div class="label">📊 Restante</div>
+          <div class="label"> Restante</div>
           <div class="value" id="resumenRestante">500 €</div>
         </div>
       </div>
@@ -673,9 +694,9 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
     <div class="form-group">
       <label>Tipo de pedido *</label>
       <select id="productoTipo">
-        <option value="unidades">🔢 Unidades (uds)</option>
+        <option value="unidades"> Unidades (uds)</option>
         <option value="cajas">📦 Cajas (1, 2, 3...)</option>
-        <option value="litros">🧴 Litros (mínimo = 1 caja)</option>
+        <option value="litros"> Litros (mínimo = 1 caja)</option>
       </select>
     </div>
     
@@ -698,11 +719,21 @@ function actualizarPanelFlotante(productos, subtotal, iva, total) {
 <div id="modalImagen" class="modal">
   <div class="modal-content" style="max-width: 900px;">
     <div class="modal-header">
-      <h2>📸 Foto del Albarán</h2>
+      <h2> Foto del Albarán</h2>
       <button class="close-btn" onclick="cerrarModal('modalImagen')">✕ Cerrar</button>
     </div>
     <div id="contenidoImagen"></div>
   </div>
+</div>
+
+<!-- NUEVO: PANEL FLOTANTE -->
+<div class="panel-flotante" id="panelFlotante">
+  <div class="pf-titulo">📊 Resumen del pedido</div>
+  <div class="pf-fila"><span>Productos:</span><span id="pfProductos">0</span></div>
+  <div class="pf-fila"><span>Subtotal:</span><span id="pfSubtotal">0,00 €</span></div>
+  <div class="pf-fila"><span>IVA (21%):</span><span id="pfIva">0,00 €</span></div>
+  <div class="pf-total"><span>TOTAL:</span><span id="pfTotal">0,00 €</span></div>
+  <div class="pf-restante">Restante hasta 500€: <strong id="pfRestante">500,00 €</strong></div>
 </div>
 
 <button id="btnTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Volver arriba">⬆️</button>
@@ -735,7 +766,7 @@ window.mostrarToast = function(mensaje, tipo) {
   var container = document.getElementById('toastContainer');
   var toast = document.createElement('div');
   toast.className = 'toast ' + tipo;
-  var iconos = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  var iconos = { success: '✅', error: '❌', warning: '⚠️', info: '️' };
   toast.innerHTML = '<span style="font-size: 20px;">' + (iconos[tipo] || '✅') + '</span><span>' + mensaje + '</span>';
   container.appendChild(toast);
   setTimeout(function() {
@@ -983,7 +1014,7 @@ window.eliminarAlbaran = async function(id) {
     mostrarToast('✅ Albarán eliminado', 'success');
     cargarListadoAlbaranes();
   } catch(e) {
-    mostrarToast('❌ Error: ' + e.message, 'error');
+    mostrarToast(' Error: ' + e.message, 'error');
   }
 };
 
@@ -1035,7 +1066,7 @@ window.verDetalleMesCalendario = function(mesKey) {
   var total = snap.reduce(function(s, a) { return s + (a.total || 0); }, 0);
   var lidera = snap.filter(function(a) { return a.proveedor === 'LIDERA'; }).reduce(function(s, a) { return s + (a.total || 0); }, 0);
   var luna = snap.filter(function(a) { return a.proveedor === 'LUNA'; }).reduce(function(s, a) { return s + (a.total || 0); }, 0);
-  mostrarToast('📅 ' + mesKey + ': ' + snap.length + ' albaranes | Total: ' + formatearMoneda(total) + ' (🟡 LIDERA: ' + formatearMoneda(lidera) + ' | 🔵 LUNA: ' + formatearMoneda(luna) + ')', 'info');
+  mostrarToast('📅 ' + mesKey + ': ' + snap.length + ' albaranes | Total: ' + formatearMoneda(total) + ' (🟡 LIDERA: ' + formatearMoneda(lidera) + ' |  LUNA: ' + formatearMoneda(luna) + ')', 'info');
 };
 
 window.cargarDashboard = async function() {
@@ -1146,7 +1177,7 @@ window.verDetalleMes = function(mes) {
   var total = albaranesMes.reduce(function(s, a) { return s + (a.total || 0); }, 0);
   var lidera = albaranesMes.filter(function(a) { return a.proveedor === 'LIDERA'; }).reduce(function(s, a) { return s + (a.total || 0); }, 0);
   var luna = albaranesMes.filter(function(a) { return a.proveedor === 'LUNA'; }).reduce(function(s, a) { return s + (a.total || 0); }, 0);
-  mostrarToast('📅 ' + mes + ': ' + albaranesMes.length + ' albaranes | Total: ' + formatearMoneda(total) + ' (🟡 LIDERA: ' + formatearMoneda(lidera) + ' | 🔵 LUNA: ' + formatearMoneda(luna) + ')', 'info');
+  mostrarToast(' ' + mes + ': ' + albaranesMes.length + ' albaranes | Total: ' + formatearMoneda(total) + ' ( LIDERA: ' + formatearMoneda(lidera) + ' | 🔵 LUNA: ' + formatearMoneda(luna) + ')', 'info');
 };
 
 window.cargarProductos = async function() {
@@ -1207,8 +1238,8 @@ window.cargarProductos = async function() {
         '<td class="col-minimo"><input type="number" class="editable" data-field="minimo" value="' + (p.minimo || 1) + '" step="0.01" onchange="guardarCambioProducto(this)"></td>' +
         '<td class="col-tipo"><select class="editable" data-field="tipo" onchange="guardarCambioProducto(this)">' +
         '<option value="unidades" ' + (p.tipo === 'unidades' ? 'selected' : '') + '>🔢 unidades</option>' +
-        '<option value="cajas" ' + (p.tipo === 'cajas' ? 'selected' : '') + '>📦 cajas</option>' +
-        '<option value="litros" ' + (p.tipo === 'litros' ? 'selected' : '') + '>🧴 litros</option>' +
+        '<option value="cajas" ' + (p.tipo === 'cajas' ? 'selected' : '') + '> cajas</option>' +
+        '<option value="litros" ' + (p.tipo === 'litros' ? 'selected' : '') + '> litros</option>' +
         '</select></td>' +
         '<td class="col-total total-celda">' + formatearMoneda(total) + '</td></tr>';
     });
@@ -1313,7 +1344,7 @@ window.buscarYResaltarProducto = function() {
               });
             }, 300);
           });
-          mostrarToast('ℹ️ Producto encontrado pero estaba oculto. Filtro cambiado a "Todos"', 'info');
+          mostrarToast('️ Producto encontrado pero estaba oculto. Filtro cambiado a "Todos"', 'info');
         } else {
           if (confirm('No se encontró el artículo "' + termino + '".\n\n¿Deseas crearlo ahora como un producto nuevo?')) {
             document.getElementById('productoNombre').value = termino;
@@ -1384,13 +1415,15 @@ window.eliminarProducto = async function(id) {
     mostrarToast('✅ Producto eliminado', 'success');
     cargarProductos();
   } catch(e) {
-    mostrarToast('❌ Error: ' + e.message, 'error');
+    mostrarToast(' Error: ' + e.message, 'error');
   }
 };
 
 window.cargarProductosPedido = async function() {
   var proveedor = document.getElementById('pedidoProveedor').value;
   var container = document.getElementById('productosPedidoContainer');
+  var buscadorContainer = document.getElementById('buscadorPedidoContainer');
+  var buscadorInput = document.getElementById('buscadorPedido');
   
   // Si no hay productos en cache, cargarlos desde Firebase
   if (productosCache.length === 0) {
@@ -1398,7 +1431,6 @@ window.cargarProductosPedido = async function() {
       var snap = await getDocs(collection(db, 'productos'));
       productosCache = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
       
-      // Si no hay productos en Firebase, extraerlos de los albaranes
       if (productosCache.length === 0 && albaranesCache.length > 0) {
         var productosMap = new Map();
         albaranesCache.forEach(function(a) {
@@ -1427,36 +1459,84 @@ window.cargarProductosPedido = async function() {
     }
   }
   
-  // Filtrar productos del proveedor seleccionado y que estén activos
   var productosFiltrados = productosCache.filter(function(p) { 
     return p.proveedor === proveedor && p.activo !== false; 
   });
   
   if (productosFiltrados.length === 0) {
     container.innerHTML = '<div class="empty-state"><p>No hay productos registrados para este proveedor</p></div>';
-    document.getElementById('resumenPedido').style.display = 'none';
+    buscadorContainer.style.display = 'none';
+    document.getElementById('panelFlotante').classList.remove('visible');
+    return;
+  }
+  
+  // Mostrar el buscador
+  buscadorContainer.style.display = 'flex';
+  buscadorInput.value = '';
+  document.getElementById('contadorResultados').textContent = productosFiltrados.length + ' productos';
+  
+  // Guardar lista completa para filtrar después
+  window._productosPedidoCompletos = productosFiltrados;
+  
+  renderizarTablaProductosPedido(productosFiltrados);
+  
+  pedidoActual = productosFiltrados.map(function(p) { return { ...p, cantidad: 0 }; });
+  actualizarResumenPedido();
+  actualizarPanelFlotante();
+};
+
+function renderizarTablaProductosPedido(productos) {
+  var container = document.getElementById('productosPedidoContainer');
+  
+  if (productos.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>No se encontraron productos con ese criterio</p></div>';
     return;
   }
   
   var html = '<table><thead><tr><th>Producto</th><th style="width: 60px;">Mín.</th><th>Precio</th><th style="width: 90px;">Cantidad</th><th>Importe</th><th></th></tr></thead><tbody>';
-  productosFiltrados.forEach(function(p, idx) {
+  productos.forEach(function(p, idx) {
     var minimo = p.minimo || 1;
     var iconoTipo = getIconoTipo(p.tipo);
-    html += '<tr>' +
+    // Buscar si ya tenía cantidad asignada
+    var existente = pedidoActual.find(function(x) { return x.ref === p.ref && x.nombre === p.nombre; });
+    var cantidadActual = existente ? (existente.cantidad || 0) : 0;
+    
+    html += '<tr data-idx="' + idx + '">' +
       '<td><span class="tipo-icon">' + iconoTipo + '</span> ' + p.nombre + '</td>' +
       '<td class="minimo-celda">' + minimo + '</td>' +
       '<td>' + formatearMoneda(p.precio) + '</td>' +
-      '<td><input type="number" id="cant-' + idx + '" value="0" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>' +
-      '<td id="imp-' + idx + '">0,00 €</td>' +
-      '<td><button class="btn btn-danger" onclick="quitarProductoPedido(' + idx + ')">🗑️</button></td>' +
+      '<td><input type="number" id="cant-' + idx + '" value="' + cantidadActual + '" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>' +
+      '<td id="imp-' + idx + '">' + formatearMoneda(cantidadActual * p.precio) + '</td>' +
+      '<td><button class="btn btn-danger" onclick="quitarProductoPedido(' + idx + ')">️</button></td>' +
       '</tr>';
   });
   html += '</tbody></table>';
   container.innerHTML = html;
+}
+
+// NUEVA: Función de filtrado en tiempo real
+window.filtrarProductosPedido = function() {
+  var termino = document.getElementById('buscadorPedido').value.toLowerCase().trim();
+  var productos = window._productosPedidoCompletos || [];
+  var contadorEl = document.getElementById('contadorResultados');
   
-  pedidoActual = productosFiltrados.map(function(p) { return { ...p, cantidad: 0 }; });
-  actualizarResumenPedido();
+  if (!termino) {
+    renderizarTablaProductosPedido(productos);
+    contadorEl.textContent = productos.length + ' productos';
+    return;
+  }
+  
+  // Filtrar por código (ref) o nombre (coincidencia parcial en orden)
+  var filtrados = productos.filter(function(p) {
+    var ref = (p.ref || '').toLowerCase();
+    var nombre = (p.nombre || '').toLowerCase();
+    return ref.includes(termino) || nombre.includes(termino);
+  });
+  
+  renderizarTablaProductosPedido(filtrados);
+  contadorEl.textContent = filtrados.length + ' de ' + productos.length + ' productos';
 };
+
 window.copiarPedidoAnterior = async function() {
   var proveedor = document.getElementById('pedidoProveedor').value;
   var mesActual = document.getElementById('pedidoMes').value;
@@ -1532,24 +1612,32 @@ window.actualizarPedido = function() {
   var iva = subtotal * 0.21;
   var total = subtotal + iva;
   
-  document.getElementById('pedidoSubtotal').textContent = formatearMoneda(subtotal);
-  document.getElementById('pedidoIva').textContent = formatearMoneda(iva);
-  document.getElementById('pedidoTotal').textContent = formatearMoneda(total);
+  // Actualizar los campos del resumen inferior (si existen)
+  var elSubtotal = document.getElementById('pedidoSubtotal');
+  var elIva = document.getElementById('pedidoIva');
+  var elTotal = document.getElementById('pedidoTotal');
+  if (elSubtotal) elSubtotal.textContent = formatearMoneda(subtotal);
+  if (elIva) elIva.textContent = formatearMoneda(iva);
+  if (elTotal) elTotal.textContent = formatearMoneda(total);
   
-  var porcentaje = Math.min((total / 500) * 100, 100);
+  // Barra de progreso
   var progreso = document.getElementById('pedidoProgreso');
-  progreso.style.width = porcentaje + '%';
-  progreso.textContent = porcentaje.toFixed(0) + '% de 500 €';
-  
-  if (total > 500) {
-    progreso.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
-  } else if (total > 400) {
-    progreso.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
-  } else {
-    progreso.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+  if (progreso) {
+    var porcentaje = Math.min((total / 500) * 100, 100);
+    progreso.style.width = porcentaje + '%';
+    progreso.textContent = porcentaje.toFixed(0) + '% de 500 €';
+    
+    if (total > 500) {
+      progreso.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+    } else if (total > 400) {
+      progreso.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+    } else {
+      progreso.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+    }
   }
   
   actualizarResumenPedido(productosConCantidad, subtotal, iva, total);
+  actualizarPanelFlotante(productosConCantidad, subtotal, iva, total);
 };
 
 function actualizarResumenPedido(productos, subtotal, iva, total) {
@@ -1569,6 +1657,41 @@ function actualizarResumenPedido(productos, subtotal, iva, total) {
   document.getElementById('resumenTotal').textContent = formatearMoneda(total);
   var restante = Math.max(500 - total, 0);
   document.getElementById('resumenRestante').textContent = formatearMoneda(restante);
+}
+
+// NUEVA: Actualiza el panel flotante
+function actualizarPanelFlotante(productos, subtotal, iva, total) {
+  productos = productos || 0;
+  subtotal = subtotal || 0;
+  iva = iva || 0;
+  total = total || 0;
+  
+  var panel = document.getElementById('panelFlotante');
+  
+  if (productos === 0 && total === 0) {
+    panel.classList.remove('visible');
+    return;
+  }
+  
+  panel.classList.add('visible');
+  
+  // Quitar clases de alerta previas
+  panel.classList.remove('pf-alerta', 'pf-cuidado');
+  
+  document.getElementById('pfProductos').textContent = productos;
+  document.getElementById('pfSubtotal').textContent = formatearMoneda(subtotal);
+  document.getElementById('pfIva').textContent = formatearMoneda(iva);
+  document.getElementById('pfTotal').textContent = formatearMoneda(total);
+  
+  var restante = Math.max(500 - total, 0);
+  document.getElementById('pfRestante').textContent = formatearMoneda(restante);
+  
+  // Cambiar color según el gasto
+  if (total > 500) {
+    panel.classList.add('pf-alerta');
+  } else if (total > 400) {
+    panel.classList.add('pf-cuidado');
+  }
 }
 
 window.verificarLimiteMensual = async function() {
@@ -1634,7 +1757,7 @@ window.filtrarPedidosGuardados = function() {
   
   var html = '';
   filtrados.sort(function(a, b) { return b.createdAt.localeCompare(a.createdAt); }).forEach(function(p) {
-    var icono = p.proveedor === 'LUNA' ? '🔵' : '🟡';
+    var icono = p.proveedor === 'LUNA' ? '' : '🟡';
     html += '<div class="pedido-item" onclick="cargarPedido(' + p.id + ')">' +
       '<div class="pedido-item-header"><h4>' + icono + ' ' + p.proveedor + ' - ' + p.mes + '</h4>' +
       '<button class="btn btn-danger" onclick="event.stopPropagation(); eliminarPedido(' + p.id + ')">🗑️</button></div>' +
@@ -1681,7 +1804,6 @@ window.eliminarPedido = function(id) {
 
 window.generarPDFPedido = function() {
   try {
-    // Calcular totales directamente desde los datos (no desde el DOM)
     var productosPedidos = pedidoActual.filter(function(p) { return p.cantidad > 0; });
     
     if (productosPedidos.length === 0) {
@@ -1715,7 +1837,6 @@ window.generarPDFPedido = function() {
     var mesTexto = mesesTexto[mesNum - 1] + ' de ' + anio;
     var proveedorNombre = proveedor === 'LUNA' ? 'Comercial Leonesa LUNA' : 'LIDERA Higiene';
     
-    // Encabezado
     doc.setFontSize(12);
     doc.text('Diputación de León', 20, 20);
     doc.setFontSize(18);
@@ -1726,7 +1847,6 @@ window.generarPDFPedido = function() {
     doc.text('Pedido correspondiente al mes de ' + mesTexto, 20, 45);
     doc.text('Proveedor: ' + proveedorNombre, 20, 55);
     
-    // Datos de la tabla
     var tableData = productosPedidos.map(function(p) {
       return [
         p.ref || '-',
@@ -1737,7 +1857,6 @@ window.generarPDFPedido = function() {
       ];
     });
     
-    // Generar tabla
     doc.autoTable({
       startY: 65,
       head: [['Referencia', 'Producto', 'Cantidad', 'Precio', 'Importe']],
@@ -1751,7 +1870,7 @@ window.generarPDFPedido = function() {
       },
       columnStyles: {
         0: { halign: 'center', cellWidth: 25 },
-        1: { halign: 'left', cellWidth: 75 },
+        1: { halign: 'left', cellWidth: 72 },
         2: { halign: 'right', cellWidth: 25 },
         3: { halign: 'right', cellWidth: 24 },
         4: { halign: 'right', cellWidth: 24 }
@@ -1762,7 +1881,6 @@ window.generarPDFPedido = function() {
       }
     });
     
-    // Totales
     var finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(10);
     doc.text('Subtotal:', 130, finalY);
@@ -1775,7 +1893,6 @@ window.generarPDFPedido = function() {
     doc.text(formatearMoneda(total), 190, finalY + 20, { align: 'right' });
     doc.setFont(undefined, 'normal');
     
-    // Pie
     var pieY = finalY + 50;
     doc.setFontSize(11);
     doc.text('Pedido efectuado por Arturo Fernández', 20, pieY);
@@ -1783,14 +1900,14 @@ window.generarPDFPedido = function() {
     var fechaHoy = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
     doc.text(fechaHoy, 20, pieY + 16);
     
-    // Guardar
     doc.save('pedido_' + proveedor + '_' + mes + '.pdf');
-    mostrarToast('📄 PDF generado correctamente', 'success');
+    mostrarToast(' PDF generado correctamente', 'success');
   } catch(e) {
     console.error('Error generando PDF:', e);
-    mostrarToast('❌ Error al generar PDF: ' + e.message, 'error');
+    mostrarToast(' Error al generar PDF: ' + e.message, 'error');
   }
 };
+
 window.copiarPedido = function() {
   var mes = document.getElementById('pedidoMes').value;
   var proveedor = document.getElementById('pedidoProveedor').value;
@@ -1827,6 +1944,8 @@ window.limpiarPedido = function() {
   document.getElementById('pedidoProgreso').style.width = '0%';
   document.getElementById('pedidoProgreso').textContent = '0% de 500 €';
   document.getElementById('resumenPedido').style.display = 'none';
+  document.getElementById('buscadorPedidoContainer').style.display = 'none';
+  document.getElementById('panelFlotante').classList.remove('visible');
   mostrarToast('🗑️ Pedido limpiado', 'info');
 };
 
