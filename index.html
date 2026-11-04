@@ -224,6 +224,42 @@ table tr:hover { background: #f8fafc; }
   display: flex; justify-content: space-between; align-items: center;
 }
 .contador-productos .total { font-weight: bold; color: #1e3a5f; }
+
+// NUEVA: Actualiza el panel flotante
+function actualizarPanelFlotante(productos, subtotal, iva, total) {
+  productos = productos || 0;
+  subtotal = subtotal || 0;
+  iva = iva || 0;
+  total = total || 0;
+  
+  var panel = document.getElementById('panelFlotante');
+  
+  if (productos === 0 && total === 0) {
+    panel.classList.remove('visible');
+    return;
+  }
+  
+  panel.classList.add('visible');
+  
+  // Quitar clases de alerta previas
+  panel.classList.remove('pf-alerta', 'pf-cuidado');
+  
+  document.getElementById('pfProductos').textContent = productos;
+  document.getElementById('pfSubtotal').textContent = formatearMoneda(subtotal);
+  document.getElementById('pfIva').textContent = formatearMoneda(iva);
+  document.getElementById('pfTotal').textContent = formatearMoneda(total);
+  
+  var restante = Math.max(500 - total, 0);
+  document.getElementById('pfRestante').textContent = formatearMoneda(restante);
+  
+  // Cambiar color según el gasto
+  if (total > 500) {
+    panel.classList.add('pf-alerta');
+  } else if (total > 400) {
+    panel.classList.add('pf-cuidado');
+  }
+}
+
 </style>
 </head>
 <body>
