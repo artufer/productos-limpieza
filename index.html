@@ -1494,26 +1494,28 @@ function renderizarTablaProductosPedido(productos) {
   }
   
   var html = '<table><thead><tr><th>Producto</th><th style="width: 60px;">Mín.</th><th>Precio</th><th style="width: 90px;">Cantidad</th><th>Importe</th><th></th></tr></thead><tbody>';
-  productos.forEach(function(p, idx) {
+  productos.forEach(function(p) {
     var minimo = p.minimo || 1;
     var iconoTipo = getIconoTipo(p.tipo);
-    // Buscar si ya tenía cantidad asignada
-    var existente = pedidoActual.find(function(x) { return x.ref === p.ref && x.nombre === p.nombre; });
-    var cantidadActual = existente ? (existente.cantidad || 0) : 0;
+    // Buscar el índice REAL en pedidoActual (no el de la tabla filtrada)
+    var idxReal = pedidoActual.findIndex(function(x) { 
+      return x.ref === p.ref && x.nombre === p.nombre; 
+    });
+    if (idxReal === -1) idxReal = 0; // fallback
+    var cantidadActual = pedidoActual[idxReal] ? (pedidoActual[idxReal].cantidad || 0) : 0;
     
-    html += '<tr data-idx="' + idx + '">' +
+    html += '<tr data-idx="' + idxReal + '">' +
       '<td><span class="tipo-icon">' + iconoTipo + '</span> ' + p.nombre + '</td>' +
       '<td class="minimo-celda">' + minimo + '</td>' +
       '<td>' + formatearMoneda(p.precio) + '</td>' +
-      '<td><input type="number" id="cant-' + idx + '" value="' + cantidadActual + '" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>' +
-      '<td id="imp-' + idx + '">' + formatearMoneda(cantidadActual * p.precio) + '</td>' +
-      '<td><button class="btn btn-danger" onclick="quitarProductoPedido(' + idx + ')">️</button></td>' +
+      '<td><input type="number" id="cant-' + idxReal + '" value="' + cantidadActual + '" min="0" step="0.01" onchange="actualizarPedido()" style="width: 80px; padding: 5px;"></td>' +
+      '<td id="imp-' + idxReal + '">' + formatearMoneda(cantidadActual * p.precio) + '</td>' +
+      '<td><button class="btn btn-danger" onclick="quitarProductoPedido(' + idxReal + ')">🗑️</button></td>' +
       '</tr>';
   });
   html += '</tbody></table>';
   container.innerHTML = html;
 }
-
 // NUEVA: Función de filtrado en tiempo real
 window.filtrarProductosPedido = function() {
   var termino = document.getElementById('buscadorPedido').value.toLowerCase().trim();
@@ -1526,7 +1528,6 @@ window.filtrarProductosPedido = function() {
     return;
   }
   
-  // Filtrar por código (ref) o nombre (coincidencia parcial en orden)
   var filtrados = productos.filter(function(p) {
     var ref = (p.ref || '').toLowerCase();
     var nombre = (p.nombre || '').toLowerCase();
@@ -1536,7 +1537,6 @@ window.filtrarProductosPedido = function() {
   renderizarTablaProductosPedido(filtrados);
   contadorEl.textContent = filtrados.length + ' de ' + productos.length + ' productos';
 };
-
 window.copiarPedidoAnterior = async function() {
   var proveedor = document.getElementById('pedidoProveedor').value;
   var mesActual = document.getElementById('pedidoMes').value;
@@ -1596,6 +1596,7 @@ window.actualizarPedido = function() {
   var subtotal = 0;
   var productosConCantidad = 0;
   
+  // Recorrer TODOS los productos de pedidoActual (no solo los visibles)
   pedidoActual.forEach(function(p, idx) {
     var cantInput = document.getElementById('cant-' + idx);
     var impCell = document.getElementById('imp-' + idx);
@@ -1612,7 +1613,7 @@ window.actualizarPedido = function() {
   var iva = subtotal * 0.21;
   var total = subtotal + iva;
   
-  // Actualizar los campos del resumen inferior (si existen)
+  // Actualizar resumen inferior
   var elSubtotal = document.getElementById('pedidoSubtotal');
   var elIva = document.getElementById('pedidoIva');
   var elTotal = document.getElementById('pedidoTotal');
@@ -1639,7 +1640,6 @@ window.actualizarPedido = function() {
   actualizarResumenPedido(productosConCantidad, subtotal, iva, total);
   actualizarPanelFlotante(productosConCantidad, subtotal, iva, total);
 };
-
 function actualizarResumenPedido(productos, subtotal, iva, total) {
   productos = productos || 0;
   subtotal = subtotal || 0;
