@@ -1352,11 +1352,49 @@ window.eliminarProducto = async function(id) {
   }
 };
 
-window.cargarProductosPedido = function() {
+window.cargarProductosPedido = async function() {
   var proveedor = document.getElementById('pedidoProveedor').value;
   var container = document.getElementById('productosPedidoContainer');
   
-  var productosFiltrados = productosCache.filter(function(p) { return p.proveedor === proveedor && p.activo !== false; });
+  // Si no hay productos en cache, cargarlos desde Firebase
+  if (productosCache.length === 0) {
+    try {
+      var snap = await getDocs(collection(db, 'productos'));
+      productosCache = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+      
+      // Si no hay productos en Firebase, extraerlos de los albaranes
+      if (productosCache.length === 0 && albaranesCache.length > 0) {
+        var productosMap = new Map();
+        albaranesCache.forEach(function(a) {
+          var prov = a.proveedor || 'DESCONOCIDO';
+          (a.lineas || []).forEach(function(l) {
+            var ref = l.ref || 'SIN_REF';
+            var key = ref + '|' + (l.producto || 'Sin nombre');
+            if (!productosMap.has(key)) {
+              productosMap.set(key, {
+                id: 'auto_' + productosMap.size,
+                ref: ref,
+                nombre: l.producto || 'Sin nombre',
+                proveedor: prov,
+                precio: l.precio || 0,
+                tipo: 'unidades',
+                minimo: 1,
+                activo: true
+              });
+            }
+          });
+        });
+        productosCache = Array.from(productosMap.values());
+      }
+    } catch(e) {
+      console.error('Error cargando productos:', e);
+    }
+  }
+  
+  // Filtrar productos del proveedor seleccionado y que estén activos
+  var productosFiltrados = productosCache.filter(function(p) { 
+    return p.proveedor === proveedor && p.activo !== false; 
+  });
   
   if (productosFiltrados.length === 0) {
     container.innerHTML = '<div class="empty-state"><p>No hay productos registrados para este proveedor</p></div>';
@@ -1383,7 +1421,6 @@ window.cargarProductosPedido = function() {
   pedidoActual = productosFiltrados.map(function(p) { return { ...p, cantidad: 0 }; });
   actualizarResumenPedido();
 };
-
 window.copiarPedidoAnterior = async function() {
   var proveedor = document.getElementById('pedidoProveedor').value;
   var mesActual = document.getElementById('pedidoMes').value;
