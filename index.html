@@ -875,7 +875,7 @@ window.calcularTotalAutomatico = function() {
 };
 
 // NUEVA: Buscar producto por referencia y autocompletar
-window.buscarProductoPorReferencia = function(input) {
+window.buscarProductoPorReferencia = async function(input) {
   var ref = input.value.trim();
   if (!ref || ref.length < 3) return;
   
@@ -884,9 +884,27 @@ window.buscarProductoPorReferencia = function(input) {
   var precioInput = linea.querySelector('.linea-precio');
   var cantidadInput = linea.querySelector('.linea-cantidad');
   
+  // Primero buscar en cache
   var productoEncontrado = productosCache.find(function(p) {
     return p.ref && p.ref.toLowerCase() === ref.toLowerCase();
   });
+  
+  // Si no está en cache, buscar en Firebase
+  if (!productoEncontrado) {
+    console.log('🔍 Producto no encontrado en cache, buscando en Firebase...');
+    try {
+      var snap = await getDocs(collection(db, 'productos'));
+      productosCache = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+      console.log('✅ Productos recargados:', productosCache.length);
+      
+      // Buscar de nuevo
+      productoEncontrado = productosCache.find(function(p) {
+        return p.ref && p.ref.toLowerCase() === ref.toLowerCase();
+      });
+    } catch(e) {
+      console.error('Error recargando productos:', e);
+    }
+  }
   
   if (productoEncontrado) {
     productoInput.value = productoEncontrado.nombre;
@@ -898,9 +916,11 @@ window.buscarProductoPorReferencia = function(input) {
     }
     calcularImporte(cantidadInput);
     mostrarToast('✅ Producto encontrado: ' + productoEncontrado.nombre, 'success');
+  } else {
+    console.log('❌ Producto no encontrado con referencia:', ref);
+    mostrarToast('⚠️ Referencia no encontrada: ' + ref, 'warning');
   }
 };
-
 window.guardarAlbaran = async function() {
   var proveedor = document.getElementById('albaranProveedor').value;
   var numero = document.getElementById('albaranNumero').value.trim();
