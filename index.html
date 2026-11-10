@@ -127,9 +127,6 @@ table tr:hover { background: #f8fafc; }
 .estado-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-top: 8px; }
 .estado-badge.hecho { background: #10b981; color: white; }
 .estado-badge.pendiente { background: #ef4444; color: white; }
-.albaran-imagen { max-width: 100%; max-height: 400px; border-radius: 8px; margin-top: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-.imagen-preview { max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 10px; cursor: pointer; transition: transform 0.2s; }
-.imagen-preview:hover { transform: scale(1.05); }
 .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
 .col-check { width: 40px; text-align: center; }
 .col-ref { width: 100px; }
@@ -229,7 +226,7 @@ table tr:hover { background: #f8fafc; }
   <div id="nuevo-albaran" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📥 Registrar Nuevo Albarán</h2>
     <div class="card">
-      <div class="alert alert-info">ℹ️ Completa los datos del albarán. La foto es <strong>opcional</strong>. Si introduces una referencia conocida, se autocompletarán los datos del producto.</div>
+      <div class="alert alert-info">ℹ️ Completa los datos del albarán. Si introduces una referencia conocida, se autocompletarán los datos del producto.</div>
       <div class="form-group">
         <label>Proveedor:</label>
         <select id="albaranProveedor"><option value="">Selecciona...</option><option value="LIDERA">🟡 LIDERA</option><option value="LUNA">🔵 LUNA</option></select>
@@ -241,11 +238,6 @@ table tr:hover { background: #f8fafc; }
       <div class="form-group">
         <label>Fecha de Entrega:</label>
         <input type="date" id="albaranFecha">
-      </div>
-      <div class="form-group">
-        <label>Foto del Albarán (opcional):</label>
-        <input type="file" id="albaranImagen" accept="image/*">
-        <div id="imagenPreviewContainer"></div>
       </div>
       <div class="form-group">
         <label>Base Imponible (€):</label>
@@ -356,7 +348,6 @@ table tr:hover { background: #f8fafc; }
 <div id="modalDetalleAlbaran" class="modal"><div class="modal-content"><div class="modal-header"><h2>Detalle del Albarán</h2><button class="close-btn" onclick="cerrarModal('modalDetalleAlbaran')">✕ Cerrar</button></div><div id="contenidoDetalleAlbaran"></div></div></div>
 <div id="modalPedidosGuardados" class="modal"><div class="modal-content"><div class="modal-header"><h2>📂 Pedidos guardados</h2><button class="close-btn" onclick="cerrarModal('modalPedidosGuardados')">✕ Cerrar</button></div><div class="alert alert-info">ℹ️ Haz clic en un pedido para cargarlo.</div><div class="form-group"><label>Filtrar por mes:</label><input type="month" id="filtroPedidosMes" onchange="filtrarPedidosGuardados()"></div><div id="listaPedidosGuardados"><div class="empty-state"><p>Cargando...</p></div></div></div></div>
 <div id="modalProducto" class="modal"><div class="modal-content"><div class="modal-header"><h2>➕ Añadir Nuevo Producto</h2><button class="close-btn" onclick="cerrarModal('modalProducto')">✕ Cerrar</button></div><div class="alert alert-info">💡 La referencia es <strong>opcional</strong>.</div><div class="form-group"><label>Referencia (opcional)</label><input type="text" id="productoRef" placeholder="Ej: 10001019"></div><div class="form-group"><label>Nombre del producto *</label><input type="text" id="productoNombre" placeholder="Ej: GEL DE MANOS NACARADO PV"></div><div class="form-group"><label>Proveedor *</label><select id="productoProveedor"><option value="LUNA">🔵 LUNA</option><option value="LIDERA">🟡 LIDERA</option></select></div><div class="form-group"><label>Precio unitario (€) *</label><input type="number" id="productoPrecio" step="0.01" placeholder="0.00"></div><div class="form-group"><label>Tipo de pedido *</label><select id="productoTipo"><option value="unidades">🔢 Unidades</option><option value="cajas">📦 Cajas</option><option value="litros">🧴 Litros</option></select></div><div class="form-group"><label>Cantidad mínima</label><input type="number" id="productoMinimo" step="0.01" placeholder="1"></div><div class="form-group"><label>Unidad de empaquetado</label><input type="text" id="productoEmpaque" placeholder="Ej: caja de 20"></div><button class="btn btn-success" onclick="guardarProducto()">💾 Guardar</button><button class="btn btn-danger" onclick="cerrarModal('modalProducto')">Cancelar</button></div></div>
-<div id="modalImagen" class="modal"><div class="modal-content" style="max-width: 900px;"><div class="modal-header"><h2>📸 Foto del Albarán</h2><button class="close-btn" onclick="cerrarModal('modalImagen')">✕ Cerrar</button></div><div id="contenidoImagen"></div></div></div>
 
 <div class="panel-flotante" id="panelFlotante">
   <div class="pf-titulo">📊 RESUMEN DEL PEDIDO</div>
@@ -372,7 +363,6 @@ table tr:hover { background: #f8fafc; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA80eaP6z8X8YrzQjr5CrgQr-9E9vqpwkY",
@@ -385,13 +375,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 let albaranesCache = [];
 let productosCache = [];
 let pedidoActual = [];
 let cantidadesPedido = {};
-let imagenAlbaranFile = null;
 
 // ===== UTILIDADES =====
 window.mostrarToast = function(mensaje, tipo) {
@@ -415,13 +403,10 @@ async function cargarDatosIniciales() {
     var snapProd = await getDocs(collection(db, 'productos'));
     productosCache = snapProd.docs.map(function(d) { return { id: d.id, ...d.data() }; });
     console.log('✅ Productos cargados:', productosCache.length);
-    
     var snapAlb = await getDocs(collection(db, 'albaranes'));
     albaranesCache = snapAlb.docs.map(function(d) { return { id: d.id, ...d.data() }; });
     console.log('✅ Albaranes cargados:', albaranesCache.length);
-  } catch(e) {
-    console.error('Error cargando datos iniciales:', e);
-  }
+  } catch(e) { console.error('Error cargando datos iniciales:', e); }
 }
 
 // ===== NAVEGACIÓN =====
@@ -431,29 +416,12 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
     document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
     btn.classList.add('active');
     document.getElementById(btn.dataset.section).classList.add('active');
-    
     if (btn.dataset.section === 'dashboard') window.cargarDashboard();
     if (btn.dataset.section === 'listado-albaranes') window.cargarListadoAlbaranes();
     if (btn.dataset.section === 'productos') window.cargarProductos();
     if (btn.dataset.section === 'calendario') window.cargarCalendario();
   });
 });
-
-// Preview imagen
-var inputImagen = document.getElementById('albaranImagen');
-if (inputImagen) {
-  inputImagen.addEventListener('change', function(e) {
-    var file = e.target.files[0];
-    if (file) {
-      imagenAlbaranFile = file;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('imagenPreviewContainer').innerHTML = '<img src="' + e.target.result + '" class="imagen-preview" alt="Preview">';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-}
 
 // ===== ALBARANES =====
 window.agregarLinea = function() {
@@ -492,16 +460,13 @@ window.calcularTotalAutomatico = function() {
 window.buscarProductoPorReferencia = async function(input) {
   var ref = input.value.trim();
   if (!ref || ref.length < 3) return;
-  
   var linea = input.closest('.producto-linea');
   var productoInput = linea.querySelector('.linea-producto');
   var precioInput = linea.querySelector('.linea-precio');
   var cantidadInput = linea.querySelector('.linea-cantidad');
-  
   var productoEncontrado = productosCache.find(function(p) {
     return p.ref && p.ref.toLowerCase() === ref.toLowerCase();
   });
-  
   if (!productoEncontrado && productosCache.length === 0) {
     console.log('🔍 Cache vacío, recargando productos...');
     try {
@@ -512,7 +477,6 @@ window.buscarProductoPorReferencia = async function(input) {
       });
     } catch(e) { console.error('Error recargando:', e); }
   }
-  
   if (productoEncontrado) {
     productoInput.value = productoEncontrado.nombre;
     if (!precioInput.value || precioInput.value === '0') precioInput.value = productoEncontrado.precio;
@@ -550,41 +514,24 @@ window.guardarAlbaran = async function() {
   });
   
   if (lineas.length === 0) { mostrarToast('❌ Añade al menos una línea con cantidad > 0', 'error'); return; }
-  
   if (total === 0) total = base * (1 + iva / 100);
   
   try {
-    var imagenURL = null;
-    if (imagenAlbaranFile) {
-      try {
-        var storageRef = ref(storage, 'albaranes/' + numero + '_' + Date.now() + '.jpg');
-        var snapshot = await uploadBytes(storageRef, imagenAlbaranFile);
-        imagenURL = await getDownloadURL(snapshot.ref);
-      } catch(imgError) {
-        console.warn('⚠️ Imagen no subida (CORS):', imgError.message);
-      }
-    }
-    
     console.log('💾 Guardando en Firebase...');
     await addDoc(collection(db, 'albaranes'), {
       numero: numero, fecha: fecha, proveedor: proveedor, base: base, iva: iva, total: total,
-      lineas: lineas, mesPedido: fecha.slice(0, 7), imagenURL: imagenURL,
+      lineas: lineas, mesPedido: fecha.slice(0, 7),
       createdAt: new Date().toISOString()
     });
-    
     console.log('✅ Albarán guardado correctamente');
     mostrarToast('✅ Albarán ' + numero + ' guardado correctamente', 'success');
     
-    // Limpiar formulario
     document.getElementById('albaranProveedor').value = '';
     document.getElementById('albaranNumero').value = '';
     document.getElementById('albaranFecha').value = '';
     document.getElementById('albaranBase').value = '';
     document.getElementById('albaranIva').value = '21';
     document.getElementById('albaranTotal').value = '';
-    document.getElementById('albaranImagen').value = '';
-    document.getElementById('imagenPreviewContainer').innerHTML = '';
-    imagenAlbaranFile = null;
     
     document.getElementById('lineasContainer').innerHTML = '<div class="producto-linea">' +
       '<input type="text" placeholder="Referencia" class="linea-ref" onchange="buscarProductoPorReferencia(this)">' +
@@ -594,10 +541,8 @@ window.guardarAlbaran = async function() {
       '<input type="number" placeholder="Importe" class="linea-importe" step="0.01" readonly>' +
       '<button class="btn btn-danger" onclick="eliminarLinea(this)">🗑️</button></div>';
     
-    // Recargar albaranes en cache
     var snap = await getDocs(collection(db, 'albaranes'));
     albaranesCache = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
-    
   } catch(e) {
     console.error('❌ Error guardando:', e);
     mostrarToast('❌ Error al guardar: ' + e.message, 'error');
@@ -608,17 +553,14 @@ window.cargarListadoAlbaranes = async function() {
   console.log('📋 Cargando listado de albaranes...');
   var contenedor = document.getElementById('tablaAlbaranes');
   contenedor.innerHTML = '<div class="empty-state"><p>Cargando albaranes...</p></div>';
-  
   try {
     if (albaranesCache.length === 0) {
       var snap = await getDocs(collection(db, 'albaranes'));
       albaranesCache = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
     }
-    
     var proveedor = document.getElementById('filtroProveedor').value;
     var anio = document.getElementById('filtroAnio').value;
     var busqueda = document.getElementById('buscadorAlbaranes').value.toLowerCase();
-    
     var filtrados = albaranesCache;
     if (proveedor !== 'TODOS') filtrados = filtrados.filter(function(a) { return a.proveedor === proveedor; });
     if (anio !== 'TODOS') filtrados = filtrados.filter(function(a) { return a.fecha && a.fecha.startsWith(anio); });
@@ -628,27 +570,13 @@ window.cargarListadoAlbaranes = async function() {
           (a.lineas || []).some(function(l) { return (l.producto || '').toLowerCase().includes(busqueda); });
       });
     }
-    
     filtrados.sort(function(a, b) { return (b.fecha || '').localeCompare(a.fecha || ''); });
-    
-    if (filtrados.length === 0) {
-      contenedor.innerHTML = '<div class="empty-state"><p>No se encontraron albaranes</p></div>';
-      return;
-    }
-    
+    if (filtrados.length === 0) { contenedor.innerHTML = '<div class="empty-state"><p>No se encontraron albaranes</p></div>'; return; }
     var html = '<table><thead><tr><th>Nº Albarán</th><th>Fecha</th><th>Proveedor</th><th>Total</th><th>Acciones</th></tr></thead><tbody>';
     filtrados.forEach(function(a) {
       var badge = a.proveedor === 'LUNA' ? 'badge-luna' : 'badge-lidera';
       var icono = a.proveedor === 'LUNA' ? '🔵' : '🟡';
-      var tieneFoto = a.imagenURL ? '📸' : '';
-      html += '<tr>' +
-        '<td><strong>' + (a.numero || '') + '</strong> ' + tieneFoto + '</td>' +
-        '<td>' + formatearFecha(a.fecha) + '</td>' +
-        '<td><span class="badge ' + badge + '">' + icono + ' ' + (a.proveedor || '?') + '</span></td>' +
-        '<td><strong>' + formatearMoneda(a.total || 0) + '</strong></td>' +
-        '<td><button class="btn btn-info" onclick="verDetalleAlbaran(\'' + a.id + '\')">👁️ Ver</button>' +
-        '<button class="btn btn-danger" onclick="eliminarAlbaran(\'' + a.id + '\')">🗑️</button></td>' +
-        '</tr>';
+      html += '<tr><td><strong>' + (a.numero || '') + '</strong></td><td>' + formatearFecha(a.fecha) + '</td><td><span class="badge ' + badge + '">' + icono + ' ' + (a.proveedor || '?') + '</span></td><td><strong>' + formatearMoneda(a.total || 0) + '</strong></td><td><button class="btn btn-info" onclick="verDetalleAlbaran(\'' + a.id + '\')">👁️ Ver</button><button class="btn btn-danger" onclick="eliminarAlbaran(\'' + a.id + '\')">🗑️</button></td></tr>';
     });
     html += '</tbody></table>';
     contenedor.innerHTML = html;
@@ -671,20 +599,9 @@ window.verDetalleAlbaran = function(id) {
     html += '<tr><td><code>' + (l.ref || '-') + '</code></td><td>' + (l.producto || '-') + '</td><td>' + (l.cantidad || 0) + '</td><td>' + formatearMoneda(l.precio || 0) + '</td><td><strong>' + formatearMoneda(l.importe || 0) + '</strong></td></tr>';
   });
   html += '</tbody></table>';
-  html += '<div class="stats" style="margin-top: 20px;">' +
-    '<div class="stat-card"><h4>Base Imponible:</h4><div class="value">' + formatearMoneda(albaran.base || 0) + '</div></div>' +
-    '<div class="stat-card"><h4>IVA (' + (albaran.iva || 21) + '%):</h4><div class="value">' + formatearMoneda(albaran.iva ? (albaran.base * albaran.iva / 100) : 0) + '</div></div>' +
-    '<div class="stat-card"><h4>TOTAL:</h4><div class="value">' + formatearMoneda(albaran.total || 0) + '</div></div></div>';
-  if (albaran.imagenURL) {
-    html += '<div style="margin-top: 20px;"><h4>📸 Foto del Albarán:</h4><img src="' + albaran.imagenURL + '" class="albaran-imagen"><br><button class="btn btn-secondary" onclick="verImagenCompleta(\'' + albaran.imagenURL + '\')" style="margin-top: 10px;">🔍 Ver en grande</button></div>';
-  }
+  html += '<div class="stats" style="margin-top: 20px;"><div class="stat-card"><h4>Base Imponible:</h4><div class="value">' + formatearMoneda(albaran.base || 0) + '</div></div><div class="stat-card"><h4>IVA (' + (albaran.iva || 21) + '%):</h4><div class="value">' + formatearMoneda(albaran.iva ? (albaran.base * albaran.iva / 100) : 0) + '</div></div><div class="stat-card"><h4>TOTAL:</h4><div class="value">' + formatearMoneda(albaran.total || 0) + '</div></div></div>';
   contenido.innerHTML = html;
   modal.classList.add('active');
-};
-
-window.verImagenCompleta = function(url) {
-  document.getElementById('contenidoImagen').innerHTML = '<img src="' + url + '" style="width: 100%; border-radius: 8px;">';
-  document.getElementById('modalImagen').classList.add('active');
 };
 
 window.eliminarAlbaran = async function(id) {
@@ -902,7 +819,7 @@ window.buscarYResaltarProducto = function() {
         var productoEncontrado = productosCache.find(function(p) { return (p.ref || '').toLowerCase().includes(termino) || (p.nombre || '').toLowerCase().includes(termino); });
         if (productoEncontrado) {
           document.getElementById('filtroProductosEstado').value = 'TODOS';
-          cargarProductos();
+          window.cargarProductos();
           mostrarToast('ℹ️ Producto encontrado pero estaba oculto. Filtro cambiado a "Todos"', 'info');
         } else {
           if (confirm('No se encontró el artículo "' + termino + '".\n\n¿Deseas crearlo ahora como un producto nuevo?')) {
