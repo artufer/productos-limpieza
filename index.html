@@ -225,7 +225,6 @@ table tr:hover { background: #f8fafc; }
 }
 .contador-productos .total { font-weight: bold; color: #1e3a5f; }
 
-/* ===== PANEL FLOTANTE DE PEDIDO ===== */
 .panel-flotante {
   position: fixed;
   bottom: 90px;
@@ -249,7 +248,6 @@ table tr:hover { background: #f8fafc; }
 .panel-flotante.pf-alerta { background: linear-gradient(135deg, #dc2626, #ef4444); }
 .panel-flotante.pf-cuidado { background: linear-gradient(135deg, #d97706, #f59e0b); }
 
-/* ===== BUSCADOR DE PRODUCTOS EN PEDIDO ===== */
 .buscador-pedido {
   display: flex;
   gap: 10px;
@@ -363,7 +361,7 @@ table tr:hover { background: #f8fafc; }
   <div id="nuevo-albaran" class="section">
     <h2 style="color: #1e3a5f; margin-bottom: 20px;">📥 Registrar Nuevo Albarán</h2>
     <div class="card">
-      <div class="alert alert-info">ℹ️ Completa los datos del albarán. Puedes subir una foto del albarán.</div>
+      <div class="alert alert-info">ℹ️ Completa los datos del albarán. La foto es <strong>opcional</strong>. Si introduces una referencia conocida, se autocompletarán los datos del producto.</div>
       
       <div class="form-group">
         <label>Proveedor:</label>
@@ -405,15 +403,15 @@ table tr:hover { background: #f8fafc; }
         <input type="number" id="albaranTotal" step="0.01" placeholder="0.00">
       </div>
       
-      <h3 style="margin-top: 30px; margin-bottom: 15px;">Líneas de Productos (una por línea):</h3>
-      <div class="alert alert-info">Formato: Referencia | Nombre del producto | Cantidad | Precio unitario</div>
+      <h3 style="margin-top: 30px; margin-bottom: 15px;">Líneas de Productos:</h3>
+      <div class="alert alert-info">💡 Escribe la <strong>referencia</strong> y pulsa Tab o haz clic fuera para autocompletar los datos del producto.</div>
       
       <div id="lineasContainer">
         <div class="producto-linea">
-          <input type="text" placeholder="Referencia" class="linea-ref">
+          <input type="text" placeholder="Referencia" class="linea-ref" onchange="buscarProductoPorReferencia(this)">
           <input type="text" placeholder="Nombre del producto" class="linea-producto">
-          <input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01">
-          <input type="number" placeholder="Precio unit." class="linea-precio" step="0.01">
+          <input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01" onchange="calcularImporte(this)">
+          <input type="number" placeholder="Precio unit." class="linea-precio" step="0.01" onchange="calcularImporte(this)">
           <input type="number" placeholder="Importe" class="linea-importe" step="0.01" readonly>
           <button class="btn btn-danger" onclick="eliminarLinea(this)">🗑️</button>
         </div>
@@ -547,7 +545,6 @@ table tr:hover { background: #f8fafc; }
       
       <h3 style="margin-top: 20px; margin-bottom: 15px;">Productos del pedido:</h3>
       
-      <!-- Buscador de productos -->
       <div class="buscador-pedido" id="buscadorPedidoContainer" style="display: none;">
         <input type="text" id="buscadorPedido" placeholder="🔍 Buscar por código o nombre del artículo..." oninput="filtrarProductosPedido()">
         <span class="contador-resultados" id="contadorResultados"></span>
@@ -796,6 +793,17 @@ window.cerrarModal = function(id) {
   document.getElementById(id).classList.remove('active');
 };
 
+// ===== CARGAR PRODUCTOS AL INICIO =====
+async function cargarProductosAlInicio() {
+  try {
+    var snap = await getDocs(collection(db, 'productos'));
+    productosCache = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+    console.log('✅ Productos cargados al inicio:', productosCache.length);
+  } catch(e) {
+    console.error('Error cargando productos:', e);
+  }
+}
+
 // ===== NAVEGACIÓN =====
 document.querySelectorAll('.nav-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
@@ -832,13 +840,16 @@ window.agregarLinea = function() {
   var container = document.getElementById('lineasContainer');
   var linea = document.createElement('div');
   linea.className = 'producto-linea';
-  linea.innerHTML = '<input type="text" placeholder="Referencia" class="linea-ref">' +
+  linea.innerHTML = '<input type="text" placeholder="Referencia" class="linea-ref" onchange="buscarProductoPorReferencia(this)">' +
     '<input type="text" placeholder="Nombre del producto" class="linea-producto">' +
     '<input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01" onchange="calcularImporte(this)">' +
     '<input type="number" placeholder="Precio unit." class="linea-precio" step="0.01" onchange="calcularImporte(this)">' +
     '<input type="number" placeholder="Importe" class="linea-importe" step="0.01" readonly>' +
     '<button class="btn btn-danger" onclick="eliminarLinea(this)">🗑️</button>';
   container.appendChild(linea);
+  
+  var refInput = linea.querySelector('.linea-ref');
+  refInput.focus();
 };
 
 window.eliminarLinea = function(btn) { btn.parentElement.remove(); };
@@ -850,6 +861,33 @@ window.calcularImporte = function(input) {
   linea.querySelector('.linea-importe').value = (cantidad * precio).toFixed(2);
 };
 
+// NUEVA: Buscar producto por referencia y autocompletar
+window.buscarProductoPorReferencia = function(input) {
+  var ref = input.value.trim();
+  if (!ref || ref.length < 3) return;
+  
+  var linea = input.closest('.producto-linea');
+  var productoInput = linea.querySelector('.linea-producto');
+  var precioInput = linea.querySelector('.linea-precio');
+  var cantidadInput = linea.querySelector('.linea-cantidad');
+  
+  var productoEncontrado = productosCache.find(function(p) {
+    return p.ref && p.ref.toLowerCase() === ref.toLowerCase();
+  });
+  
+  if (productoEncontrado) {
+    productoInput.value = productoEncontrado.nombre;
+    if (!precioInput.value || precioInput.value === '0') {
+      precioInput.value = productoEncontrado.precio;
+    }
+    if (!cantidadInput.value || cantidadInput.value === '0') {
+      cantidadInput.value = productoEncontrado.minimo || 1;
+    }
+    calcularImporte(cantidadInput);
+    mostrarToast('✅ Producto encontrado: ' + productoEncontrado.nombre, 'success');
+  }
+};
+
 window.guardarAlbaran = async function() {
   var proveedor = document.getElementById('albaranProveedor').value;
   var numero = document.getElementById('albaranNumero').value;
@@ -858,44 +896,76 @@ window.guardarAlbaran = async function() {
   var iva = parseFloat(document.getElementById('albaranIva').value) || 21;
   var total = parseFloat(document.getElementById('albaranTotal').value) || 0;
   
-  if (!proveedor || !numero || !fecha) {
-    mostrarToast('Completa los campos obligatorios: Proveedor, Número y Fecha', 'warning');
+  if (!proveedor) {
+    mostrarToast('❌ Selecciona un proveedor', 'error');
+    return;
+  }
+  
+  if (!numero) {
+    mostrarToast('❌ Introduce el número de albarán', 'error');
+    return;
+  }
+  
+  if (!fecha) {
+    mostrarToast('❌ Introduce la fecha de entrega', 'error');
     return;
   }
   
   var lineas = [];
   document.querySelectorAll('.producto-linea').forEach(function(linea) {
-    var ref = linea.querySelector('.linea-ref').value;
-    var producto = linea.querySelector('.linea-producto').value;
+    var ref = linea.querySelector('.linea-ref').value.trim();
+    var producto = linea.querySelector('.linea-producto').value.trim();
     var cantidad = parseFloat(linea.querySelector('.linea-cantidad').value) || 0;
     var precio = parseFloat(linea.querySelector('.linea-precio').value) || 0;
     var importe = parseFloat(linea.querySelector('.linea-importe').value) || 0;
+    
     if (producto && cantidad > 0) {
-      lineas.push({ ref: ref, producto: producto, cantidad: cantidad, precio: precio, importe: importe });
+      lineas.push({ 
+        ref: ref, 
+        producto: producto, 
+        cantidad: cantidad, 
+        precio: precio, 
+        importe: importe 
+      });
     }
   });
   
   if (lineas.length === 0) {
-    mostrarToast('Añade al menos una línea de producto', 'warning');
+    mostrarToast('❌ Añade al menos una línea de producto con cantidad > 0', 'error');
     return;
   }
   
   try {
     var imagenURL = null;
+    
     if (imagenAlbaranFile) {
       mostrarToast('📸 Subiendo imagen...', 'info');
-      var storageRef = ref(storage, 'albaranes/' + numero + '_' + fecha + '_' + Date.now() + '.jpg');
-      var snapshot = await uploadBytes(storageRef, imagenAlbaranFile);
-      imagenURL = await getDownloadURL(snapshot.ref);
-      mostrarToast('✅ Imagen subida correctamente', 'success');
+      try {
+        var storageRef = ref(storage, 'albaranes/' + numero + '_' + fecha + '_' + Date.now() + '.jpg');
+        var snapshot = await uploadBytes(storageRef, imagenAlbaranFile);
+        imagenURL = await getDownloadURL(snapshot.ref);
+        console.log('Imagen subida:', imagenURL);
+      } catch(imgError) {
+        console.error('Error subiendo imagen:', imgError);
+        mostrarToast('⚠️ Albarán guardado pero la imagen no se pudo subir', 'warning');
+      }
     }
     
     await addDoc(collection(db, 'albaranes'), {
-      numero: numero, fecha: fecha, proveedor: proveedor, base: base, iva: iva, total: total, lineas: lineas,
-      mesPedido: fecha.slice(0, 7), imagenURL: imagenURL, createdAt: new Date().toISOString()
+      numero: numero,
+      fecha: fecha,
+      proveedor: proveedor,
+      base: base,
+      iva: iva,
+      total: total,
+      lineas: lineas,
+      mesPedido: fecha.slice(0, 7),
+      imagenURL: imagenURL,
+      createdAt: new Date().toISOString()
     });
     
     mostrarToast('✅ Albarán guardado correctamente', 'success');
+    
     document.getElementById('albaranProveedor').value = '';
     document.getElementById('albaranNumero').value = '';
     document.getElementById('albaranFecha').value = '';
@@ -904,14 +974,21 @@ window.guardarAlbaran = async function() {
     document.getElementById('albaranImagen').value = '';
     document.getElementById('imagenPreviewContainer').innerHTML = '';
     imagenAlbaranFile = null;
+    
     document.getElementById('lineasContainer').innerHTML = '<div class="producto-linea">' +
-      '<input type="text" placeholder="Referencia" class="linea-ref">' +
+      '<input type="text" placeholder="Referencia" class="linea-ref" onchange="buscarProductoPorReferencia(this)">' +
       '<input type="text" placeholder="Nombre del producto" class="linea-producto">' +
-      '<input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01">' +
-      '<input type="number" placeholder="Precio unit." class="linea-precio" step="0.01">' +
+      '<input type="number" placeholder="Cantidad" class="linea-cantidad" step="0.01" onchange="calcularImporte(this)">' +
+      '<input type="number" placeholder="Precio unit." class="linea-precio" step="0.01" onchange="calcularImporte(this)">' +
       '<input type="number" placeholder="Importe" class="linea-importe" step="0.01" readonly>' +
       '<button class="btn btn-danger" onclick="eliminarLinea(this)">🗑️</button></div>';
+    
+    if (document.getElementById('dashboard').classList.contains('active')) {
+      cargarDashboard();
+    }
+    
   } catch(e) {
+    console.error('Error guardando albarán:', e);
     mostrarToast('❌ Error al guardar: ' + e.message, 'error');
   }
 };
@@ -1409,15 +1486,13 @@ window.eliminarProducto = async function(id) {
   }
 };
 
-// ===== PREPARAR PEDIDO (CORREGIDO) =====
-
+// ===== PREPARAR PEDIDO =====
 window.cargarProductosPedido = async function() {
   var proveedor = document.getElementById('pedidoProveedor').value;
   var container = document.getElementById('productosPedidoContainer');
   var buscadorContainer = document.getElementById('buscadorPedidoContainer');
   var buscadorInput = document.getElementById('buscadorPedido');
   
-  // Resetear completamente
   cantidadesPedido = {};
   pedidoActual = [];
   
@@ -1469,7 +1544,6 @@ window.cargarProductosPedido = async function() {
   buscadorInput.value = '';
   document.getElementById('contadorResultados').textContent = productosFiltrados.length + ' productos';
   
-  // Inicializar pedidoActual con índices consecutivos (0,1,2,3...)
   pedidoActual = productosFiltrados.map(function(p, idx) { 
     cantidadesPedido[idx] = 0;
     return { 
@@ -1500,7 +1574,6 @@ function renderizarTablaProductosPedido(productos) {
   var html = '<table><thead><tr><th>Producto</th><th style="width: 60px;">Mín.</th><th>Precio</th><th style="width: 90px;">Cantidad</th><th>Importe</th><th></th></tr></thead><tbody>';
   
   productos.forEach(function(p) {
-    // Buscar el índice en pedidoActual por nombre y referencia
     var idx = pedidoActual.findIndex(function(x) { 
       return x.ref === p.ref && x.nombre === p.nombre; 
     });
@@ -2128,7 +2201,10 @@ window.addEventListener('scroll', function() {
   btn.style.display = window.scrollY > 300 ? 'block' : 'none';
 });
 
-cargarDashboard();
+// ===== INICIALIZACIÓN =====
+cargarProductosAlInicio().then(function() {
+  cargarDashboard();
+});
 </script>
 
 </body>
