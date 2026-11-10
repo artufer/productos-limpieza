@@ -860,6 +860,20 @@ window.calcularImporte = function(input) {
   var precio = parseFloat(linea.querySelector('.linea-precio').value) || 0;
   linea.querySelector('.linea-importe').value = (cantidad * precio).toFixed(2);
 };
+// NUEVA: Calcular IVA y Total automáticamente cuando cambia la base
+window.calcularTotalAutomatico = function() {
+  var base = parseFloat(document.getElementById('albaranBase').value) || 0;
+  var iva = parseFloat(document.getElementById('albaranIva').value) || 21;
+  
+  if (base > 0) {
+    var importeIva = base * (iva / 100);
+    var total = base + importeIva;
+    
+    document.getElementById('albaranTotal').value = total.toFixed(2);
+  } else {
+    document.getElementById('albaranTotal').value = '';
+  }
+};
 
 // NUEVA: Buscar producto por referencia y autocompletar
 window.buscarProductoPorReferencia = function(input) {
@@ -890,11 +904,13 @@ window.buscarProductoPorReferencia = function(input) {
 
 window.guardarAlbaran = async function() {
   var proveedor = document.getElementById('albaranProveedor').value;
-  var numero = document.getElementById('albaranNumero').value;
+  var numero = document.getElementById('albaranNumero').value.trim();
   var fecha = document.getElementById('albaranFecha').value;
   var base = parseFloat(document.getElementById('albaranBase').value) || 0;
   var iva = parseFloat(document.getElementById('albaranIva').value) || 21;
   var total = parseFloat(document.getElementById('albaranTotal').value) || 0;
+  
+  console.log('🔍 Intentando guardar albarán:', { proveedor, numero, fecha, base, total });
   
   if (!proveedor) {
     mostrarToast('❌ Selecciona un proveedor', 'error');
@@ -911,6 +927,12 @@ window.guardarAlbaran = async function() {
     return;
   }
   
+  if (base <= 0) {
+    mostrarToast('❌ La base imponible debe ser mayor que 0', 'error');
+    return;
+  }
+  
+  // Recoger líneas de productos
   var lineas = [];
   document.querySelectorAll('.producto-linea').forEach(function(linea) {
     var ref = linea.querySelector('.linea-ref').value.trim();
@@ -935,21 +957,30 @@ window.guardarAlbaran = async function() {
     return;
   }
   
+  // Recalcular total automáticamente por si acaso
+  if (total === 0) {
+    total = base * (1 + iva / 100);
+  }
+  
   try {
     var imagenURL = null;
     
+    // Intentar subir imagen (pero NO bloquear si falla)
     if (imagenAlbaranFile) {
-      mostrarToast('📸 Subiendo imagen...', 'info');
       try {
-        var storageRef = ref(storage, 'albaranes/' + numero + '_' + fecha + '_' + Date.now() + '.jpg');
+        mostrarToast('📸 Subiendo imagen...', 'info');
+        var storageRef = ref(storage, 'albaranes/' + numero + '_' + Date.now() + '.jpg');
         var snapshot = await uploadBytes(storageRef, imagenAlbaranFile);
         imagenURL = await getDownloadURL(snapshot.ref);
-        console.log('Imagen subida:', imagenURL);
+        console.log('✅ Imagen subida:', imagenURL);
       } catch(imgError) {
-        console.error('Error subiendo imagen:', imgError);
-        mostrarToast('⚠️ Albarán guardado pero la imagen no se pudo subir', 'warning');
+        console.warn('⚠️ No se pudo subir la imagen (CORS o permisos):', imgError.message);
+        // NO bloqueamos el guardado, seguimos sin imagen
       }
     }
+    
+    // Guardar en Firebase (siempre, con o sin imagen)
+    console.log('💾 Guardando en Firebase...', { numero, fecha, proveedor, base, iva, total, lineas: lineas.length });
     
     await addDoc(collection(db, 'albaranes'), {
       numero: numero,
@@ -964,17 +995,21 @@ window.guardarAlbaran = async function() {
       createdAt: new Date().toISOString()
     });
     
-    mostrarToast('✅ Albarán guardado correctamente', 'success');
+    console.log('✅ Albarán guardado correctamente');
+    mostrarToast('✅ Albarán ' + numero + ' guardado correctamente', 'success');
     
+    // Limpiar formulario
     document.getElementById('albaranProveedor').value = '';
     document.getElementById('albaranNumero').value = '';
     document.getElementById('albaranFecha').value = '';
     document.getElementById('albaranBase').value = '';
+    document.getElementById('albaranIva').value = '21';
     document.getElementById('albaranTotal').value = '';
     document.getElementById('albaranImagen').value = '';
     document.getElementById('imagenPreviewContainer').innerHTML = '';
     imagenAlbaranFile = null;
     
+    // Resetear líneas
     document.getElementById('lineasContainer').innerHTML = '<div class="producto-linea">' +
       '<input type="text" placeholder="Referencia" class="linea-ref" onchange="buscarProductoPorReferencia(this)">' +
       '<input type="text" placeholder="Nombre del producto" class="linea-producto">' +
@@ -983,16 +1018,16 @@ window.guardarAlbaran = async function() {
       '<input type="number" placeholder="Importe" class="linea-importe" step="0.01" readonly>' +
       '<button class="btn btn-danger" onclick="eliminarLinea(this)">🗑️</button></div>';
     
+    // Recargar dashboard si estamos allí
     if (document.getElementById('dashboard').classList.contains('active')) {
       cargarDashboard();
     }
     
   } catch(e) {
-    console.error('Error guardando albarán:', e);
+    console.error('❌ Error guardando albarán:', e);
     mostrarToast('❌ Error al guardar: ' + e.message, 'error');
   }
 };
-
 window.cargarListadoAlbaranes = async function() {
   var contenedor = document.getElementById('tablaAlbaranes');
   contenedor.innerHTML = '<div class="empty-state"><p>Cargando albaranes...</p></div>';
@@ -2200,7 +2235,9 @@ window.addEventListener('scroll', function() {
   var btn = document.getElementById('btnTop');
   btn.style.display = window.scrollY > 300 ? 'block' : 'none';
 });
-
+// Cálculo automático del total cuando cambia la base o el IVA
+document.getElementById('albaranBase').addEventListener('input', calcularTotalAutomatico);
+document.getElementById('albaranIva').addEventListener('input', calcularTotalAutomatico);
 // ===== INICIALIZACIÓN =====
 cargarProductosAlInicio().then(function() {
   cargarDashboard();
